@@ -1,0 +1,45 @@
+import { z } from 'zod'
+
+export const taskStatusSchema = z.enum(['Pending', 'InProgress', 'Completed', 'Cancelled'])
+
+export const taskPrioritySchema = z.enum(['Low', 'Medium', 'High', 'Critical'])
+
+export const createTaskSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be less than 200 characters'),
+  description: z
+    .string()
+    .max(2000, 'Description must be less than 2000 characters')
+    .optional(),
+  status: taskStatusSchema.default('Pending'),
+  priority: taskPrioritySchema.default('Medium'),
+  dueDate: z
+    .string()
+    .nullable()
+    .optional(),
+  parentTaskId: z
+    .string()
+    .nullable()
+    .optional(),
+  taskLevel: z
+    .number()
+    .min(1)
+    .max(3, 'Task level cannot exceed 3'),
+})
+
+export const updateTaskSchema = createTaskSchema.extend({
+  id: z.string(),
+}).partial()
+
+export const taskActivitySchema = z.object({
+  taskId: z.string(),
+  activity: z
+    .string()
+    .min(1, 'Activity is required'),
+  notes: z
+    .string()
+    .max(2000, 'Notes must be less than 2000 characters')
+    .optional(),
+})
