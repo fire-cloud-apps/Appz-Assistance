@@ -9,9 +9,10 @@ import { useParentTasks, useUpdateTask } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskEmptyState } from '../components/TaskEmptyState'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
+import { formatDateTime } from '../../../../core/utils/dateHelper'
 import { useNavigate } from 'react-router-dom'
 import { Task } from '../../../../core/database/models'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 
 const ITEMS_PER_PAGE = 5
 
@@ -33,6 +34,25 @@ export function TaskAllTasksScreen() {
   const updateTask = useUpdateTask()
   const [currentPage, setCurrentPage] = useState<number>(1)
 
+  // Sort tasks by due date (earliest first, null dates at the end, completed tasks always last)
+  const sortedTasks = useMemo(() => {
+    return [...tasks].sort((a, b) => {
+      // Completed tasks always go to the end
+      if (a.status === 'Completed' && b.status !== 'Completed') return 1
+      if (a.status !== 'Completed' && b.status === 'Completed') return -1
+      // If both are completed, maintain original order
+      if (a.status === 'Completed' && b.status === 'Completed') return 0
+      // If both have no due date, maintain original order
+      if (!a.dueDate && !b.dueDate) return 0
+      // If a has no due date, put it at the end
+      if (!a.dueDate) return 1
+      // If b has no due date, put it at the end
+      if (!b.dueDate) return -1
+      // Sort by due date (earliest first)
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+    })
+  }, [tasks])
+
   const handleTaskSelect = (taskId: string) => {
     if (!taskId || taskId.trim() === '') return
     setSelectedTaskId(taskId)
@@ -48,7 +68,7 @@ export function TaskAllTasksScreen() {
     })
   }
 
-  const totalPages = Math.max(1, Math.ceil(tasks.length / ITEMS_PER_PAGE))
+  const totalPages = Math.max(1, Math.ceil(sortedTasks.length / ITEMS_PER_PAGE))
 
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
@@ -104,14 +124,14 @@ export function TaskAllTasksScreen() {
             <Group justify="space-between" align="center">
               <Text fw={700} size="md">All Tasks</Text>
               <Badge variant="light" color="blue" size="sm">
-                {Math.min(currentPage * ITEMS_PER_PAGE, tasks.length)} of {tasks.length}
+                {Math.min(currentPage * ITEMS_PER_PAGE, sortedTasks.length)} of {sortedTasks.length}
               </Badge>
             </Group>
 
             <Divider size="sm" />
 
             <Stack gap="xs">
-              {tasks.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((task: Task) => {
+              {sortedTasks.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((task: Task) => {
                 const statusMeta = getStatusMeta(task.status)
                 const priorityMeta = getPriorityMeta(task.priority)
                 const borderLeftColor = task.status === 'Pending' ? 'yellow' : statusMeta.color
@@ -184,7 +204,7 @@ export function TaskAllTasksScreen() {
                           Due: {task.dueDate || 'Not set'}
                         </Text>
                         <Text size="xs" c="dimmed">
-                          Updated: {task.updatedAt}
+                          Updated: {formatDateTime(task.updatedAt)}
                         </Text>
                       </Group>
                     </Paper>

@@ -85,9 +85,9 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
           <Box mt="xs" pt="xs" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
             <Stack gap="xs">
               {task.description && (
-                <Text size="sm" c="dimmed">
-                  <strong>Description:</strong> {task.description}
-                </Text>
+                <Box component="pre" className="task-description" c="dimmed" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+                  <strong>Description:</strong> {'\n'}{task.description}
+                </Box>
               )}
               <Group gap="lg">
                 {task.dueDate && (

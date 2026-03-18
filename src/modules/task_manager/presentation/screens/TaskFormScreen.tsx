@@ -135,10 +135,24 @@ export function TaskFormScreen() {
 
           <Textarea
             label="Description"
-            placeholder="Enter task description"
-            minRows={5}
+            placeholder="Enter task description (supports tabs, multi-line, and formatted text)"
+            minRows={8}
             autosize
-            maxRows={10}
+            maxRows={15}
+            variant="filled"
+            spellCheck={false}
+            onKeyDown={(e) => {
+              if (e.key === 'Tab') {
+                e.preventDefault()
+                const target = e.target as HTMLTextAreaElement
+                const start = target.selectionStart
+                const end = target.selectionEnd
+                const value = target.value
+                target.value = value.substring(0, start) + '\t' + value.substring(end)
+                target.selectionStart = target.selectionEnd = start + 1
+                setValue('description', target.value)
+              }
+            }}
             error={errors.description?.message as string}
             {...register('description')}
           />
@@ -165,8 +179,9 @@ export function TaskFormScreen() {
             label="Due Date"
             placeholder="Select due date"
             minDate={new Date(getToday())}
-            value={watch('dueDate') ? new Date(watch('dueDate') as string) : null} // Cast to string, assuming schema ensures it's string or null
-            onChange={(value) => setValue('dueDate', value ? value.toISOString().split('T')[0] : null)}
+            valueFormat="YYYY-MM-DD"
+            value={watch('dueDate') as string | null}
+            onChange={(value) => setValue('dueDate', value || null)}
             error={errors.dueDate?.message as string}
           />
 

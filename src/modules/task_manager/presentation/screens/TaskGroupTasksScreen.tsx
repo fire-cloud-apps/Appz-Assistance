@@ -2,8 +2,8 @@
  * Route: /tasks/groups
  * Ref: routes/index.tsx
  */
-import { Box, Button, Stack, Text, Loader, Center, Tabs, Group, Badge, Collapse, ThemeIcon, UnstyledButton } from '@mantine/core'
-import { IconListCheck, IconClockHour4, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
+import { Box, Button, Stack, Text, Loader, Center, Tabs, Group, Badge, Collapse, ThemeIcon, UnstyledButton, Tooltip, ActionIcon } from '@mantine/core'
+import { IconListCheck, IconClockHour4, IconChevronDown, IconChevronRight, IconPlus } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useParentTasks, useChildTasks } from '../hooks/useTaskQueries'
 import { TaskCard } from '../../components/TaskCard'
@@ -219,6 +219,27 @@ export function TaskGroupTasksScreen() {
           </Stack>
         )}
       </Stack>
+
+      {/* FAB Button for Mobile */}
+      <Tooltip label="New Task" withArrow position="left">
+        <ActionIcon
+          onClick={() => navigate('/tasks/create')}
+          hiddenFrom="sm"
+          size="xl"
+          variant="filled"
+          color="blue"
+          aria-label="New Task"
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 1000,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          <IconPlus size={28} />
+        </ActionIcon>
+      </Tooltip>
 
       <SubtaskModal
         parentTaskId={selectedParentTask?.id || ''}

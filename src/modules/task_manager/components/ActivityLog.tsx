@@ -58,17 +58,49 @@ export function ActivityLog({ taskId }: ActivityLogProps) {
 
         <Stack gap="xs">
           <Textarea
-            placeholder="What did you do?"
+            placeholder="What did you do? (supports tabs, multi-line)"
             value={newActivity}
             onChange={(e) => setNewActivity(e.target.value)}
-            minRows={2}
+            minRows={4}
+            autosize
+            maxRows={8}
+            variant="filled"
+            spellCheck={false}
+            onKeyDown={(e) => {
+              if (e.key === 'Tab') {
+                e.preventDefault()
+                const target = e.target as HTMLTextAreaElement
+                const start = target.selectionStart
+                const end = target.selectionEnd
+                const value = target.value
+                target.value = value.substring(0, start) + '\t' + value.substring(end)
+                target.selectionStart = target.selectionEnd = start + 1
+                setNewActivity(target.value)
+              }
+            }}
             label="Activity"
           />
           <Textarea
             placeholder="Additional notes (optional)"
             value={newNotes}
             onChange={(e) => setNewNotes(e.target.value)}
-            minRows={2}
+            minRows={4}
+            autosize
+            maxRows={8}
+            variant="filled"
+            spellCheck={false}
+            onKeyDown={(e) => {
+              if (e.key === 'Tab') {
+                e.preventDefault()
+                const target = e.target as HTMLTextAreaElement
+                const start = target.selectionStart
+                const end = target.selectionEnd
+                const value = target.value
+                target.value = value.substring(0, start) + '\t' + value.substring(end)
+                target.selectionStart = target.selectionEnd = start + 1
+                setNewNotes(target.value)
+              }
+            }}
             label="Notes"
           />
           <Button onClick={handleAddActivity} loading={addActivity.isPending}>
@@ -108,9 +140,9 @@ export function ActivityLog({ taskId }: ActivityLogProps) {
                   }
                 >
                   {activity.notes && (
-                    <Text size="sm" c="dimmed" mt="xs">
+                    <Box component="pre" className="task-description" c="dimmed" mt="xs" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
                       {activity.notes}
-                    </Text>
+                    </Box>
                   )}
                   <Text size="xs" c="dimmed" mt="xs">
                     {formatDateTime(activity.createdAt)}

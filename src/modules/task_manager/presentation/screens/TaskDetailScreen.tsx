@@ -131,7 +131,9 @@ export function TaskDetailScreen() {
                 <Divider />
                 <Box>
                   <Text fw={600} mb="xs">Description</Text>
-                  <Text>{task.description}</Text>
+                  <Box component="pre" className="task-description">
+                    {task.description}
+                  </Box>
                 </Box>
               </>
             )}

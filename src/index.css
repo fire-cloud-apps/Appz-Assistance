@@ -1,3 +1,10 @@
+/* Mantine CSS Layers - Must be loaded first */
+@import '@mantine/core/styles/baseline.css';
+@import '@mantine/core/styles/default-css-variables.css';
+@import '@mantine/core/styles/global.css';
+@import '@mantine/core/styles.css';
+@import '@mantine/dates/styles.css';
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -30,4 +37,14 @@ body {
 /* Smooth transitions for theme switching */
 * {
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Preserve whitespace and formatting for task descriptions */
+.task-description {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
 }
