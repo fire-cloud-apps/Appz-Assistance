@@ -19,3 +19,12 @@ Once you are ready let me know I will issue the '/Quit' command.
 ### Other Commands for flexibility
 Hope you understood? If yes, Create a task plan and proceed accord
 
+--- 
+
+### CLI Coder used
+1. QWEN
+2. OpenCode
+3. Codex
+4. GEMINI
+
+

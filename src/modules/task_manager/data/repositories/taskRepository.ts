@@ -2,6 +2,24 @@ import { Task, TaskStatus } from '../../../../core/database/models'
 import { db } from '../../../../core/database/appDatabase'
 
 export class TaskRepository {
+  private sortTasksForAll(tasks: Task[]): Task[] {
+    return [...tasks].sort((a, b) => {
+      // Completed tasks always go to the end
+      if (a.status === 'Completed' && b.status !== 'Completed') return 1
+      if (a.status !== 'Completed' && b.status === 'Completed') return -1
+      // If both are completed, maintain original order
+      if (a.status === 'Completed' && b.status === 'Completed') return 0
+      // If both have no due date, maintain original order
+      if (!a.dueDate && !b.dueDate) return 0
+      // If a has no due date, put it at the end
+      if (!a.dueDate) return 1
+      // If b has no due date, put it at the end
+      if (!b.dueDate) return -1
+      // Sort by due date (earliest first)
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+    })
+  }
+
   async createTask(task: Task): Promise<string> {
     return db.tasks.add(task)
   }
@@ -36,6 +54,16 @@ export class TaskRepository {
   async getParentTasks(): Promise<Task[]> {
     const allTasks = await db.tasks.toArray()
     return allTasks.filter(task => task.parentTaskId === null && !task.isDeleted)
+  }
+
+  async getParentTasksPaged(page: number, pageSize: number): Promise<{ items: Task[]; total: number }> {
+    const allTasks = await db.tasks.toArray()
+    const parentTasks = allTasks.filter(task => task.parentTaskId === null && !task.isDeleted)
+    const sortedTasks = this.sortTasksForAll(parentTasks)
+    const total = sortedTasks.length
+    const startIndex = Math.max(0, (page - 1) * pageSize)
+    const items = sortedTasks.slice(startIndex, startIndex + pageSize)
+    return { items, total }
   }
 
   async getChildTasks(parentTaskId: string): Promise<Task[]> {

@@ -30,6 +30,15 @@ export function useParentTasks() {
   })
 }
 
+export function useParentTasksPaged(page: number, pageSize: number) {
+  return useQuery<{ items: Task[]; total: number }>({
+    queryKey: [...taskKeys.all, 'parents', 'paged', page, pageSize],
+    queryFn: () => taskRepository.getParentTasksPaged(page, pageSize),
+    placeholderData: (prev) => prev,
+    staleTime: 10_000,
+  })
+}
+
 export function useTaskById(taskId: string) {
   return useQuery<Task | undefined>({
     queryKey: taskKeys.detail(taskId),

@@ -7,6 +7,7 @@ import { MainLayout } from '../core/services/MainLayout'
 import { TaskDashboardScreen } from '../modules/task_manager/presentation/screens/TaskDashboardScreen'
 import { TaskAllTasksScreen } from '../modules/task_manager/presentation/screens/TaskAllTasksScreen'
 import { TaskGroupTasksScreen } from '../modules/task_manager/presentation/screens/TaskGroupTasksScreen'
+import { TaskKanbanBoardScreen } from '../modules/task_manager/presentation/screens/TaskKanbanBoardScreen'
 import { TaskDetailScreen } from '../modules/task_manager/presentation/screens/TaskDetailScreen'
 import { TaskFormScreen } from '../modules/task_manager/presentation/screens/TaskFormScreen' // New import
 import { SettingsScreen } from '../core/services/SettingsScreen'
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
       {
         path: 'tasks/groups',
         element: <TaskGroupTasksScreen />,
+      },
+      {
+        path: 'tasks/kanban',
+        element: <TaskKanbanBoardScreen />,
       },
       {
         path: 'tasks/create', // New route for creation

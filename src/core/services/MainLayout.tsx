@@ -29,6 +29,7 @@ export function MainLayout() {
         { id: 'task-dashboard', label: 'Task Dashboard', path: '/tasks/dashboard', icon: 'lucide:layout-dashboard' },
         { id: 'task-all', label: 'All Tasks', path: '/tasks/all', icon: 'lucide:list-checks' },
         { id: 'task-groups', label: 'Group Tasks', path: '/tasks/groups', icon: 'lucide:layers' },
+        { id: 'task-kanban', label: 'Kanban Board', path: '/tasks/kanban', icon: 'lucide:columns-3' },
       ],
     },
     { id: 'notes', label: 'Notes', icon: '📝', path: '/notes', disabled: true },

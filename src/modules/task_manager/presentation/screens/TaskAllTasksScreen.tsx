@@ -5,14 +5,14 @@
 import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Paper, ThemeIcon, UnstyledButton, Divider, Tooltip, ActionIcon, Checkbox } from '@mantine/core'
 import { IconPlus } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
-import { useParentTasks, useUpdateTask } from '../hooks/useTaskQueries'
+import { useParentTasksPaged, useUpdateTask } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskEmptyState } from '../components/TaskEmptyState'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
 import { formatDateTime } from '../../../../core/utils/dateHelper'
 import { useNavigate } from 'react-router-dom'
 import { Task } from '../../../../core/database/models'
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
 const ITEMS_PER_PAGE = 5
 
@@ -30,28 +30,10 @@ type PriorityMeta = {
 export function TaskAllTasksScreen() {
   const navigate = useNavigate()
   const { setSelectedTaskId } = useTaskStore()
-  const { data: tasks = [], isLoading } = useParentTasks()
-  const updateTask = useUpdateTask()
   const [currentPage, setCurrentPage] = useState<number>(1)
-
-  // Sort tasks by due date (earliest first, null dates at the end, completed tasks always last)
-  const sortedTasks = useMemo(() => {
-    return [...tasks].sort((a, b) => {
-      // Completed tasks always go to the end
-      if (a.status === 'Completed' && b.status !== 'Completed') return 1
-      if (a.status !== 'Completed' && b.status === 'Completed') return -1
-      // If both are completed, maintain original order
-      if (a.status === 'Completed' && b.status === 'Completed') return 0
-      // If both have no due date, maintain original order
-      if (!a.dueDate && !b.dueDate) return 0
-      // If a has no due date, put it at the end
-      if (!a.dueDate) return 1
-      // If b has no due date, put it at the end
-      if (!b.dueDate) return -1
-      // Sort by due date (earliest first)
-      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-    })
-  }, [tasks])
+  const { data, isLoading } = useParentTasksPaged(currentPage, ITEMS_PER_PAGE)
+  const updateTask = useUpdateTask()
+  const [totalTasks, setTotalTasks] = useState<number>(0)
 
   const handleTaskSelect = (taskId: string) => {
     if (!taskId || taskId.trim() === '') return
@@ -68,7 +50,20 @@ export function TaskAllTasksScreen() {
     })
   }
 
-  const totalPages = Math.max(1, Math.ceil(sortedTasks.length / ITEMS_PER_PAGE))
+  const tasks = data?.items ?? []
+  const totalPages = Math.max(1, Math.ceil(totalTasks / ITEMS_PER_PAGE))
+
+  useEffect(() => {
+    if (typeof data?.total === 'number') {
+      setTotalTasks(data.total)
+    }
+  }, [data?.total])
+
+  useEffect(() => {
+    if (totalTasks > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages, totalTasks])
 
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
@@ -124,14 +119,14 @@ export function TaskAllTasksScreen() {
             <Group justify="space-between" align="center">
               <Text fw={700} size="md">All Tasks</Text>
               <Badge variant="light" color="blue" size="sm">
-                {Math.min(currentPage * ITEMS_PER_PAGE, sortedTasks.length)} of {sortedTasks.length}
+                {Math.min(currentPage * ITEMS_PER_PAGE, totalTasks)} of {totalTasks}
               </Badge>
             </Group>
 
             <Divider size="sm" />
 
             <Stack gap="xs">
-              {sortedTasks.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((task: Task) => {
+              {tasks.map((task: Task) => {
                 const statusMeta = getStatusMeta(task.status)
                 const priorityMeta = getPriorityMeta(task.priority)
                 const borderLeftColor = task.status === 'Pending' ? 'yellow' : statusMeta.color
@@ -218,7 +213,7 @@ export function TaskAllTasksScreen() {
                 onClick={handlePrevPage}
                 variant="outline"
                 size="md"
-                disabled={currentPage === 1}
+                disabled={currentPage === 1 || isLoading}
                 leftSection={<StatusIcon icon="lucide:chevron-left" size={16} />}
               >
                 Prev
@@ -227,7 +222,7 @@ export function TaskAllTasksScreen() {
                 onClick={handleNextPage}
                 variant="outline"
                 size="md"
-                disabled={currentPage === totalPages}
+                disabled={currentPage === totalPages || isLoading}
                 rightSection={<StatusIcon icon="lucide:chevron-right" size={16} />}
               >
                 Next
