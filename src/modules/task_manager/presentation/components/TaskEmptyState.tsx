@@ -7,15 +7,17 @@ import { IconPlus } from '@tabler/icons-react'
 
 type TaskEmptyStateProps = {
   onCreate: () => void
+  title?: string
+  description?: string
 }
 
-export function TaskEmptyState({ onCreate }: TaskEmptyStateProps) {
+export function TaskEmptyState({ onCreate, title, description }: TaskEmptyStateProps) {
   return (
     <Center py="xl">
       <Stack align="center" gap="xs">
         <Box style={{ fontSize: '4rem' }}>📋</Box>
-        <Text c="dimmed" size="lg">No tasks yet</Text>
-        <Text c="dimmed" size="sm">Create your first task to get started</Text>
+        <Text c="dimmed" size="lg">{title ?? 'No tasks yet'}</Text>
+        <Text c="dimmed" size="sm">{description ?? 'Create your first task to get started'}</Text>
         <Button
           leftSection={<IconPlus size={18} />}
           onClick={onCreate}

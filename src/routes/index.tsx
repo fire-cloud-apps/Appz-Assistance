@@ -58,10 +58,6 @@ export const router = createBrowserRouter([
         element: <ComingSoonScreen moduleName="Notes" />,
       },
       {
-        path: 'calendar',
-        element: <ComingSoonScreen moduleName="Calendar" />,
-      },
-      {
         path: 'knowledge',
         element: <ComingSoonScreen moduleName="Knowledge Base" />,
       },

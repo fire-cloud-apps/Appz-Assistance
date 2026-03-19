@@ -2,10 +2,10 @@
  * Route: /tasks/all
  * Ref: routes/index.tsx
  */
-import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Paper, ThemeIcon, UnstyledButton, Divider, Tooltip, ActionIcon, Checkbox } from '@mantine/core'
-import { IconPlus } from '@tabler/icons-react'
+import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Paper, ThemeIcon, UnstyledButton, Divider, Tooltip, ActionIcon, Checkbox, TextInput } from '@mantine/core'
+import { IconPlus, IconSearch } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
-import { useParentTasksPaged, useUpdateTask } from '../hooks/useTaskQueries'
+import { useParentTasksPaged, useUpdateTask, useSearchTasksPaged } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskEmptyState } from '../components/TaskEmptyState'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
@@ -13,6 +13,7 @@ import { formatDateTime } from '../../../../core/utils/dateHelper'
 import { useNavigate } from 'react-router-dom'
 import { Task } from '../../../../core/database/models'
 import { useState, useEffect } from 'react'
+import { getTaskManagerItemsPerPage } from '../../../../core/services/userSettingsService'
 
 const ITEMS_PER_PAGE = 5
 
@@ -31,9 +32,36 @@ export function TaskAllTasksScreen() {
   const navigate = useNavigate()
   const { setSelectedTaskId } = useTaskStore()
   const [currentPage, setCurrentPage] = useState<number>(1)
-  const { data, isLoading } = useParentTasksPaged(currentPage, ITEMS_PER_PAGE)
+  const [itemsPerPage, setItemsPerPage] = useState<number>(ITEMS_PER_PAGE)
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('')
+  const [isPagingDisabled, setIsPagingDisabled] = useState<boolean>(false)
+
+  // Load user settings for items per page
+  useEffect(() => {
+    const items = getTaskManagerItemsPerPage()
+    setItemsPerPage(items)
+  }, [])
+
+  // Use search or parent tasks based on search term
+  const searchQuery = useSearchTasksPaged(debouncedSearchTerm, currentPage, itemsPerPage)
+  const parentQuery = useParentTasksPaged(currentPage, itemsPerPage)
+  
+  const { data, isLoading } = debouncedSearchTerm.trim() ? searchQuery : parentQuery
   const updateTask = useUpdateTask()
   const [totalTasks, setTotalTasks] = useState<number>(0)
+
+  // Debounce search term
+  useEffect(() => {
+    setIsPagingDisabled(true)
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+      setCurrentPage(1) // Reset to first page on search
+      setIsPagingDisabled(false)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
 
   const handleTaskSelect = (taskId: string) => {
     if (!taskId || taskId.trim() === '') return
@@ -66,11 +94,15 @@ export function TaskAllTasksScreen() {
   }, [currentPage, totalPages, totalTasks])
 
   const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+    if (!isPagingDisabled) {
+      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+    }
   }
 
   const handlePrevPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1))
+    if (!isPagingDisabled) {
+      setCurrentPage((prev) => Math.max(prev - 1, 1))
+    }
   }
 
   const getStatusMeta = (status: Task['status']): StatusMeta => {
@@ -112,14 +144,35 @@ export function TaskAllTasksScreen() {
       <Stack gap="md">
         <TaskDashboardHeader title="All Tasks" onNewTask={() => navigate('/tasks/create')} />
 
+        <TextInput
+          placeholder="Search by title or description..."
+          leftSection={<IconSearch size={16} />}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.currentTarget.value)}
+          size="md"
+          radius="md"
+          style={{ width: '100%' }}
+          mt="sm"
+        />
+
         {tasks.length === 0 ? (
-          <TaskEmptyState onCreate={() => navigate('/tasks/create')} />
+          searchTerm.trim() ? (
+            <TaskEmptyState 
+              title="No matching tasks found" 
+              description={`No tasks found matching "${searchTerm}"`}
+              onCreate={() => navigate('/tasks/create')} 
+            />
+          ) : (
+            <TaskEmptyState onCreate={() => navigate('/tasks/create')} />
+          )
         ) : (
           <Stack gap="sm">
             <Group justify="space-between" align="center">
-              <Text fw={700} size="md">All Tasks</Text>
+              <Text fw={700} size="md">
+                {debouncedSearchTerm.trim() ? 'Search Results' : 'All Tasks'}
+              </Text>
               <Badge variant="light" color="blue" size="sm">
-                {Math.min(currentPage * ITEMS_PER_PAGE, totalTasks)} of {totalTasks}
+                {Math.min(currentPage * itemsPerPage, totalTasks)} of {totalTasks}
               </Badge>
             </Group>
 

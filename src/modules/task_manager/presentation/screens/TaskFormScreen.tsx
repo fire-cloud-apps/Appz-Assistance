@@ -131,6 +131,7 @@ export function TaskFormScreen() {
             required
             error={errors.title?.message as string}
             {...register('title')}
+            autoFocus
           />
 
           <Textarea

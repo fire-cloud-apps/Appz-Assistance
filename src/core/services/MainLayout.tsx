@@ -10,6 +10,7 @@ import { useDisclosure } from '@mantine/hooks'
 import { AppZHeader } from './AppZHeader'
 import { ModuleMenu } from './ModuleMenu'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { useTaskNotifications } from '../hooks/useTaskNotifications'
 
 export function MainLayout() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
@@ -17,6 +18,9 @@ export function MainLayout() {
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
   const navigate = useNavigate()
   const location = useLocation()
+
+  // Initialize task notifications
+  useTaskNotifications()
 
   const modules = [
     {
@@ -33,7 +37,6 @@ export function MainLayout() {
       ],
     },
     { id: 'notes', label: 'Notes', icon: '📝', path: '/notes', disabled: true },
-    { id: 'calendar', label: 'Calendar', icon: '📅', path: '/calendar', disabled: true },
     { id: 'knowledge', label: 'Knowledge Base', icon: '📚', path: '/knowledge', disabled: true },
 { id: 'finance', label: 'Personal Finance', icon: '💰', path: '/finance', disabled: true },
     { id: 'family-tree', label: 'Family Tree', icon: '🌳', path: '/family-tree', disabled: true },

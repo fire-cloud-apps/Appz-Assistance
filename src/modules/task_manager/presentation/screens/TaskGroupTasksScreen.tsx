@@ -2,8 +2,9 @@
  * Route: /tasks/groups
  * Ref: routes/index.tsx
  */
-import { Box, Button, Stack, Text, Loader, Center, Tabs, Group, Badge, Collapse, ThemeIcon, UnstyledButton, Tooltip, ActionIcon } from '@mantine/core'
-import { IconListCheck, IconClockHour4, IconChevronDown, IconChevronRight, IconPlus } from '@tabler/icons-react'
+import React from 'react'
+import { Box, Button, Stack, Text, Loader, Center, Tabs, Group, Badge, Collapse, ThemeIcon, UnstyledButton, Tooltip, ActionIcon, Paper, rem } from '@mantine/core'
+import { IconListCheck, IconClockHour4, IconChevronDown, IconChevronRight, IconPlus, IconTarget, IconStatusChange } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useParentTasks, useChildTasks } from '../hooks/useTaskQueries'
 import { TaskCard } from '../../components/TaskCard'
@@ -12,11 +13,13 @@ import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskEmptyState } from '../components/TaskEmptyState'
 import { useNavigate } from 'react-router-dom'
 import { Task } from '../../../../core/database/models'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { getTaskManagerItemsPerPage } from '../../../../core/services/userSettingsService'
 
 type GroupByOption = 'priority' | 'status'
 
-const ITEMS_PER_PAGE = 25
+const ITEMS_PER_PAGE = 5
+const INITIAL_DISPLAY_COUNT = 5
 
 export function TaskGroupTasksScreen() {
   const navigate = useNavigate()
@@ -24,17 +27,25 @@ export function TaskGroupTasksScreen() {
   const { data: tasks = [], isLoading } = useParentTasks()
   const [selectedParentTask, setSelectedParentTask] = useState<{ id: string; title: string; level: number } | null>(null)
   const [groupBy, setGroupBy] = useState<GroupByOption>('priority')
-  const [displayedCount, setDisplayedCount] = useState<number>(ITEMS_PER_PAGE)
+  const [itemsPerPage, setItemsPerPage] = useState<number>(ITEMS_PER_PAGE)
+  const [displayedCount, setDisplayedCount] = useState<number>(INITIAL_DISPLAY_COUNT)
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    Critical: true,
-    High: true,
-    Medium: true,
-    Low: true,
-    InProgress: true,
-    Pending: true,
-    Completed: true,
-    Cancelled: true,
+    Critical: false,
+    High: false,
+    Medium: false,
+    Low: false,
+    Cancelled: false,
+    InProgress: false,
+    Pending: false,
+    Completed: false,
   })
+
+  // Load user settings for items per page
+  useEffect(() => {
+    const items = getTaskManagerItemsPerPage()
+    setItemsPerPage(items)
+    setDisplayedCount(items)
+  }, [])
 
   const handleTaskSelect = (taskId: string) => {
     if (!taskId || taskId.trim() === '') return
@@ -48,11 +59,11 @@ export function TaskGroupTasksScreen() {
   }
 
   const handleLoadMore = () => {
-    setDisplayedCount((prev) => prev + ITEMS_PER_PAGE)
+    setDisplayedCount((prev) => prev + itemsPerPage)
   }
 
   const resetDisplayedCount = () => {
-    setDisplayedCount(ITEMS_PER_PAGE)
+    setDisplayedCount(itemsPerPage)
   }
 
   const toggleGroup = (groupKey: string) => {
@@ -65,10 +76,11 @@ export function TaskGroupTasksScreen() {
   const groupedTasks = useMemo(() => {
     if (groupBy === 'priority') {
       return {
-        Critical: tasks.filter((t: Task) => t.priority === 'Critical'),
-        High: tasks.filter((t: Task) => t.priority === 'High'),
-        Medium: tasks.filter((t: Task) => t.priority === 'Medium'),
-        Low: tasks.filter((t: Task) => t.priority === 'Low'),
+        Critical: tasks.filter((t: Task) => t.priority === 'Critical' && t.status !== 'Cancelled'),
+        High: tasks.filter((t: Task) => t.priority === 'High' && t.status !== 'Cancelled'),
+        Medium: tasks.filter((t: Task) => t.priority === 'Medium' && t.status !== 'Cancelled'),
+        Low: tasks.filter((t: Task) => t.priority === 'Low' && t.status !== 'Cancelled'),
+        Cancelled: tasks.filter((t: Task) => t.status === 'Cancelled'),
       }
     }
     return {
@@ -84,14 +96,14 @@ export function TaskGroupTasksScreen() {
     setGroupBy(value)
     if (value === 'priority') {
       setExpandedGroups({
-        Critical: true,
-        High: true,
-        Medium: true,
-        Low: true,
+        Critical: false,
+        High: false,
+        Medium: false,
+        Low: false,
+        Cancelled: false,
         InProgress: false,
         Pending: false,
         Completed: false,
-        Cancelled: false,
       })
     } else if (value === 'status') {
       setExpandedGroups({
@@ -99,10 +111,10 @@ export function TaskGroupTasksScreen() {
         High: false,
         Medium: false,
         Low: false,
-        InProgress: true,
-        Pending: true,
-        Completed: true,
-        Cancelled: true,
+        Cancelled: false,
+        InProgress: false,
+        Pending: false,
+        Completed: false,
       })
     }
   }
@@ -113,30 +125,49 @@ export function TaskGroupTasksScreen() {
       High: 'orange',
       Medium: 'yellow',
       Low: 'blue',
+      Cancelled: 'red',
     }
     const statusColors: Record<string, string> = {
       InProgress: 'orange',
-      Pending: 'gray',
+      Pending: 'blue',
       Completed: 'green',
-      Cancelled: 'dimmed',
+      Cancelled: 'red',
     }
     return groupBy === 'priority' ? priorityColors[key] || 'gray' : statusColors[key] || 'gray'
   }
 
   const getGroupLabel = (key: string): string => {
     const priorityLabels: Record<string, string> = {
-      Critical: '🔴 Critical',
-      High: '🟠 High',
-      Medium: '🟡 Medium',
-      Low: '🔵 Low',
+      Critical: 'Critical Priority',
+      High: 'High Priority',
+      Medium: 'Medium Priority',
+      Low: 'Low Priority',
+      Cancelled: 'Cancelled',
     }
     const statusLabels: Record<string, string> = {
-      InProgress: '🔄 In Progress',
-      Pending: '⏳ Pending',
-      Completed: '✅ Completed',
-      Cancelled: '❌ Cancelled',
+      InProgress: 'In Progress',
+      Pending: 'Pending',
+      Completed: 'Completed',
+      Cancelled: 'Cancelled',
     }
     return groupBy === 'priority' ? priorityLabels[key] || key : statusLabels[key] || key
+  }
+
+  const getGroupIcon = (key: string) => {
+    const priorityIcons: Record<string, React.ReactNode> = {
+      Critical: <IconTarget size={18} />,
+      High: <IconTarget size={18} />,
+      Medium: <IconTarget size={18} />,
+      Low: <IconTarget size={18} />,
+      Cancelled: <IconListCheck size={18} />,
+    }
+    const statusIcons: Record<string, React.ReactNode> = {
+      InProgress: <IconStatusChange size={18} />,
+      Pending: <IconClockHour4 size={18} />,
+      Completed: <IconListCheck size={18} />,
+      Cancelled: <IconListCheck size={18} />,
+    }
+    return groupBy === 'priority' ? priorityIcons[key] || <IconTarget size={18} /> : statusIcons[key] || <IconStatusChange size={18} />
   }
 
   if (isLoading) {
@@ -156,12 +187,12 @@ export function TaskGroupTasksScreen() {
           <TaskEmptyState onCreate={() => navigate('/tasks/create')} />
         ) : (
           <Stack gap="md" pt="sm">
-            <Tabs value={groupBy} onChange={(value) => handleGroupByChange(value as GroupByOption)} variant="outline">
-              <Tabs.List grow>
-                <Tabs.Tab value="priority" leftSection={<IconListCheck size={16} />}>
+            <Tabs value={groupBy} onChange={(value) => handleGroupByChange(value as GroupByOption)} variant="pills">
+              <Tabs.List grow mb="md">
+                <Tabs.Tab value="priority" leftSection={<IconTarget size={18} />}>
                   Priority Group
                 </Tabs.Tab>
-                <Tabs.Tab value="status" leftSection={<IconClockHour4 size={16} />}>
+                <Tabs.Tab value="status" leftSection={<IconStatusChange size={18} />}>
                   Status Group
                 </Tabs.Tab>
               </Tabs.List>
@@ -171,22 +202,64 @@ export function TaskGroupTasksScreen() {
               groupTasks.length > 0 && (
                 <Stack key={key} gap="xs">
                   <UnstyledButton onClick={() => toggleGroup(key)}>
-                    <Group gap="xs" justify="space-between" p="xs" style={{ borderRadius: 'var(--mantine-radius-md)' }} bg={`var(--mantine-color-${getGroupColor(key)}-light)`}>
-                      <Group gap="xs">
-                        <ThemeIcon
-                          variant="light"
-                          color={getGroupColor(key)}
-                          size="sm"
-                          radius="xl"
-                        >
-                          {expandedGroups[key] ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
-                        </ThemeIcon>
-                        <Text fw={700} size="md">{getGroupLabel(key)}</Text>
+                    <Paper
+                      p="sm"
+                      radius="md"
+                      bg={`var(--mantine-color-${getGroupColor(key)}-light)`}
+                      style={{
+                        border: `1px solid var(--mantine-color-${getGroupColor(key)}-light)`,
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      <Group gap="md" justify="space-between" wrap="nowrap">
+                        <Group gap="md" wrap="nowrap">
+                          <ThemeIcon
+                            variant="light"
+                            color={getGroupColor(key)}
+                            size="lg"
+                            radius="md"
+                          >
+                            {getGroupIcon(key)}
+                          </ThemeIcon>
+                          <Stack gap={2}>
+                            <Text fw={700} size="md" c={`var(--mantine-color-${getGroupColor(key)}-filled)`}>
+                              {getGroupLabel(key)}
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              {groupBy === 'priority'
+                                ? key === 'Cancelled'
+                                  ? 'All cancelled tasks'
+                                  : `${key === 'Critical' ? 'Urgent' : key === 'High' ? 'Important' : key === 'Medium' ? 'Normal' : 'Routine'} priority tasks`
+                                : key === 'InProgress'
+                                  ? 'Tasks currently being worked on'
+                                  : key === 'Pending'
+                                    ? 'Tasks waiting to be started'
+                                    : key === 'Completed'
+                                      ? 'Successfully finished tasks'
+                                      : 'Tasks that were cancelled'
+                              }
+                            </Text>
+                          </Stack>
+                        </Group>
+                        <Group gap="sm" wrap="nowrap">
+                          <Badge
+                            variant="filled"
+                            color={getGroupColor(key)}
+                            size="lg"
+                            style={{ minWidth: rem(50) }}
+                          >
+                            {Math.min(displayedCount, groupTasks.length)} / {groupTasks.length}
+                          </Badge>
+                          <ThemeIcon
+                            variant="transparent"
+                            color={getGroupColor(key)}
+                            size="sm"
+                          >
+                            {expandedGroups[key] ? <IconChevronDown size={20} /> : <IconChevronRight size={20} />}
+                          </ThemeIcon>
+                        </Group>
                       </Group>
-                      <Badge variant="light" color={getGroupColor(key)} size="sm">
-                        {Math.min(displayedCount, groupTasks.length)} of {groupTasks.length}
-                      </Badge>
-                    </Group>
+                    </Paper>
                   </UnstyledButton>
 
                   <Collapse in={expandedGroups[key]}>

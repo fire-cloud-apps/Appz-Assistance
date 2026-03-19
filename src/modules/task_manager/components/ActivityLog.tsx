@@ -3,6 +3,7 @@ import {
   Box,
   Text,
   Textarea,
+  TextInput,
   Button,
   Stack,
   Timeline,
@@ -57,27 +58,11 @@ export function ActivityLog({ taskId }: ActivityLogProps) {
         <Title order={4}>Activity Log</Title>
 
         <Stack gap="xs">
-          <Textarea
-            placeholder="What did you do? (supports tabs, multi-line)"
+          <TextInput
+            placeholder="What did you do?"
             value={newActivity}
             onChange={(e) => setNewActivity(e.target.value)}
-            minRows={4}
-            autosize
-            maxRows={8}
             variant="filled"
-            spellCheck={false}
-            onKeyDown={(e) => {
-              if (e.key === 'Tab') {
-                e.preventDefault()
-                const target = e.target as HTMLTextAreaElement
-                const start = target.selectionStart
-                const end = target.selectionEnd
-                const value = target.value
-                target.value = value.substring(0, start) + '\t' + value.substring(end)
-                target.selectionStart = target.selectionEnd = start + 1
-                setNewActivity(target.value)
-              }
-            }}
             label="Activity"
           />
           <Textarea

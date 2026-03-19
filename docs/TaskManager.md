@@ -20,7 +20,6 @@ Future modules:
 
 ```
 Notes
-Calendar
 Knowledge Base
 AI Assistant
 Personal Finance

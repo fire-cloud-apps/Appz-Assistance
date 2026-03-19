@@ -5,8 +5,8 @@ It is a complete Personalized Application can be used by any individuals. This A
 ## Modules
 
 - Tools Modules
-    - [TaskManager](/TaskManager.React.md)
-    - Notes
+    - [TaskManager](/TaskManager.md)
+    - [Notes](/Notes.md)
     - Knowledge Base
 - Finance Modules
     - Personal Finance

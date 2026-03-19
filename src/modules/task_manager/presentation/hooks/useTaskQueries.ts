@@ -128,3 +128,13 @@ export function useUpcomingTasks(limit: number = 5) {
     queryFn: () => taskRepository.getUpcomingTasks(limit),
   })
 }
+
+export function useSearchTasksPaged(searchTerm: string, page: number, pageSize: number) {
+  return useQuery<{ items: Task[]; total: number }>({
+    queryKey: [...taskKeys.all, 'search', searchTerm, page, pageSize],
+    queryFn: () => taskRepository.searchTasksPaged(searchTerm, page, pageSize),
+    placeholderData: (prev) => prev,
+    staleTime: 10_000,
+    enabled: searchTerm.trim().length > 0,
+  })
+}

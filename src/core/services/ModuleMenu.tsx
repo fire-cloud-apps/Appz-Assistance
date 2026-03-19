@@ -15,6 +15,7 @@ import {
 } from '@mantine/core'
 import { IconLock, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { StatusIcon } from '../components/StatusIcon'
 import classes from './ModuleMenu.module.css'
 
@@ -43,6 +44,7 @@ interface ModuleMenuProps {
 }
 
 export function ModuleMenu({ modules, activeModule, activePath, onModuleClick }: ModuleMenuProps) {
+  const navigate = useNavigate()
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({
     'app-modules': true,
   })
@@ -184,7 +186,7 @@ export function ModuleMenu({ modules, activeModule, activePath, onModuleClick }:
 
         <UnstyledButton
           className={classes.moduleLink}
-          onClick={() => {}}
+          onClick={() => navigate('/settings')}
           w="100%"
         >
           <Box component="span" style={{ fontSize: '1.25rem' }}>

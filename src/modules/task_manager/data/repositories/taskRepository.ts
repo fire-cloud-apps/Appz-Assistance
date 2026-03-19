@@ -95,15 +95,56 @@ export class TaskRepository {
 
     const allTasks = await db.tasks.toArray()
     const upcomingTasks = allTasks
-      .filter(task => 
-        !task.isDeleted && 
-        task.status !== 'Completed' && 
+      .filter(task =>
+        !task.isDeleted &&
+        task.status !== 'Completed' &&
         task.status !== 'Cancelled' &&
-        task.dueDate && 
+        task.dueDate &&
         task.dueDate >= today
       )
       .sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''))
-    
+
     return upcomingTasks.slice(0, limit)
+  }
+
+  async searchTasks(searchTerm: string): Promise<Task[]> {
+    const allTasks = await db.tasks.toArray()
+    const normalizedTerm = searchTerm.toLowerCase().trim()
+
+    if (!normalizedTerm) {
+      return []
+    }
+
+    return allTasks.filter(task =>
+      !task.isDeleted &&
+      (
+        task.title.toLowerCase().includes(normalizedTerm) ||
+        (task.description && task.description.toLowerCase().includes(normalizedTerm))
+      )
+    )
+  }
+
+  async searchTasksPaged(searchTerm: string, page: number, pageSize: number): Promise<{ items: Task[]; total: number }> {
+    const allTasks = await db.tasks.toArray()
+    const normalizedTerm = searchTerm.toLowerCase().trim()
+
+    if (!normalizedTerm) {
+      return { items: [], total: 0 }
+    }
+
+    const filteredTasks = allTasks.filter(task =>
+      !task.isDeleted &&
+      (
+        task.title.toLowerCase().includes(normalizedTerm) ||
+        (task.description && task.description.toLowerCase().includes(normalizedTerm))
+      )
+    )
+
+    const sortedTasks = this.sortTasksForAll(filteredTasks)
+    const total = sortedTasks.length
+    const startIndex = Math.max(0, (page - 1) * pageSize)
+    const items = sortedTasks.slice(startIndex, startIndex + pageSize)
+
+    return { items, total }
   }
 }
