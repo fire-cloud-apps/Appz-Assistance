@@ -12,7 +12,7 @@ import {
   NumberInput,
   Switch,
 } from '@mantine/core'
-import { IconInfoCircle, IconTrash, IconBell } from '@tabler/icons-react'
+import { IconInfoCircle, IconTrash, IconBell, IconArchive } from '@tabler/icons-react'
 import { useState, useEffect } from 'react'
 import appConfig from '../config/appConfig.json'
 import {
@@ -20,6 +20,7 @@ import {
   setTaskManagerItemsPerPage,
   setNotificationCheckInterval,
   setEnableDueDateNotifications,
+  setArchiveRetentionDays,
 } from './userSettingsService'
 import {
   requestNotificationPermission,
@@ -33,12 +34,14 @@ export function SettingsScreen() {
   const [enableNotifications, setEnableNotifications] = useState<boolean>(false)
   const [checkInterval, setCheckInterval] = useState<number>(1)
   const [notificationPermission, setNotificationPermission] = useState<boolean>(false)
+  const [archiveRetentionDays, setArchiveRetentionDaysState] = useState<number>(90)
 
   useEffect(() => {
     const settings = getUserSettings()
     setItemsPerPage(settings.taskManager.defaultItemsPerPage)
     setEnableNotifications(settings.taskManager.enableDueDateNotifications)
     setCheckInterval(settings.taskManager.notificationCheckInterval)
+    setArchiveRetentionDaysState(settings.taskManager.archiveRetentionDays)
     setNotificationPermission(hasNotificationPermission())
   }, [])
 
@@ -71,6 +74,14 @@ export function SettingsScreen() {
     
     setCheckInterval(numValue)
     setNotificationCheckInterval(numValue)
+  }
+
+  const handleArchiveRetentionDaysChange = (value: number | string) => {
+    const numValue = typeof value === 'string' ? parseInt(value, 10) : value
+    if (isNaN(numValue) || numValue < 1 || numValue > 365) return
+    
+    setArchiveRetentionDaysState(numValue)
+    setArchiveRetentionDays(numValue)
   }
 
   const handleClearData = () => {
@@ -132,7 +143,7 @@ export function SettingsScreen() {
           <Stack gap="md">
             <Title order={4}>Task Manager</Title>
             <Text size="sm" c="dimmed">
-              Configure how tasks are displayed
+              Configure how tasks are displayed and managed
             </Text>
 
             <Divider />
@@ -154,6 +165,38 @@ export function SettingsScreen() {
                 size="sm"
               />
             </Group>
+
+            <Divider />
+
+            <Group justify="space-between" wrap="nowrap">
+              <Box>
+                <Text fw={500}>Archive Retention Period</Text>
+                <Text size="sm" c="dimmed">
+                  Days before archived tasks are permanently deleted (1-365)
+                </Text>
+              </Box>
+              <NumberInput
+                value={archiveRetentionDays}
+                onChange={handleArchiveRetentionDaysChange}
+                min={1}
+                max={365}
+                step={1}
+                w={100}
+                size="sm"
+              />
+            </Group>
+
+            {archiveRetentionDays && (
+              <Alert
+                icon={<IconArchive size={16} />}
+                title="Archive Auto-Deletion"
+                color="orange"
+                variant="light"
+                style={{ fontSize: 'var(--mantine-font-size-xs)' }}
+              >
+                Archived tasks will be automatically deleted after {archiveRetentionDays} day{archiveRetentionDays > 1 ? 's' : ''}.
+              </Alert>
+            )}
           </Stack>
         </Card>
 

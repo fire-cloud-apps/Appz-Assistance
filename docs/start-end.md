@@ -22,15 +22,20 @@ Hope you understood? If yes, Create a task plan and proceed accord
 
 ### All Instructions to follow
 Module: 'Task Manager' 
-Screen: 'All Tasks'. 
-Feature: I need a search box on the top of the 'All Tasks' the URL: 'https://appz-assistance.vercel.app/tasks/all'. It should search on the title and description for the given word  and perform search, and display the result for the matched items. 
+Screen: 'TaskAllTasksScreen.tsx'
+Route: '/tasks/all' 
+
+Feature to Implement: 
+I need a search box on the top of the 'All Tasks' the URL: 'https://appz-assistance.vercel.app/tasks/all'. It should search on the title and description for the given word  and perform search, and display the result for the matched items. 
 
 ---
 
 ### CLI Coder used
-1. QWEN
-2. OpenCode
-3. Codex
-4. GEMINI
+1. QWEN (Monday)
+2. OpenCode (Tuesday)
+3. Codex (Wednesday)
+4. GEMINI (Thursday)
+5. Copilot (Friday)
+
 
 

@@ -19,7 +19,9 @@ export class AppDatabase extends Dexie {
         dueDate,
         createdAt,
         updatedAt,
-        isDeleted
+        isDeleted,
+        isArchived,
+        archivedAt
       `,
       taskActivities: `
         id,

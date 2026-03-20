@@ -42,23 +42,43 @@ export class TaskRepository {
     }
   }
 
+  async archiveTask(id: string): Promise<void> {
+    const task = await db.tasks.get(id)
+    if (task) {
+      task.isArchived = true
+      task.archivedAt = new Date().toISOString()
+      task.updatedAt = new Date().toISOString()
+      await db.tasks.put(task)
+    }
+  }
+
+  async unarchiveTask(id: string): Promise<void> {
+    const task = await db.tasks.get(id)
+    if (task) {
+      task.isArchived = false
+      task.archivedAt = null
+      task.updatedAt = new Date().toISOString()
+      await db.tasks.put(task)
+    }
+  }
+
   async getTaskById(id: string): Promise<Task | undefined> {
     return db.tasks.get(id)
   }
 
   async getTasks(): Promise<Task[]> {
     const allTasks = await db.tasks.toArray()
-    return allTasks.filter(task => !task.isDeleted)
+    return allTasks.filter(task => !task.isDeleted && !task.isArchived)
   }
 
   async getParentTasks(): Promise<Task[]> {
     const allTasks = await db.tasks.toArray()
-    return allTasks.filter(task => task.parentTaskId === null && !task.isDeleted)
+    return allTasks.filter(task => task.parentTaskId === null && !task.isDeleted && !task.isArchived)
   }
 
   async getParentTasksPaged(page: number, pageSize: number): Promise<{ items: Task[]; total: number }> {
     const allTasks = await db.tasks.toArray()
-    const parentTasks = allTasks.filter(task => task.parentTaskId === null && !task.isDeleted)
+    const parentTasks = allTasks.filter(task => task.parentTaskId === null && !task.isDeleted && !task.isArchived)
     const sortedTasks = this.sortTasksForAll(parentTasks)
     const total = sortedTasks.length
     const startIndex = Math.max(0, (page - 1) * pageSize)
@@ -68,12 +88,12 @@ export class TaskRepository {
 
   async getChildTasks(parentTaskId: string): Promise<Task[]> {
     const allTasks = await db.tasks.toArray()
-    return allTasks.filter(task => task.parentTaskId === parentTaskId && !task.isDeleted)
+    return allTasks.filter(task => task.parentTaskId === parentTaskId && !task.isDeleted && !task.isArchived)
   }
 
   async getTasksByStatus(status: TaskStatus): Promise<Task[]> {
     const allTasks = await db.tasks.toArray()
-    return allTasks.filter(task => task.status === status && !task.isDeleted)
+    return allTasks.filter(task => task.status === status && !task.isDeleted && !task.isArchived)
   }
 
   async completeTask(id: string): Promise<void> {
@@ -87,7 +107,7 @@ export class TaskRepository {
 
   async getTasksByPriority(priority: string): Promise<Task[]> {
     const allTasks = await db.tasks.toArray()
-    return allTasks.filter(task => task.priority === priority && !task.isDeleted)
+    return allTasks.filter(task => task.priority === priority && !task.isDeleted && !task.isArchived)
   }
 
   async getUpcomingTasks(limit: number = 5): Promise<Task[]> {
@@ -97,6 +117,7 @@ export class TaskRepository {
     const upcomingTasks = allTasks
       .filter(task =>
         !task.isDeleted &&
+        !task.isArchived &&
         task.status !== 'Completed' &&
         task.status !== 'Cancelled' &&
         task.dueDate &&
@@ -117,6 +138,7 @@ export class TaskRepository {
 
     return allTasks.filter(task =>
       !task.isDeleted &&
+      !task.isArchived &&
       (
         task.title.toLowerCase().includes(normalizedTerm) ||
         (task.description && task.description.toLowerCase().includes(normalizedTerm))
@@ -134,6 +156,7 @@ export class TaskRepository {
 
     const filteredTasks = allTasks.filter(task =>
       !task.isDeleted &&
+      !task.isArchived &&
       (
         task.title.toLowerCase().includes(normalizedTerm) ||
         (task.description && task.description.toLowerCase().includes(normalizedTerm))
@@ -146,5 +169,33 @@ export class TaskRepository {
     const items = sortedTasks.slice(startIndex, startIndex + pageSize)
 
     return { items, total }
+  }
+
+  async getArchivedTasksPaged(page: number, pageSize: number): Promise<{ items: Task[]; total: number }> {
+    const allTasks = await db.tasks.toArray()
+    const archivedTasks = allTasks.filter(task => task.isArchived && !task.isDeleted)
+    const sortedTasks = archivedTasks.sort((a, b) => 
+      new Date(b.archivedAt || '').getTime() - new Date(a.archivedAt || '').getTime()
+    )
+    const total = sortedTasks.length
+    const startIndex = Math.max(0, (page - 1) * pageSize)
+    const items = sortedTasks.slice(startIndex, startIndex + pageSize)
+    return { items, total }
+  }
+
+  async getExpiredArchivedTasks(retentionDays: number): Promise<Task[]> {
+    const allTasks = await db.tasks.toArray()
+    const now = new Date()
+    
+    return allTasks.filter(task => {
+      if (!task.isArchived || !task.archivedAt) return false
+      const archivedDate = new Date(task.archivedAt)
+      const daysDiff = Math.floor((now.getTime() - archivedDate.getTime()) / (1000 * 60 * 60 * 24))
+      return daysDiff >= retentionDays
+    })
+  }
+
+  async permanentlyDeleteTask(id: string): Promise<void> {
+    await db.tasks.delete(id)
   }
 }

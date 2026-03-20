@@ -11,6 +11,8 @@ import { AppZHeader } from './AppZHeader'
 import { ModuleMenu } from './ModuleMenu'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTaskNotifications } from '../hooks/useTaskNotifications'
+import { useEffect } from 'react'
+import { archiveCleanupService } from '../../modules/task_manager/data/repositories/archiveCleanupService'
 
 export function MainLayout() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
@@ -21,6 +23,15 @@ export function MainLayout() {
 
   // Initialize task notifications
   useTaskNotifications()
+
+  // Initialize archive cleanup service
+  useEffect(() => {
+    archiveCleanupService.startCleanupJob()
+
+    return () => {
+      archiveCleanupService.stopCleanupJob()
+    }
+  }, [])
 
   const modules = [
     {
@@ -34,6 +45,7 @@ export function MainLayout() {
         { id: 'task-all', label: 'All Tasks', path: '/tasks/all', icon: 'lucide:list-checks' },
         { id: 'task-groups', label: 'Group Tasks', path: '/tasks/groups', icon: 'lucide:layers' },
         { id: 'task-kanban', label: 'Kanban Board', path: '/tasks/kanban', icon: 'lucide:columns-3' },
+        { id: 'task-archive', label: 'Archive Tasks', path: '/tasks/archive', icon: 'lucide:archive' },
       ],
     },
     { id: 'notes', label: 'Notes', icon: '📝', path: '/notes', disabled: true },

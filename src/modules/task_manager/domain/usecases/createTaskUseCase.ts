@@ -57,6 +57,8 @@ export class CreateTaskUseCase {
       createdAt: now,
       updatedAt: now,
       isDeleted: false,
+      isArchived: false,
+      archivedAt: null,
     }
 
     await this.taskRepository.createTask(task)

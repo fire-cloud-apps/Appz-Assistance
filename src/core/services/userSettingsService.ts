@@ -10,6 +10,7 @@ export interface UserSettings {
     defaultItemsPerPage: number
     notificationCheckInterval: number // in minutes
     enableDueDateNotifications: boolean
+    archiveRetentionDays: number // days before auto-deletion
   }
 }
 
@@ -18,6 +19,7 @@ const defaultSettings: UserSettings = {
     defaultItemsPerPage: 5,
     notificationCheckInterval: 1, // Default: check every 1 minute
     enableDueDateNotifications: false,
+    archiveRetentionDays: 90, // Default: 90 days retention
   },
 }
 
@@ -75,5 +77,15 @@ export function getEnableDueDateNotifications(): boolean {
 export function setEnableDueDateNotifications(value: boolean): void {
   const current = getUserSettings()
   current.taskManager.enableDueDateNotifications = value
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
+}
+
+export function getArchiveRetentionDays(): number {
+  return getUserSettings().taskManager.archiveRetentionDays
+}
+
+export function setArchiveRetentionDays(value: number): void {
+  const current = getUserSettings()
+  current.taskManager.archiveRetentionDays = value
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
 }

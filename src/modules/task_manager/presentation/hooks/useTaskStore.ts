@@ -6,9 +6,12 @@ interface TaskUIState {
   isEditModalOpen: boolean
   isSubtaskModalOpen: boolean
   isDeleteModalOpen: boolean
+  isArchiveModalOpen: boolean
   isCreateModalOpen: boolean
   deleteTaskId: string | null
   deleteTaskTitle: string | null
+  archiveTaskId: string | null
+  archiveTaskTitle: string | null
 
   setSelectedTaskId: (id: string | null) => void
   toggleExpandedTask: (id: string) => void
@@ -20,6 +23,8 @@ interface TaskUIState {
   closeSubtaskModal: () => void
   openDeleteModal: (taskId: string, taskTitle: string) => void
   closeDeleteModal: () => void
+  openArchiveModal: (taskId: string, taskTitle: string) => void
+  closeArchiveModal: () => void
   openCreateModal: () => void
   closeCreateModal: () => void
   reset: () => void
@@ -31,9 +36,12 @@ export const useTaskStore = create<TaskUIState>((set) => ({
   isEditModalOpen: false,
   isSubtaskModalOpen: false,
   isDeleteModalOpen: false,
+  isArchiveModalOpen: false,
   isCreateModalOpen: false,
   deleteTaskId: null,
   deleteTaskTitle: null,
+  archiveTaskId: null,
+  archiveTaskTitle: null,
 
   setSelectedTaskId: (id) => set({ selectedTaskId: id }),
 
@@ -73,6 +81,17 @@ export const useTaskStore = create<TaskUIState>((set) => ({
     deleteTaskTitle: null 
   }),
 
+  openArchiveModal: (taskId, taskTitle) => set({
+    isArchiveModalOpen: true,
+    archiveTaskId: taskId,
+    archiveTaskTitle: taskTitle,
+  }),
+  closeArchiveModal: () => set({
+    isArchiveModalOpen: false,
+    archiveTaskId: null,
+    archiveTaskTitle: null,
+  }),
+
   openCreateModal: () => set({ isCreateModalOpen: true }),
   closeCreateModal: () => set({ isCreateModalOpen: false }),
 
@@ -83,8 +102,11 @@ export const useTaskStore = create<TaskUIState>((set) => ({
       isEditModalOpen: false,
       isSubtaskModalOpen: false,
       isDeleteModalOpen: false,
+      isArchiveModalOpen: false,
       isCreateModalOpen: false,
       deleteTaskId: null,
       deleteTaskTitle: null,
+      archiveTaskId: null,
+      archiveTaskTitle: null,
     }),
 }))

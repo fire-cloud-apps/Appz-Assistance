@@ -10,6 +10,8 @@ export interface Task {
   createdAt: string
   updatedAt: string
   isDeleted: boolean
+  isArchived: boolean
+  archivedAt?: string | null
 }
 
 export type TaskStatus = 'Pending' | 'InProgress' | 'Completed' | 'Cancelled'

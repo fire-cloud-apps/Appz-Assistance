@@ -79,6 +79,8 @@ export function useCreateTask() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       isDeleted: false,
+      isArchived: false,
+      archivedAt: null,
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })

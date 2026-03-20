@@ -15,7 +15,7 @@ import {
   ActionIcon,
   Alert,
 } from '@mantine/core'
-import { IconArrowLeft, IconEdit, IconTrash, IconPlus } from '@tabler/icons-react'
+import { IconArrowLeft, IconEdit, IconArchive, IconPlus } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTaskById, useChildTasks } from '../hooks' // Removed useUpdateTask
 import { useTaskStore } from '../hooks'
@@ -23,13 +23,13 @@ import { ActivityLog } from '../../components/ActivityLog'
 import { TaskCard } from '../../components/TaskCard'
 import { Task } from '../../../../core/database/models'
 import { useEffect } from 'react' // Removed useState
-import { DeleteConfirmationModal } from '../../components/DeleteConfirmationModal'
+import { ArchiveConfirmationModal } from '../../components/ArchiveConfirmationModal'
 import { SubtaskModal } from '../../components/SubtaskModal'
 
 export function TaskDetailScreen() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { setSelectedTaskId, openDeleteModal, openSubtaskModal } = useTaskStore()
+  const { setSelectedTaskId, openArchiveModal, openSubtaskModal } = useTaskStore()
 
   // Redirect to dashboard if ID is empty
   useEffect(() => {
@@ -62,9 +62,9 @@ export function TaskDetailScreen() {
     }
   }
 
-  const handleDelete = () => {
+  const handleArchive = () => {
     if (!task) return
-    openDeleteModal(task.id, task.title)
+    openArchiveModal(task.id, task.title)
   }
 
   const handleClose = () => {
@@ -115,14 +115,26 @@ export function TaskDetailScreen() {
                 >
                   {task.priority}
                 </Badge>
+                {task.isArchived && (
+                  <Badge
+                    variant="filled"
+                    color="orange"
+                    size="lg"
+                    leftSection={<IconArchive size={14} />}
+                  >
+                    Archived
+                  </Badge>
+                )}
               </Group>
               <Group>
                 <ActionIcon variant="light" onClick={handleEdit}>
                   <IconEdit size={18} />
                 </ActionIcon>
-                <ActionIcon variant="light" color="red" onClick={handleDelete}>
-                  <IconTrash size={18} />
-                </ActionIcon>
+                {!task.isArchived && (
+                  <ActionIcon variant="light" color="orange" onClick={handleArchive}>
+                    <IconArchive size={18} />
+                  </ActionIcon>
+                )}
               </Group>
             </Group>
 
@@ -209,8 +221,8 @@ export function TaskDetailScreen() {
         </Button>
       </Stack>
 
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal />
+      {/* Archive Confirmation Modal */}
+      <ArchiveConfirmationModal />
 
       {/* Subtask Modal */}
       <SubtaskModal 
