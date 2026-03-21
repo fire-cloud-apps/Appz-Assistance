@@ -15,7 +15,7 @@ import {
   ActionIcon,
   Alert,
 } from '@mantine/core'
-import { IconArrowLeft, IconEdit, IconArchive, IconPlus } from '@tabler/icons-react'
+import { IconArrowLeft, IconEdit, IconArchive, IconPlus, IconRepeat } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTaskById, useChildTasks } from '../hooks' // Removed useUpdateTask
 import { useTaskStore } from '../hooks'
@@ -25,6 +25,7 @@ import { Task } from '../../../../core/database/models'
 import { useEffect } from 'react' // Removed useState
 import { ArchiveConfirmationModal } from '../../components/ArchiveConfirmationModal'
 import { SubtaskModal } from '../../components/SubtaskModal'
+import { getRecurrenceLabel } from '../../../../core/utils/recurrenceHelper'
 
 export function TaskDetailScreen() {
   const { id } = useParams<{ id: string }>()
@@ -69,7 +70,7 @@ export function TaskDetailScreen() {
 
   const handleClose = () => {
     setSelectedTaskId(null)
-    navigate('/')
+    navigate(-1) // Go back to the previous page
   }
 
   if (isLoading) {
@@ -166,6 +167,21 @@ export function TaskDetailScreen() {
                 <Text size="sm" c="dimmed">Level</Text>
                 <Text size="sm">Level {task.taskLevel}</Text>
               </Box>
+              {task.isRecurring && task.recurrencePattern && (
+                <Box>
+                  <Group gap="xs">
+                    <IconRepeat size={16} color="pink" />
+                    <Text size="sm" c="pink">
+                      {getRecurrenceLabel(task.recurrencePattern)}
+                    </Text>
+                  </Group>
+                  {task.recurrenceEndDate && (
+                    <Text size="xs" c="dimmed" mt={4}>
+                      Until: {new Date(task.recurrenceEndDate).toLocaleDateString()}
+                    </Text>
+                  )}
+                </Box>
+              )}
             </Group>
           </Stack>
         </Card>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react' // Added
+import { useEffect, useState } from 'react' // Added
 import { useForm } from 'react-hook-form' // Added
 import { zodResolver } from '@hookform/resolvers/zod' // Added
 import {
@@ -11,6 +11,9 @@ import {
   Title,
   Container,
   LoadingOverlay,
+  Badge,
+  Box,
+  Text,
 } from '@mantine/core' // Added Mantine components
 import { DateInput } from '@mantine/dates' // Added DateInput
 
@@ -26,7 +29,9 @@ import {
 } from '../hooks'
 import { getToday } from '../../../../core/utils/dateHelper'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Task } from '../../../../core/database/models'
+import { Task, RecurrencePattern } from '../../../../core/database/models'
+import { RecurrencePicker } from '../../components/RecurrencePicker'
+import { getRecurrenceLabel } from '../../../../core/utils/recurrenceHelper'
 
 // Removed type TaskFormValues = z.infer<typeof createTaskSchema>
 // Removed type UpdateTaskFormValues = z.infer<typeof updateTaskSchema>
@@ -41,7 +46,10 @@ export function TaskFormScreen() {
   const updateTask = useUpdateTask()
   const { data: parentTasks = [] } = useParentTasks()
 
-  // const schema = isEditing ? updateTaskSchema : createTaskSchema // Removed unused schema
+  // Recurrence state
+  const [recurrencePickerOpened, setRecurrencePickerOpened] = useState(false)
+  const [recurrencePattern, setRecurrencePattern] = useState<RecurrencePattern | null>(null)
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<string | null>(null)
 
   const {
     register,
@@ -74,6 +82,14 @@ export function TaskFormScreen() {
         parentTaskId: taskToEdit.parentTaskId || null,
         taskLevel: taskToEdit.taskLevel,
       })
+      // Load recurrence data
+      if (taskToEdit.recurrencePattern) {
+        setRecurrencePattern(taskToEdit.recurrencePattern)
+        setRecurrenceEndDate(taskToEdit.recurrenceEndDate || null)
+      } else {
+        setRecurrencePattern(null)
+        setRecurrenceEndDate(null)
+      }
     } else if (!isEditing) {
       reset({
         title: '',
@@ -84,6 +100,8 @@ export function TaskFormScreen() {
         parentTaskId: null,
         taskLevel: 1,
       })
+      setRecurrencePattern(null)
+      setRecurrenceEndDate(null)
     }
   }, [isEditing, taskToEdit, reset])
 
@@ -100,9 +118,17 @@ export function TaskFormScreen() {
           parentTaskId: data.parentTaskId,
           taskLevel: data.taskLevel,
           updatedAt: new Date().toISOString(),
+          isRecurring: !!recurrencePattern,
+          recurrencePattern,
+          recurrenceEndDate,
         } as Task) // Cast to Task for updateTask.mutateAsync
       } else {
-        await createTask.mutateAsync(data) // Pass data directly, hook handles other fields
+        await createTask.mutateAsync({
+          ...data,
+          isRecurring: !!recurrencePattern,
+          recurrencePattern,
+          recurrenceEndDate,
+        })
       }
       navigate(-1) // Go back to the previous screen
     } catch (error) {
@@ -112,6 +138,17 @@ export function TaskFormScreen() {
 
   const handleCancel = () => {
     navigate(-1) // Go back to the previous screen
+  }
+
+  const handleRecurrenceSave = (pattern: RecurrencePattern | null, endDate: string | null) => {
+    setRecurrencePattern(pattern)
+    setRecurrenceEndDate(endDate)
+    setRecurrencePickerOpened(false)
+  }
+
+  const handleClearRecurrence = () => {
+    setRecurrencePattern(null)
+    setRecurrenceEndDate(null)
   }
 
   if (isEditing && isLoadingTask) {
@@ -186,6 +223,47 @@ export function TaskFormScreen() {
             error={errors.dueDate?.message as string}
           />
 
+          {/* Recurrence Picker Button */}
+          <Box>
+            <Group justify="space-between" align="flex-end" mb="xs">
+              <Text size="sm" fw={500}>
+                Repeat
+              </Text>
+              {recurrencePattern && (
+                <Badge
+                  variant="light"
+                  color="blue"
+                  size="sm"
+                  rightSection={
+                    <Text
+                      component="span"
+                      size="xs"
+                      c="blue"
+                      fw={500}
+                      style={{ cursor: 'pointer', marginLeft: 4 }}
+                      onClick={handleClearRecurrence}
+                    >
+                      ✕
+                    </Text>
+                  }
+                >
+                  {getRecurrenceLabel(recurrencePattern)}
+                </Badge>
+              )}
+            </Group>
+            <Button
+              variant={recurrencePattern ? 'outline' : 'light'}
+              color={recurrencePattern ? 'gray' : 'blue'}
+              onClick={() => setRecurrencePickerOpened(true)}
+              fullWidth
+              justify="flex-start"
+            >
+              {recurrencePattern
+                ? `Repeats: ${getRecurrenceLabel(recurrencePattern)}${recurrenceEndDate ? ` until ${new Date(recurrenceEndDate).toLocaleDateString()}` : ''}`
+                : 'Does not repeat'}
+            </Button>
+          </Box>
+
           <Select
             label="Parent Task (optional)"
             placeholder="Select parent task for subtask"
@@ -206,6 +284,15 @@ export function TaskFormScreen() {
           </Group>
         </Stack>
       </form>
+
+      <RecurrencePicker
+        opened={recurrencePickerOpened}
+        onClose={() => setRecurrencePickerOpened(false)}
+        onSave={handleRecurrenceSave}
+        initialPattern={recurrencePattern}
+        initialEndDate={recurrenceEndDate}
+        dueDate={watch('dueDate') as string | null}
+      />
     </Container>
   )
 }

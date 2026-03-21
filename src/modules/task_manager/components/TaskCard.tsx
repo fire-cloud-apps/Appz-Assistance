@@ -1,6 +1,7 @@
 import { Card, Group, Text, Badge, Button, Stack, Box } from '@mantine/core'
-import { IconChevronRight, IconChevronDown, IconCalendar, IconList, IconPlus } from '@tabler/icons-react'
+import { IconChevronRight, IconChevronDown, IconCalendar, IconList, IconPlus, IconRepeat } from '@tabler/icons-react'
 import { Task } from '../../../core/database/models'
+import { getRecurrenceLabel } from '../../../core/utils/recurrenceHelper'
 
 interface TaskCardProps {
   task: Task
@@ -109,6 +110,14 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
                     {childTasksCount} subtask(s)
                   </Text>
                 )}
+                {task.isRecurring && task.recurrencePattern && (
+                  <Group gap="xs">
+                    <IconRepeat size={16} />
+                    <Text size="sm" c="pink">
+                      {getRecurrenceLabel(task.recurrencePattern)}
+                    </Text>
+                  </Group>
+                )}
               </Group>
               
               {canAddSubtask && (
@@ -133,9 +142,14 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
                 Due: {task.dueDate}
               </Text>
             )}
-            <Text size="xs" c="dimmed">
-              Level {task.taskLevel}
-            </Text>
+            <Group gap="xs">
+              {task.isRecurring && task.recurrencePattern && (
+                <IconRepeat size={14} color="pink" />
+              )}
+              <Text size="xs" c="dimmed">
+                Level {task.taskLevel}
+              </Text>
+            </Group>
           </Group>
         )}
       </Stack>

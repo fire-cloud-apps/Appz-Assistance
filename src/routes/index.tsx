@@ -10,7 +10,13 @@ import { TaskGroupTasksScreen } from '../modules/task_manager/presentation/scree
 import { TaskKanbanBoardScreen } from '../modules/task_manager/presentation/screens/TaskKanbanBoardScreen'
 import { TaskArchiveScreen } from '../modules/task_manager/presentation/screens/TaskArchiveScreen'
 import { TaskDetailScreen } from '../modules/task_manager/presentation/screens/TaskDetailScreen'
-import { TaskFormScreen } from '../modules/task_manager/presentation/screens/TaskFormScreen' // New import
+import { TaskFormScreen } from '../modules/task_manager/presentation/screens/TaskFormScreen'
+import { NotesDashboardScreen } from '../modules/notes/presentation/screens/NotesDashboardScreen'
+import { NotesFolderViewScreen } from '../modules/notes/presentation/screens/NotesFolderViewScreen'
+import { NotesEditorScreen } from '../modules/notes/presentation/screens/NotesEditorScreen'
+import { NotesSearchScreen } from '../modules/notes/presentation/screens/NotesSearchScreen'
+import { NotesFavoritesScreen } from '../modules/notes/presentation/screens/NotesFavoritesScreen'
+import { NotesTrashScreen } from '../modules/notes/presentation/screens/NotesTrashScreen'
 import { SettingsScreen } from '../core/services/SettingsScreen'
 
 export const router = createBrowserRouter([
@@ -43,11 +49,11 @@ export const router = createBrowserRouter([
         element: <TaskArchiveScreen />,
       },
       {
-        path: 'tasks/create', // New route for creation
+        path: 'tasks/create',
         element: <TaskFormScreen />,
       },
       {
-        path: 'tasks/edit/:id', // New route for update
+        path: 'tasks/edit/:id',
         element: <TaskFormScreen />,
       },
       {
@@ -60,13 +66,37 @@ export const router = createBrowserRouter([
       },
       {
         path: 'notes',
-        element: <ComingSoonScreen moduleName="Notes" />,
+        element: <NotesDashboardScreen />,
+      },
+      {
+        path: 'notes/folder/:id',
+        element: <NotesFolderViewScreen />,
+      },
+      {
+        path: 'notes/editor/:id',
+        element: <NotesEditorScreen />,
+      },
+      {
+        path: 'notes/create',
+        element: <NotesEditorScreen />,
+      },
+      {
+        path: 'notes/search',
+        element: <NotesSearchScreen />,
+      },
+      {
+        path: 'notes/favorites',
+        element: <NotesFavoritesScreen />,
+      },
+      {
+        path: 'notes/trash',
+        element: <NotesTrashScreen />,
       },
       {
         path: 'knowledge',
         element: <ComingSoonScreen moduleName="Knowledge Base" />,
       },
-{
+      {
         path: 'finance',
         element: <ComingSoonScreen moduleName="Personal Finance" />,
       },

@@ -5,8 +5,8 @@ It is a complete Personalized Application can be used by any individuals. This A
 ## Modules
 
 - Tools Modules
-    - [TaskManager](/TaskManager.md)
-    - [Notes](/Notes.md)
+    - [TaskManager](modules/TaskManager.md)
+    - [Notes](modules/Notes.md)
     - Knowledge Base
 - Finance Modules
     - Personal Finance
@@ -14,21 +14,10 @@ It is a complete Personalized Application can be used by any individuals. This A
     - Finance Goals 
 
 ## Skills 
-- [Skills](/Skills.md.md)
+- [Skills](common/Skills.md)
 
-## Instructions
-
-## Before you start
-
-Follow below before your start
-1. Using the file '@docs/TaskManager.md', understand the current functionality of module. 
-2. Using the file '@docs/dev-Instruction', understand the instructions to develop the module wise application.
-3. using the file '@docs/TaskManager.Status.md', understand the current status of the module.
-Finally wait for the instruction from the user and start coding. 
-
-
----
-### Other Commands for flexibility
-Hope you understood? If yes, Create a task plan and proceed accord
-
+## STRICTLY FOLLOW Instructions
+- [Developer Instruction](instructions/dev-Instruction.md)
+- [On Start](instructions/start-end.md)
+- [On End](instructions/onEnd.md)
 

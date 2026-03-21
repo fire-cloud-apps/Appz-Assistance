@@ -1,4 +1,5 @@
 import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Table } from '@mantine/core'
+import { IconRepeat } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useParentTasks } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
@@ -58,6 +59,7 @@ export function TaskDashboardListViewScreen() {
                   <Table.Th>Status</Table.Th>
                   <Table.Th>Priority</Table.Th>
                   <Table.Th>Due Date</Table.Th>
+                  <Table.Th>Repeat</Table.Th>
                   <Table.Th>Updated</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -72,6 +74,16 @@ export function TaskDashboardListViewScreen() {
                     <Table.Td>{task.status}</Table.Td>
                     <Table.Td>{task.priority}</Table.Td>
                     <Table.Td>{task.dueDate || '-'}</Table.Td>
+                    <Table.Td>
+                      {task.isRecurring && task.recurrencePattern ? (
+                        <Group gap="xs">
+                          <IconRepeat size={16} color="pink" />
+                          <Text size="sm" c="pink">Yes</Text>
+                        </Group>
+                      ) : (
+                        <Text size="sm" c="dimmed">No</Text>
+                      )}
+                    </Table.Td>
                     <Table.Td>{task.updatedAt}</Table.Td>
                   </Table.Tr>
                 ))}

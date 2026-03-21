@@ -8,18 +8,17 @@ import {
 } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useTaskStore, useDeleteTask } from '../presentation/hooks'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 export function DeleteConfirmationModal() {
-  const { 
-    isDeleteModalOpen, 
-    closeDeleteModal, 
-    deleteTaskId, 
-    deleteTaskTitle 
+  const {
+    isDeleteModalOpen,
+    closeDeleteModal,
+    deleteTaskId,
+    deleteTaskTitle
   } = useTaskStore()
   const deleteTask = useDeleteTask()
   const navigate = useNavigate()
-  const location = useLocation()
 
   const handleDelete = async () => {
     if (!deleteTaskId) return
@@ -27,10 +26,8 @@ export function DeleteConfirmationModal() {
     try {
       await deleteTask.mutateAsync({ taskId: deleteTaskId })
       closeDeleteModal()
-      // Only navigate if we're on the detail page
-      if (location.pathname.startsWith('/task/')) {
-        navigate('/')
-      }
+      // Go back to the previous page (like browser back button)
+      navigate(-1)
     } catch (error) {
       console.error('Failed to delete task:', error)
     }

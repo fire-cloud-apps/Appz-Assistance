@@ -48,7 +48,18 @@ export function MainLayout() {
         { id: 'task-archive', label: 'Archive Tasks', path: '/tasks/archive', icon: 'lucide:archive' },
       ],
     },
-    { id: 'notes', label: 'Notes', icon: '📝', path: '/notes', disabled: true },
+    {
+      id: 'notes',
+      label: 'Notes',
+      icon: '📝',
+      path: '/notes',
+      disabled: false,
+      children: [
+        { id: 'notes-dashboard', label: 'Dashboard', path: '/notes', icon: 'lucide:layout-dashboard' },
+        { id: 'notes-favorites', label: 'Favorites', path: '/notes/favorites', icon: 'lucide:star' },
+        { id: 'notes-trash', label: 'Trash', path: '/notes/trash', icon: 'lucide:trash' },
+      ],
+    },
     { id: 'knowledge', label: 'Knowledge Base', icon: '📚', path: '/knowledge', disabled: true },
 { id: 'finance', label: 'Personal Finance', icon: '💰', path: '/finance', disabled: true },
     { id: 'family-tree', label: 'Family Tree', icon: '🌳', path: '/family-tree', disabled: true },
@@ -59,7 +70,9 @@ export function MainLayout() {
   const activeModule =
     activePath === '/' || activePath.startsWith('/tasks') || activePath.startsWith('/task')
       ? 'task-manager'
-      : modules.find((module) => activePath.startsWith(module.path))?.id || 'task-manager'
+      : activePath.startsWith('/notes')
+        ? 'notes'
+        : modules.find((module) => activePath.startsWith(module.path))?.id || 'task-manager'
 
   const handleModuleClick = (_moduleId: string, path: string, disabled?: boolean) => {
     if (disabled) return

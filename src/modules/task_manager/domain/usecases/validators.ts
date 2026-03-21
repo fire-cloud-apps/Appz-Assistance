@@ -4,6 +4,18 @@ export const taskStatusSchema = z.enum(['Pending', 'InProgress', 'Completed', 'C
 
 export const taskPrioritySchema = z.enum(['Low', 'Medium', 'High', 'Critical'])
 
+export const recurrenceFrequencySchema = z.enum(['daily', 'weekly', 'monthly', 'yearly'])
+
+export const recurrenceWeeklyDaySchema = z.enum(['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'])
+
+export const recurrencePatternSchema = z.object({
+  frequency: recurrenceFrequencySchema,
+  interval: z.number().min(1).max(365),
+  weeklyDays: z.array(recurrenceWeeklyDaySchema).optional(),
+  monthlyDay: z.number().min(1).max(31).optional(),
+  count: z.number().min(1).max(1000).optional(),
+})
+
 export const createTaskSchema = z.object({
   title: z
     .string()
@@ -27,6 +39,13 @@ export const createTaskSchema = z.object({
     .number()
     .min(1)
     .max(3, 'Task level cannot exceed 3'),
+  // Recurrence fields
+  isRecurring: z.boolean().optional(),
+  recurrencePattern: recurrencePatternSchema.nullable().optional(),
+  recurrenceEndDate: z
+    .string()
+    .nullable()
+    .optional(),
 })
 
 export const updateTaskSchema = createTaskSchema.extend({

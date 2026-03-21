@@ -8,7 +8,7 @@ import {
 } from '@mantine/core'
 import { IconArchive } from '@tabler/icons-react'
 import { useTaskStore } from '../presentation/hooks'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { TaskRepository } from '../data/repositories/taskRepository'
 import { useState } from 'react'
 
@@ -20,7 +20,6 @@ export function ArchiveConfirmationModal() {
     archiveTaskTitle,
   } = useTaskStore()
   const navigate = useNavigate()
-  const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleArchive = async () => {
@@ -31,10 +30,8 @@ export function ArchiveConfirmationModal() {
       const taskRepository = new TaskRepository()
       await taskRepository.archiveTask(archiveTaskId)
       closeArchiveModal()
-      // Only navigate if we're on the detail page
-      if (location.pathname.startsWith('/task/')) {
-        navigate('/')
-      }
+      // Go back to the previous page (like browser back button)
+      navigate(-1)
     } catch (error) {
       console.error('Failed to archive task:', error)
     } finally {

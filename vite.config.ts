@@ -39,18 +39,49 @@ export default defineConfig({
     })
   ],
   build: {
-    chunkSizeWarningLimit: 600,
+    target: 'esnext',
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
-            return 'vendor'
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react'
           }
-          if (id.includes('node_modules/@mantine')) {
-            return 'mantine'
+          if (id.includes('node_modules/react-router-dom')) {
+            return 'vendor-router'
+          }
+          if (id.includes('node_modules/@mantine/core')) {
+            return 'mantine-core'
+          }
+          if (id.includes('node_modules/@mantine/dates')) {
+            return 'mantine-dates'
+          }
+          if (id.includes('node_modules/@mantine/hooks')) {
+            return 'mantine-hooks'
+          }
+          if (id.includes('node_modules/@mantine/tiptap')) {
+            return 'mantine-tiptap'
           }
           if (id.includes('node_modules/@tabler/icons-react')) {
             return 'icons'
+          }
+          if (id.includes('node_modules/@tiptap')) {
+            return 'tiptap'
+          }
+          if (id.includes('node_modules/@dnd-kit')) {
+            return 'dnd-kit'
+          }
+          if (id.includes('node_modules/@tanstack/react-query')) {
+            return 'react-query'
+          }
+          if (id.includes('node_modules/dexie')) {
+            return 'dexie'
+          }
+          if (id.includes('node_modules/zustand')) {
+            return 'zustand'
+          }
+          if (id.includes('node_modules/zod')) {
+            return 'zod'
           }
         }
       }

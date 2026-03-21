@@ -148,11 +148,11 @@ export function TaskArchiveScreen() {
   }
 
   const handleNewTask = () => {
-    navigate('/task/new')
+    navigate('/tasks/create')
   }
 
   const handleEmptyStateCreate = () => {
-    navigate('/task/new')
+    navigate('/tasks/create')
   }
 
   return (

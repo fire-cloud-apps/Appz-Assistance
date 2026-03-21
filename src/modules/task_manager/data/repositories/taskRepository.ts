@@ -198,4 +198,50 @@ export class TaskRepository {
   async permanentlyDeleteTask(id: string): Promise<void> {
     await db.tasks.delete(id)
   }
+
+  // Recurrence-related methods
+
+  async getRecurringTasks(): Promise<Task[]> {
+    const allTasks = await db.tasks.toArray()
+    return allTasks.filter(task =>
+      task.isRecurring &&
+      !task.isDeleted &&
+      !task.isArchived &&
+      !task.parentRecurrenceId
+    )
+  }
+
+  async getRecurrenceInstances(parentRecurrenceId: string): Promise<Task[]> {
+    const allTasks = await db.tasks.toArray()
+    return allTasks.filter(task =>
+      task.parentRecurrenceId === parentRecurrenceId &&
+      !task.isDeleted &&
+      !task.isArchived
+    )
+  }
+
+  async createRecurrenceInstance(task: Task): Promise<string> {
+    return db.tasks.add(task)
+  }
+
+  async updateRecurrencePattern(taskId: string, pattern: any): Promise<void> {
+    const task = await db.tasks.get(taskId)
+    if (task) {
+      task.recurrencePattern = pattern
+      task.isRecurring = true
+      task.updatedAt = new Date().toISOString()
+      await db.tasks.put(task)
+    }
+  }
+
+  async removeRecurrence(taskId: string): Promise<void> {
+    const task = await db.tasks.get(taskId)
+    if (task) {
+      task.isRecurring = false
+      task.recurrencePattern = null
+      task.recurrenceEndDate = null
+      task.updatedAt = new Date().toISOString()
+      await db.tasks.put(task)
+    }
+  }
 }

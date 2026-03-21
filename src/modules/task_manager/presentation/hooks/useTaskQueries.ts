@@ -1,7 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Task, RecurrencePattern } from '../../../../core/database/models'
 import { TaskRepository } from '../../data/repositories'
-import { Task } from '../../../../core/database/models'
 import { generateId } from '../../../../core/utils/idGenerator'
+import {
+  calculateNextOccurrence,
+  formatDateToISO,
+} from '../../../../core/utils/recurrenceHelper'
 
 const taskRepository = new TaskRepository()
 
@@ -14,6 +18,9 @@ export const taskKeys = {
   detail: (id: string) => [...taskKeys.details(), id] as const,
   children: (parentTaskId: string) =>
     [...taskKeys.all, 'children', parentTaskId] as const,
+  recurring: () => [...taskKeys.all, 'recurring'] as const,
+  instances: (parentRecurrenceId: string) =>
+    [...taskKeys.all, 'instances', parentRecurrenceId] as const,
 }
 
 export function useTasks() {
@@ -138,5 +145,90 @@ export function useSearchTasksPaged(searchTerm: string, page: number, pageSize: 
     placeholderData: (prev) => prev,
     staleTime: 10_000,
     enabled: searchTerm.trim().length > 0,
+  })
+}
+
+// Recurrence hooks
+
+export function useRecurringTasks() {
+  return useQuery<Task[]>({
+    queryKey: taskKeys.recurring(),
+    queryFn: () => taskRepository.getRecurringTasks(),
+  })
+}
+
+export function useRecurrenceInstances(parentRecurrenceId: string) {
+  return useQuery<Task[]>({
+    queryKey: taskKeys.instances(parentRecurrenceId),
+    queryFn: () => taskRepository.getRecurrenceInstances(parentRecurrenceId),
+    enabled: !!parentRecurrenceId,
+  })
+}
+
+export function useUpdateRecurrencePattern() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ taskId, pattern }: { taskId: string; pattern: RecurrencePattern }) =>
+      taskRepository.updateRecurrencePattern(taskId, pattern),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: taskKeys.all })
+    },
+  })
+}
+
+export function useRemoveRecurrence() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (taskId: string) => taskRepository.removeRecurrence(taskId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: taskKeys.all })
+    },
+  })
+}
+
+export function useCompleteTaskWithRecurrence() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      const task = await taskRepository.getTaskById(taskId)
+      if (!task) throw new Error('Task not found')
+
+      // Complete the current task
+      await taskRepository.completeTask(taskId)
+
+      // If it's a recurring task, create the next occurrence
+      if (task.isRecurring && task.recurrencePattern && task.dueDate) {
+        const nextDueDate = calculateNextOccurrence(
+          new Date(task.dueDate),
+          task.recurrencePattern,
+          task.recurrenceEndDate
+        )
+
+        if (nextDueDate) {
+          const nextTask: Task = {
+            ...task,
+            id: generateId(),
+            status: 'Pending',
+            dueDate: formatDateToISO(nextDueDate),
+            parentRecurrenceId: task.id,
+            recurrenceInstanceId: task.recurrenceInstanceId || task.id,
+            isRecurring: false, // Instance is not recurring, only the parent
+            recurrencePattern: null,
+            recurrenceEndDate: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
+          await taskRepository.createRecurrenceInstance(nextTask)
+        }
+      }
+
+      return taskId
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: taskKeys.all })
+    },
   })
 }

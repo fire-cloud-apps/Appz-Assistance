@@ -29,6 +29,32 @@ export class AppDatabase extends Dexie {
         createdAt
       `
     })
+
+    // Version 2: Add recurrence fields
+    this.version(2).stores({
+      tasks: `
+        id,
+        parentTaskId,
+        taskLevel,
+        status,
+        priority,
+        dueDate,
+        createdAt,
+        updatedAt,
+        isDeleted,
+        isArchived,
+        archivedAt,
+        isRecurring,
+        parentRecurrenceId,
+        recurrenceInstanceId,
+        recurrenceEndDate
+      `,
+      taskActivities: `
+        id,
+        taskId,
+        createdAt
+      `
+    })
   }
 }
 

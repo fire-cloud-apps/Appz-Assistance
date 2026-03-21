@@ -3,7 +3,7 @@
  * Ref: routes/index.tsx
  */
 import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Paper, ThemeIcon, UnstyledButton, Divider, Tooltip, ActionIcon, Checkbox, TextInput } from '@mantine/core'
-import { IconPlus, IconSearch } from '@tabler/icons-react'
+import { IconPlus, IconSearch, IconRepeat } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useParentTasksPaged, useUpdateTask, useSearchTasksPaged } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
@@ -251,9 +251,17 @@ export function TaskAllTasksScreen() {
                         <Text size="xs" c="dimmed">
                           Due: {task.dueDate || 'Not set'}
                         </Text>
-                        <Text size="xs" c="dimmed">
-                          Updated: {formatDateTime(task.updatedAt)}
-                        </Text>
+                        <Group gap="xs">
+                          {task.isRecurring && task.recurrencePattern && (
+                            <Group gap="xs">
+                              <IconRepeat size={14} color="pink" />
+                              <Text size="xs" c="pink">Repeats</Text>
+                            </Group>
+                          )}
+                          <Text size="xs" c="dimmed">
+                            Updated: {formatDateTime(task.updatedAt)}
+                          </Text>
+                        </Group>
                       </Group>
                     </Paper>
                   </UnstyledButton>

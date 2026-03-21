@@ -4,7 +4,7 @@
  */
 import { Box, Stack, Loader, Center, Tooltip, ActionIcon } from '@mantine/core'
 import { IconPlus } from '@tabler/icons-react'
-import { useParentTasks, useUpcomingTasks, useCompleteTask } from '../hooks/useTaskQueries'
+import { useParentTasks, useUpcomingTasks, useCompleteTaskWithRecurrence } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskStatsGrid } from '../components/TaskStatsGrid'
 import { UpcomingTasksCard } from '../components/UpcomingTasksCard'
@@ -14,7 +14,7 @@ export function TaskDashboardScreen() {
   const navigate = useNavigate()
   const { data: tasks = [], isLoading } = useParentTasks()
   const { data: upcomingTasks = [] } = useUpcomingTasks(5)
-  const completeTaskMutation = useCompleteTask()
+  const completeTaskMutation = useCompleteTaskWithRecurrence()
 
   const handleCompleteTask = (taskId: string) => {
     completeTaskMutation.mutate(taskId)
