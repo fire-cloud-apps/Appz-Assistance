@@ -10,6 +10,7 @@ import { IconSun, IconMoon, IconSettings } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import logo from '../../img/appz-logo.png'
 import appConfig from '../config/appConfig.json'
+import { NotificationBell } from '../components/NotificationBell'
 
 interface AppZHeaderProps {
   mobileOpened: boolean
@@ -63,6 +64,7 @@ export function AppZHeader({
       </Group>
 
       <Group gap="xs">
+        <NotificationBell />
         <ActionIcon
           variant="subtle"
           color="gray"

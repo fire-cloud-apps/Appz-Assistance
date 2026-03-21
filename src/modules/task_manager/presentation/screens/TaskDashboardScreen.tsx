@@ -20,6 +20,16 @@ export function TaskDashboardScreen() {
     completeTaskMutation.mutate(taskId)
   }
 
+  const handleStatClick = (status: string) => {
+    // Navigate to All Tasks screen with status filter
+    if (status === 'all') {
+      navigate('/tasks/all')
+    } else {
+      // Use query parameter to pass the filter
+      navigate(`/tasks/all?status=${status}`)
+    }
+  }
+
   if (isLoading) {
     return (
       <Center h="100vh">
@@ -32,7 +42,7 @@ export function TaskDashboardScreen() {
     <Box style={{ position: 'relative', minHeight: '100%' }}>
       <Stack gap="md" pt="sm">
         <TaskDashboardHeader title="Task Dashboard" onNewTask={() => navigate('/tasks/create')} />
-        <TaskStatsGrid tasks={tasks} />
+        <TaskStatsGrid tasks={tasks} onStatClick={handleStatClick} />
         <UpcomingTasksCard tasks={upcomingTasks} onCompleteTask={handleCompleteTask} />
       </Stack>
 

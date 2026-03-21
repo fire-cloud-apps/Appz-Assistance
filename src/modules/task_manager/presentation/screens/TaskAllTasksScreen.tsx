@@ -3,14 +3,14 @@
  * Ref: routes/index.tsx
  */
 import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Paper, ThemeIcon, UnstyledButton, Divider, Tooltip, ActionIcon, Checkbox, TextInput } from '@mantine/core'
-import { IconPlus, IconSearch, IconRepeat } from '@tabler/icons-react'
+import { IconPlus, IconSearch, IconRepeat, IconX } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useParentTasksPaged, useUpdateTask, useSearchTasksPaged } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskEmptyState } from '../components/TaskEmptyState'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
 import { formatDateTime } from '../../../../core/utils/dateHelper'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Task } from '../../../../core/database/models'
 import { useState, useEffect } from 'react'
 import { getTaskManagerItemsPerPage } from '../../../../core/services/userSettingsService'
@@ -30,12 +30,16 @@ type PriorityMeta = {
 
 export function TaskAllTasksScreen() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { setSelectedTaskId } = useTaskStore()
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [itemsPerPage, setItemsPerPage] = useState<number>(ITEMS_PER_PAGE)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('')
   const [isPagingDisabled, setIsPagingDisabled] = useState<boolean>(false)
+  
+  // Get status filter from query params
+  const statusFilter = searchParams.get('status') || 'all'
 
   // Load user settings for items per page
   useEffect(() => {
@@ -46,7 +50,7 @@ export function TaskAllTasksScreen() {
   // Use search or parent tasks based on search term
   const searchQuery = useSearchTasksPaged(debouncedSearchTerm, currentPage, itemsPerPage)
   const parentQuery = useParentTasksPaged(currentPage, itemsPerPage)
-  
+
   const { data, isLoading } = debouncedSearchTerm.trim() ? searchQuery : parentQuery
   const updateTask = useUpdateTask()
   const [totalTasks, setTotalTasks] = useState<number>(0)
@@ -79,6 +83,12 @@ export function TaskAllTasksScreen() {
   }
 
   const tasks = data?.items ?? []
+
+  // Filter tasks by status if status filter is applied
+  const filteredTasks = statusFilter === 'all' 
+    ? tasks 
+    : tasks.filter((task) => task.status === statusFilter)
+
   const totalPages = Math.max(1, Math.ceil(totalTasks / ITEMS_PER_PAGE))
 
   useEffect(() => {
@@ -144,6 +154,29 @@ export function TaskAllTasksScreen() {
       <Stack gap="md">
         <TaskDashboardHeader title="All Tasks" onNewTask={() => navigate('/tasks/create')} />
 
+        {/* Status Filter Indicator */}
+        {statusFilter !== 'all' && (
+          <Group gap="xs">
+            <Badge 
+              color={getStatusMeta(statusFilter as any).color} 
+              variant="filled"
+              size="md"
+              leftSection={<StatusIcon icon={getStatusMeta(statusFilter as any).icon} size={14} />}
+            >
+              {getStatusMeta(statusFilter as any).label}
+            </Badge>
+            <Button
+              variant="subtle"
+              size="compact-sm"
+              color="gray"
+              onClick={() => navigate('/tasks/all')}
+              leftSection={<IconX size={14} />}
+            >
+              Clear filter
+            </Button>
+          </Group>
+        )}
+
         <TextInput
           placeholder="Search by title or description..."
           leftSection={<IconSearch size={16} />}
@@ -155,21 +188,25 @@ export function TaskAllTasksScreen() {
           mt="sm"
         />
 
-        {tasks.length === 0 ? (
+        {filteredTasks.length === 0 ? (
           searchTerm.trim() ? (
-            <TaskEmptyState 
-              title="No matching tasks found" 
+            <TaskEmptyState
+              title="No matching tasks found"
               description={`No tasks found matching "${searchTerm}"`}
-              onCreate={() => navigate('/tasks/create')} 
+              onCreate={() => navigate('/tasks/create')}
             />
           ) : (
-            <TaskEmptyState onCreate={() => navigate('/tasks/create')} />
+            <TaskEmptyState 
+              title={statusFilter !== 'all' ? `No ${getStatusMeta(statusFilter as any).label} tasks` : 'No tasks'}
+              description={statusFilter !== 'all' ? `No tasks found with status "${getStatusMeta(statusFilter as any).label}"` : undefined}
+              onCreate={() => navigate('/tasks/create')} 
+            />
           )
         ) : (
           <Stack gap="sm">
             <Group justify="space-between" align="center">
               <Text fw={700} size="md">
-                {debouncedSearchTerm.trim() ? 'Search Results' : 'All Tasks'}
+                {debouncedSearchTerm.trim() ? 'Search Results' : statusFilter !== 'all' ? `${getStatusMeta(statusFilter as any).label} Tasks` : 'All Tasks'}
               </Text>
               <Badge variant="light" color="blue" size="sm">
                 {Math.min(currentPage * itemsPerPage, totalTasks)} of {totalTasks}
@@ -179,7 +216,7 @@ export function TaskAllTasksScreen() {
             <Divider size="sm" />
 
             <Stack gap="xs">
-              {tasks.map((task: Task) => {
+              {filteredTasks.map((task: Task) => {
                 const statusMeta = getStatusMeta(task.status)
                 const priorityMeta = getPriorityMeta(task.priority)
                 const borderLeftColor = task.status === 'Pending' ? 'yellow' : statusMeta.color

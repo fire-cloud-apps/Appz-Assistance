@@ -1,4 +1,7 @@
+import React from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { notifications } from '@mantine/notifications'
+import { IconPlus, IconCheck, IconX, IconLoader, IconEdit, IconAlertCircle, type IconProps } from '@tabler/icons-react'
 import { Task, RecurrencePattern } from '../../../../core/database/models'
 import { TaskRepository } from '../../data/repositories'
 import { generateId } from '../../../../core/utils/idGenerator'
@@ -6,8 +9,14 @@ import {
   calculateNextOccurrence,
   formatDateToISO,
 } from '../../../../core/utils/recurrenceHelper'
+import { inAppNotificationRepository } from '../../../../core/database/inAppNotificationRepository'
 
 const taskRepository = new TaskRepository()
+
+// Helper function to create icon elements
+const createIcon = (Icon: React.ComponentType<IconProps>) => {
+  return React.createElement(Icon, { size: 18 })
+}
 
 export const taskKeys = {
   all: ['tasks'] as const,
@@ -89,8 +98,35 @@ export function useCreateTask() {
       isArchived: false,
       archivedAt: null,
     }),
-    onSuccess: () => {
+    onSuccess: (taskId, variables) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['inAppNotifications'] })
+      
+      // Show toast notification
+      notifications.show({
+        title: 'Task Created',
+        message: variables.title,
+        color: 'green',
+        icon: createIcon(IconPlus),
+      })
+
+      // Create in-app notification
+      inAppNotificationRepository.create({
+        type: 'task_created',
+        title: 'Task Created',
+        message: variables.title,
+        taskId: taskId,
+        taskTitle: variables.title,
+        taskRoute: `/task/${taskId}`,
+      })
+    },
+    onError: (error) => {
+      notifications.show({
+        title: 'Failed to Create Task',
+        message: error.message,
+        color: 'red',
+        icon: createIcon(IconAlertCircle),
+      })
     },
   })
 }
@@ -100,8 +136,67 @@ export function useUpdateTask() {
 
   return useMutation({
     mutationFn: (data: Task) => taskRepository.updateTask(data),
-    onSuccess: () => {
+    onSuccess: (__, variables) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['inAppNotifications'] })
+
+      // Determine notification type based on status
+      let notificationType: 'task_completed' | 'task_updated' = 'task_updated'
+      let toastTitle = 'Task Updated'
+      
+      if (variables.status === 'Completed') {
+        notificationType = 'task_completed'
+        toastTitle = 'Task Completed'
+      }
+
+      // Show different notification based on status change
+      if (variables.status === 'Completed') {
+        notifications.show({
+          title: 'Task Completed',
+          message: variables.title,
+          color: 'green',
+          icon: createIcon(IconCheck),
+        })
+      } else if (variables.status === 'InProgress') {
+        notifications.show({
+          title: 'Task In Progress',
+          message: variables.title,
+          color: 'blue',
+          icon: createIcon(IconLoader),
+        })
+      } else if (variables.status === 'Cancelled') {
+        notifications.show({
+          title: 'Task Cancelled',
+          message: variables.title,
+          color: 'red',
+          icon: createIcon(IconX),
+        })
+      } else {
+        notifications.show({
+          title: 'Task Updated',
+          message: variables.title,
+          color: 'blue',
+          icon: createIcon(IconEdit),
+        })
+      }
+
+      // Create in-app notification
+      inAppNotificationRepository.create({
+        type: notificationType,
+        title: toastTitle,
+        message: variables.title,
+        taskId: variables.id,
+        taskTitle: variables.title,
+        taskRoute: `/task/${variables.id}`,
+      })
+    },
+    onError: (error) => {
+      notifications.show({
+        title: 'Failed to Update Task',
+        message: error.message,
+        color: 'red',
+        icon: createIcon(IconAlertCircle),
+      })
     },
   })
 }
@@ -124,9 +219,27 @@ export function useCompleteTask() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (taskId: string) => taskRepository.completeTask(taskId),
-    onSuccess: () => {
+    mutationFn: async (taskId: string) => {
+      const task = await taskRepository.getTaskById(taskId)
+      return { taskId, task }
+    },
+    onSuccess: async ({ taskId, task }) => {
+      await taskRepository.completeTask(taskId)
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
+      notifications.show({
+        title: 'Task Completed',
+        message: task?.title || 'Task completed successfully',
+        color: 'green',
+        icon: createIcon(IconCheck),
+      })
+    },
+    onError: (error) => {
+      notifications.show({
+        title: 'Failed to Complete Task',
+        message: error.message,
+        color: 'red',
+        icon: createIcon(IconAlertCircle),
+      })
     },
   })
 }
@@ -225,10 +338,37 @@ export function useCompleteTaskWithRecurrence() {
         }
       }
 
-      return taskId
+      return { taskId, task }
     },
-    onSuccess: () => {
+    onSuccess: ({ task }) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['inAppNotifications'] })
+      
+      // Show toast notification
+      notifications.show({
+        title: 'Task Completed',
+        message: task.title,
+        color: 'green',
+        icon: createIcon(IconCheck),
+      })
+
+      // Create in-app notification
+      inAppNotificationRepository.create({
+        type: 'task_completed',
+        title: 'Task Completed',
+        message: task.title,
+        taskId: task.id,
+        taskTitle: task.title,
+        taskRoute: `/task/${task.id}`,
+      })
+    },
+    onError: (error) => {
+      notifications.show({
+        title: 'Failed to Complete Task',
+        message: error.message,
+        color: 'red',
+        icon: createIcon(IconAlertCircle),
+      })
     },
   })
 }

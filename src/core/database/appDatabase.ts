@@ -1,10 +1,11 @@
 import Dexie, { Table } from 'dexie'
-import { Task } from './models'
+import { Task, InAppNotification } from './models'
 import { TaskActivity } from './taskActivity'
 
 export class AppDatabase extends Dexie {
   tasks!: Table<Task>
   taskActivities!: Table<TaskActivity>
+  inAppNotifications!: Table<InAppNotification>
 
   constructor() {
     super('appzDB')
@@ -52,6 +53,39 @@ export class AppDatabase extends Dexie {
       taskActivities: `
         id,
         taskId,
+        createdAt
+      `
+    })
+
+    // Version 3: Add in-app notifications table
+    this.version(3).stores({
+      tasks: `
+        id,
+        parentTaskId,
+        taskLevel,
+        status,
+        priority,
+        dueDate,
+        createdAt,
+        updatedAt,
+        isDeleted,
+        isArchived,
+        archivedAt,
+        isRecurring,
+        parentRecurrenceId,
+        recurrenceInstanceId,
+        recurrenceEndDate
+      `,
+      taskActivities: `
+        id,
+        taskId,
+        createdAt
+      `,
+      inAppNotifications: `
+        id,
+        type,
+        taskId,
+        isRead,
         createdAt
       `
     })
