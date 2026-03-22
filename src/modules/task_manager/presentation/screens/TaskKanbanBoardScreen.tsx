@@ -8,7 +8,7 @@ import { TaskEmptyState } from '../components/TaskEmptyState'
 import { useParentTasks, useUpdateTask } from '../hooks/useTaskQueries'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useNavigate } from 'react-router-dom'
-import { Task } from '../../../../core/database/models'
+import { Task } from '../../data/models'
 import { useMemo, useState, useRef } from 'react'
 import {
   DndContext,

@@ -1,7 +1,7 @@
 import {
   RecurrencePattern,
   RecurrenceWeeklyDay,
-} from '../database/models'
+} from '../../modules/task_manager/data/models'
 
 /**
  * Calculate the next occurrence date based on the recurrence pattern

@@ -11,7 +11,7 @@ import { TaskEmptyState } from '../components/TaskEmptyState'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
 import { formatDateTime } from '../../../../core/utils/dateHelper'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Task } from '../../../../core/database/models'
+import { Task } from '../../data/models'
 import { useState, useEffect } from 'react'
 import { getTaskManagerItemsPerPage } from '../../../../core/services/userSettingsService'
 

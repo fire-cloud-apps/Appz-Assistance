@@ -21,7 +21,7 @@ import { useTaskById, useChildTasks } from '../hooks' // Removed useUpdateTask
 import { useTaskStore } from '../hooks'
 import { ActivityLog } from '../../components/ActivityLog'
 import { TaskCard } from '../../components/TaskCard'
-import { Task } from '../../../../core/database/models'
+import { Task } from '../../data/models'
 import { useEffect } from 'react' // Removed useState
 import { ArchiveConfirmationModal } from '../../components/ArchiveConfirmationModal'
 import { SubtaskModal } from '../../components/SubtaskModal'

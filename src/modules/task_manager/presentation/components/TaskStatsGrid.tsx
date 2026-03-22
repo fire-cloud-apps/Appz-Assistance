@@ -3,7 +3,7 @@
  * Ref: /tasks/dashboard
  */
 import { Box, Group, SimpleGrid, Text, ThemeIcon, UnstyledButton } from '@mantine/core'
-import { Task } from '../../../../core/database/models'
+import { Task } from '../../data/models'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
 
 type TaskStatsGridProps = {

@@ -1,4 +1,4 @@
-import { Task, TaskStatus, TaskPriority } from '../../../../core/database/models'
+import { Task, TaskStatus, TaskPriority } from '../../data/models'
 import { generateId } from '../../../../core/utils'
 import { createTaskSchema } from './validators'
 import { TaskRepository } from '../../data/repositories'

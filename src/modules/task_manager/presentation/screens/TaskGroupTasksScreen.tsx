@@ -12,7 +12,7 @@ import { SubtaskModal } from '../../components/SubtaskModal'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskEmptyState } from '../components/TaskEmptyState'
 import { useNavigate } from 'react-router-dom'
-import { Task } from '../../../../core/database/models'
+import { Task } from '../../data/models'
 import { useState, useMemo, useEffect } from 'react'
 import { getTaskManagerItemsPerPage } from '../../../../core/services/userSettingsService'
 

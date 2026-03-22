@@ -1,5 +1,5 @@
 import { db } from './appDatabase'
-import { InAppNotification, NotificationType } from './models'
+import { InAppNotification, NotificationType } from './models/InAppNotification'
 import { generateId } from '../utils/idGenerator'
 
 export class InAppNotificationRepository {

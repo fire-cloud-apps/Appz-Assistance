@@ -6,7 +6,7 @@ import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskStatsGrid } from '../components/TaskStatsGrid'
 import { TaskEmptyState } from '../components/TaskEmptyState'
 import { useNavigate } from 'react-router-dom'
-import { Task } from '../../../../core/database/models'
+import { Task } from '../../data/models'
 import { useState } from 'react'
 
 const ITEMS_PER_PAGE = 25 // Added this line

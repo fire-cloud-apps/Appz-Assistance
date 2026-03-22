@@ -1,4 +1,4 @@
-import { Task, TaskStatus } from '../../../../core/database/models'
+import { Task, TaskStatus } from '../models'
 import { db } from '../../../../core/database/appDatabase'
 
 export class TaskRepository {

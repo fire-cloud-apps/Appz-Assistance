@@ -29,7 +29,7 @@ import {
 } from '../hooks'
 import { getToday } from '../../../../core/utils/dateHelper'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Task, RecurrencePattern } from '../../../../core/database/models'
+import { Task, RecurrencePattern } from '../../data/models'
 import { RecurrencePicker } from '../../components/RecurrencePicker'
 import { getRecurrenceLabel } from '../../../../core/utils/recurrenceHelper'
 

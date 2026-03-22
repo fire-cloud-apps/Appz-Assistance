@@ -8,7 +8,7 @@ import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Paper, Divider,
 import { IconArrowLeft, IconTrash, IconArchive } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useNavigate } from 'react-router-dom'
-import { Task } from '../../../../core/database/models'
+import { Task } from '../../data/models'
 import { useState, useEffect } from 'react'
 import { getTaskManagerItemsPerPage, getArchiveRetentionDays } from '../../../../core/services/userSettingsService'
 import { TaskRepository } from '../../data/repositories/taskRepository'

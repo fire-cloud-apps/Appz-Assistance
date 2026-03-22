@@ -1,7 +1,7 @@
 import { Card, Group, Text, Badge, Checkbox, Stack, Box, ThemeIcon, Paper } from '@mantine/core'
 import { IconClock } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
-import { Task } from '../../../../core/database/models'
+import { Task } from '../../data/models'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
 import dayjs from 'dayjs'
 

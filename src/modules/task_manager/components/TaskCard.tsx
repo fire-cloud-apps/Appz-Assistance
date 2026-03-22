@@ -1,6 +1,6 @@
 import { Card, Group, Text, Badge, Button, Stack, Box } from '@mantine/core'
 import { IconChevronRight, IconChevronDown, IconCalendar, IconList, IconPlus, IconRepeat } from '@tabler/icons-react'
-import { Task } from '../../../core/database/models'
+import { Task } from '../data/models'
 import { getRecurrenceLabel } from '../../../core/utils/recurrenceHelper'
 
 interface TaskCardProps {

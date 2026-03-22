@@ -1,5 +1,6 @@
 import Dexie, { Table } from 'dexie'
-import { Task, InAppNotification } from './models'
+import { Task } from '../../modules/task_manager/data/models'
+import { InAppNotification } from './models/InAppNotification'
 import { TaskActivity } from './taskActivity'
 
 export class AppDatabase extends Dexie {

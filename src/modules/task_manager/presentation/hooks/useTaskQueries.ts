@@ -2,7 +2,7 @@ import React from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
 import { IconPlus, IconCheck, IconX, IconLoader, IconEdit, IconAlertCircle, type IconProps } from '@tabler/icons-react'
-import { Task, RecurrencePattern } from '../../../../core/database/models'
+import { Task, RecurrencePattern } from '../../data/models'
 import { TaskRepository } from '../../data/repositories'
 import { generateId } from '../../../../core/utils/idGenerator'
 import {

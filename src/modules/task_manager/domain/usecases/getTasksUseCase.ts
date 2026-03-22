@@ -1,4 +1,4 @@
-import { Task } from '../../../../core/database/models'
+import { Task } from '../../data/models'
 import { TaskRepository } from '../../data/repositories'
 
 export class GetTasksUseCase {

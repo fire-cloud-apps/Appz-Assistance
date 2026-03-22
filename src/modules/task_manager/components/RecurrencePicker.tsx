@@ -16,7 +16,7 @@ import {
   RecurrencePattern,
   RecurrenceFrequency,
   RecurrenceWeeklyDay,
-} from '../../../core/database/models'
+} from '../data/models'
 import { getRecurrenceLabel, getDayOfWeek } from '../../../core/utils/recurrenceHelper'
 
 interface RecurrencePickerProps {
