@@ -11,6 +11,7 @@ export interface UserSettings {
     notificationCheckInterval: number // in minutes
     enableDueDateNotifications: boolean
     archiveRetentionDays: number // days before auto-deletion
+    completedArchiveDays: number // days before completed tasks are archived
   }
 }
 
@@ -20,6 +21,7 @@ const defaultSettings: UserSettings = {
     notificationCheckInterval: 1, // Default: check every 1 minute
     enableDueDateNotifications: false,
     archiveRetentionDays: 90, // Default: 90 days retention
+    completedArchiveDays: 90, // Default: 90 days before archive
   },
 }
 
@@ -27,7 +29,15 @@ export function getUserSettings(): UserSettings {
   try {
     const stored = localStorage.getItem(SETTINGS_KEY)
     if (stored) {
-      return { ...defaultSettings, ...JSON.parse(stored) }
+      const parsed = JSON.parse(stored) as Partial<UserSettings>
+      return {
+        ...defaultSettings,
+        ...parsed,
+        taskManager: {
+          ...defaultSettings.taskManager,
+          ...parsed.taskManager,
+        },
+      }
     }
   } catch (error) {
     console.error('Failed to load user settings:', error)
@@ -47,6 +57,14 @@ export function setUserSettings(settings: Partial<UserSettings>): void {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(updated))
   } catch (error) {
     console.error('Failed to save user settings:', error)
+  }
+}
+
+export function resetUserSettings(): void {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings))
+  } catch (error) {
+    console.error('Failed to reset user settings:', error)
   }
 }
 
@@ -87,5 +105,15 @@ export function getArchiveRetentionDays(): number {
 export function setArchiveRetentionDays(value: number): void {
   const current = getUserSettings()
   current.taskManager.archiveRetentionDays = value
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
+}
+
+export function getCompletedArchiveDays(): number {
+  return getUserSettings().taskManager.completedArchiveDays
+}
+
+export function setCompletedArchiveDays(value: number): void {
+  const current = getUserSettings()
+  current.taskManager.completedArchiveDays = value
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
 }

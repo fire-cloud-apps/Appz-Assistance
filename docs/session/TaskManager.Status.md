@@ -1,15 +1,123 @@
 # AppZ - Task Manager Module Status
 
-**Last Updated:** March 21, 2026 (Session 3 - Navigation & Recurrence Fixes)
-**Version:** 1.4.0
-**Build:** 2026.03.21-1
-**Status:** Navigation Fixed + Recurrence Indicator Complete
+**Last Updated:** March 22, 2026 (Session 4 - Auth0 Authentication)
+**Version:** 1.3.15
+**Build:** 2026.03.22-11
+**Status:** Reset to Defaults Added
 
 ---
 
 ## Executive Summary
 
-The Task Manager module now includes **proper browser-back navigation behavior** and **complete recurrence task indicators** across all views. All navigation now uses `navigate(-1)` to return users to the page they came from (All Tasks, Group Tasks, Archive, Kanban Board, etc.) instead of always redirecting to the dashboard. Recurrence indicators are now displayed consistently with a **pink color theme** across all screens including Task Dashboard List View, All Tasks, Task Cards, and Task Detail screens.
+AppZ now includes **Auth0-based authentication** for the full application. Users are redirected to login before accessing modules, and authenticated user details (profile image, name, email, ID, role) are surfaced in the new Profile screen and header avatar menu. Logout is available from the header.
+
+---
+
+## Recent Enhancements (Session: March 22, 2026 - Session 4)
+
+### Session 4 Focus: Auth0 Authentication + Profile UX
+
+#### 1. Auth0 SPA Integration
+**Change:** Added Auth0 SPA authentication provider and configuration.
+
+**Implementation Highlights:**
+| Area | Details |
+|------|---------|
+| Provider | `Auth0Provider` added to app root with redirect + audience |
+| Login Gate | Unauthenticated users see a login screen |
+| Config | Environment-based Auth0 settings via `VITE_AUTH0_*` |
+
+**Files Added/Updated:**
+- `src/core/auth/authConfig.ts` - Auth0 config + defaults
+- `src/core/auth/AuthScreen.tsx` - Login screen
+- `src/App.tsx` - Provider wiring
+- `src/core/services/MainLayout.tsx` - Auth gating
+
+#### 2. Profile Screen
+**Change:** New Profile screen displaying user name, email, ID, avatar, and roles.
+
+**Files Added/Updated:**
+- `src/core/services/ProfileScreen.tsx` - Profile UI
+- `src/routes/index.tsx` - `/profile` route
+- `src/core/services/ModuleMenu.tsx` - Profile navigation
+
+#### 3. Header Avatar + Logout
+**Change:** App header now shows user avatar with profile summary and logout action.
+
+**Files Updated:**
+- `src/core/services/AppZHeader.tsx` - Avatar menu + logout
+
+#### 4. Role Claim Fallbacks
+**Change:** Role lookup now checks ID token claims, user object claims, and access token claims.
+
+**Files Updated:**
+- `src/core/auth/useAuthUser.ts` - Role extraction fallbacks
+
+#### 5. Audience Configuration Fix
+**Change:** Default Auth0 audience updated and now optional in Auth0Provider params.
+
+**Files Updated:**
+- `src/core/auth/authConfig.ts` - Default audience to `/me/`
+- `src/App.tsx` - Optional audience param
+- `.env` and `.env.example` - Audience updated
+
+#### 6. Audience Authorization Error Fix
+**Change:** Removed default audience to prevent unauthorized resource server errors in SPA.
+
+**Files Updated:**
+- `src/core/auth/authConfig.ts` - Default audience cleared
+- `.env` and `.env.example` - Audience cleared
+
+#### 7. Auth0 Audience + Role Claim Configuration
+**Change:** Env updated per requested audience and role claim values.
+
+**Files Updated:**
+- `.env` and `.env.example` - Audience and role claim configured
+
+#### 8. Header Notification Order
+**Change:** Notification bell now appears after the user avatar in the header.
+
+**Files Updated:**
+- `src/core/services/AppZHeader.tsx` - Reordered avatar and bell
+
+#### 9. Sync Toggle + Login Gate
+**Change:** Added sync toggle; login screen appears only when sync is enabled.
+
+**Files Updated:**
+- `src/core/hooks/useSyncSetting.ts` - Persisted sync setting
+- `src/core/services/AppZHeader.tsx` - Sync toggle icon
+- `src/core/services/MainLayout.tsx` - Auth gate respects sync state
+
+#### 10. Completed Task Retention + Archive Purge
+**Change:** Completed tasks auto-archive after 90 days; archived tasks delete after 90 days.
+
+**Files Updated:**
+- `src/core/database/models.ts` - Added `completedAt`
+- `src/core/database/appDatabase.ts` - Indexed `completedAt`
+- `src/modules/task_manager/data/repositories/taskRepository.ts` - Completed retention helpers
+- `src/modules/task_manager/data/repositories/archiveCleanupService.ts` - Retention enforcement
+- `src/modules/task_manager/presentation/hooks/useTaskQueries.ts` - Initialize `completedAt`
+
+#### 11. Configurable Retention Periods
+**Change:** Added settings to configure completed-task archive and archive deletion retention days.
+
+**Files Updated:**
+- `src/core/services/userSettingsService.ts` - New setting getters/setters
+- `src/core/services/SettingsScreen.tsx` - New settings inputs + alerts
+- `src/modules/task_manager/data/repositories/archiveCleanupService.ts` - Read settings
+
+#### 12. Settings Default Merge
+**Change:** Deep-merge defaults so all configurable values fall back to defined defaults.
+
+**Files Updated:**
+- `src/core/services/userSettingsService.ts` - Deep merge defaults
+
+#### 13. Reset to Defaults
+**Change:** Added a reset button to restore default Task Manager settings.
+
+**Files Updated:**
+- `src/core/services/userSettingsService.ts` - Reset helper
+- `src/core/services/SettingsScreen.tsx` - Reset UI button
 
 ---
 

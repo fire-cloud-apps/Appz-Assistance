@@ -21,6 +21,8 @@ import {
   setNotificationCheckInterval,
   setEnableDueDateNotifications,
   setArchiveRetentionDays,
+  setCompletedArchiveDays,
+  resetUserSettings,
 } from './userSettingsService'
 import {
   requestNotificationPermission,
@@ -35,6 +37,7 @@ export function SettingsScreen() {
   const [checkInterval, setCheckInterval] = useState<number>(1)
   const [notificationPermission, setNotificationPermission] = useState<boolean>(false)
   const [archiveRetentionDays, setArchiveRetentionDaysState] = useState<number>(90)
+  const [completedArchiveDays, setCompletedArchiveDaysState] = useState<number>(90)
 
   useEffect(() => {
     const settings = getUserSettings()
@@ -42,6 +45,7 @@ export function SettingsScreen() {
     setEnableNotifications(settings.taskManager.enableDueDateNotifications)
     setCheckInterval(settings.taskManager.notificationCheckInterval)
     setArchiveRetentionDaysState(settings.taskManager.archiveRetentionDays)
+    setCompletedArchiveDaysState(settings.taskManager.completedArchiveDays)
     setNotificationPermission(hasNotificationPermission())
   }, [])
 
@@ -84,6 +88,14 @@ export function SettingsScreen() {
     setArchiveRetentionDays(numValue)
   }
 
+  const handleCompletedArchiveDaysChange = (value: number | string) => {
+    const numValue = typeof value === 'string' ? parseInt(value, 10) : value
+    if (isNaN(numValue) || numValue < 1 || numValue > 365) return
+
+    setCompletedArchiveDaysState(numValue)
+    setCompletedArchiveDays(numValue)
+  }
+
   const handleClearData = () => {
     if (!confirm('Are you sure you want to clear all local data? This cannot be undone.')) {
       return
@@ -96,6 +108,18 @@ export function SettingsScreen() {
       alert('All local data has been cleared. The app will reload.')
       window.location.reload()
     }, 1000)
+  }
+
+  const handleResetDefaults = () => {
+    if (!confirm('Reset all settings to defaults?')) return
+
+    resetUserSettings()
+    const settings = getUserSettings()
+    setItemsPerPage(settings.taskManager.defaultItemsPerPage)
+    setEnableNotifications(settings.taskManager.enableDueDateNotifications)
+    setCheckInterval(settings.taskManager.notificationCheckInterval)
+    setArchiveRetentionDaysState(settings.taskManager.archiveRetentionDays)
+    setCompletedArchiveDaysState(settings.taskManager.completedArchiveDays)
   }
 
   return (
@@ -170,6 +194,26 @@ export function SettingsScreen() {
 
             <Group justify="space-between" wrap="nowrap">
               <Box>
+                <Text fw={500}>Completed Task Archive Period</Text>
+                <Text size="sm" c="dimmed">
+                  Days before completed tasks move to archive (1-365)
+                </Text>
+              </Box>
+              <NumberInput
+                value={completedArchiveDays}
+                onChange={handleCompletedArchiveDaysChange}
+                min={1}
+                max={365}
+                step={1}
+                w={100}
+                size="sm"
+              />
+            </Group>
+
+            <Divider />
+
+            <Group justify="space-between" wrap="nowrap">
+              <Box>
                 <Text fw={500}>Archive Retention Period</Text>
                 <Text size="sm" c="dimmed">
                   Days before archived tasks are permanently deleted (1-365)
@@ -186,7 +230,19 @@ export function SettingsScreen() {
               />
             </Group>
 
-            {archiveRetentionDays && (
+            {completedArchiveDays > 0 && (
+              <Alert
+                icon={<IconArchive size={16} />}
+                title="Completed Task Auto-Archive"
+                color="blue"
+                variant="light"
+                style={{ fontSize: 'var(--mantine-font-size-xs)' }}
+              >
+                Completed tasks will be archived after {completedArchiveDays} day{completedArchiveDays > 1 ? 's' : ''}.
+              </Alert>
+            )}
+
+            {archiveRetentionDays > 0 && (
               <Alert
                 icon={<IconArchive size={16} />}
                 title="Archive Auto-Deletion"
@@ -197,6 +253,14 @@ export function SettingsScreen() {
                 Archived tasks will be automatically deleted after {archiveRetentionDays} day{archiveRetentionDays > 1 ? 's' : ''}.
               </Alert>
             )}
+
+            <Divider />
+
+            <Group justify="flex-end">
+              <Button variant="light" onClick={handleResetDefaults}>
+                Reset to Defaults
+              </Button>
+            </Group>
           </Stack>
         </Card>
 

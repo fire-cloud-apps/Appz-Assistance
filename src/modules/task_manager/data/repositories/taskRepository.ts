@@ -25,7 +25,20 @@ export class TaskRepository {
   }
 
   async updateTask(task: Task): Promise<void> {
+    const existing = await db.tasks.get(task.id)
+    const isCompleting = task.status === 'Completed'
+    const wasCompleted = existing?.status === 'Completed'
+
     task.updatedAt = new Date().toISOString()
+
+    if (isCompleting && (!task.completedAt || !wasCompleted)) {
+      task.completedAt = new Date().toISOString()
+    }
+
+    if (!isCompleting && wasCompleted) {
+      task.completedAt = null
+    }
+
     await db.tasks.put(task)
   }
 
@@ -100,6 +113,7 @@ export class TaskRepository {
     const task = await db.tasks.get(id)
     if (task) {
       task.status = 'Completed'
+      task.completedAt = new Date().toISOString()
       task.updatedAt = new Date().toISOString()
       await db.tasks.put(task)
     }
@@ -191,6 +205,23 @@ export class TaskRepository {
       if (!task.isArchived || !task.archivedAt) return false
       const archivedDate = new Date(task.archivedAt)
       const daysDiff = Math.floor((now.getTime() - archivedDate.getTime()) / (1000 * 60 * 60 * 24))
+      return daysDiff >= retentionDays
+    })
+  }
+
+  async getCompletedTasksForArchive(retentionDays: number): Promise<Task[]> {
+    const allTasks = await db.tasks.toArray()
+    const now = new Date()
+
+    return allTasks.filter(task => {
+      if (task.isDeleted || task.isArchived) return false
+      if (task.status !== 'Completed') return false
+
+      const completedDate = task.completedAt
+        ? new Date(task.completedAt)
+        : new Date(task.updatedAt || task.createdAt)
+
+      const daysDiff = Math.floor((now.getTime() - completedDate.getTime()) / (1000 * 60 * 60 * 24))
       return daysDiff >= retentionDays
     })
   }

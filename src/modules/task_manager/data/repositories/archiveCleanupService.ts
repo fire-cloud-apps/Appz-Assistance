@@ -1,5 +1,5 @@
 import { TaskRepository } from '../repositories/taskRepository'
-import { getArchiveRetentionDays } from '../../../../core/services/userSettingsService'
+import { getArchiveRetentionDays, getCompletedArchiveDays } from '../../../../core/services/userSettingsService'
 
 const CLEANUP_CHECK_INTERVAL = 60 * 60 * 1000 // 1 hour in milliseconds
 let cleanupIntervalId: ReturnType<typeof setInterval> | null = null
@@ -20,8 +20,19 @@ export const archiveCleanupService = {
 
     const runCleanup = async () => {
       try {
-        const retentionDays = getArchiveRetentionDays()
-        const expiredTasks = await taskRepository.getExpiredArchivedTasks(retentionDays)
+        const completedRetentionDays = getCompletedArchiveDays()
+        const archiveRetentionDays = getArchiveRetentionDays()
+
+        const completedTasks = await taskRepository.getCompletedTasksForArchive(completedRetentionDays)
+        const expiredTasks = await taskRepository.getExpiredArchivedTasks(archiveRetentionDays)
+
+        if (completedTasks.length > 0) {
+          console.log(`Found ${completedTasks.length} completed task(s) to archive`)
+          for (const task of completedTasks) {
+            await taskRepository.archiveTask(task.id)
+            console.log(`Archived completed task: ${task.id}`)
+          }
+        }
 
         if (expiredTasks.length > 0) {
           console.log(`Found ${expiredTasks.length} expired archived task(s) to delete`)

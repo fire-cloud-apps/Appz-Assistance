@@ -12,6 +12,7 @@ export interface Task {
   isDeleted: boolean
   isArchived: boolean
   archivedAt?: string | null
+  completedAt?: string | null
   // Recurrence fields
   isRecurring?: boolean
   recurrencePattern?: RecurrencePattern | null

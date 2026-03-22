@@ -4,6 +4,8 @@
  */
 import {
   AppShell,
+  Center,
+  Loader,
   useMantineColorScheme,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
@@ -13,6 +15,9 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTaskNotifications } from '../hooks/useTaskNotifications'
 import { useEffect } from 'react'
 import { archiveCleanupService } from '../../modules/task_manager/data/repositories/archiveCleanupService'
+import { useAuth0 } from '@auth0/auth0-react'
+import { AuthScreen } from '../auth/AuthScreen'
+import { useSyncSetting } from '../hooks/useSyncSetting'
 
 export function MainLayout() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
@@ -20,6 +25,8 @@ export function MainLayout() {
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
   const navigate = useNavigate()
   const location = useLocation()
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
+  const { syncEnabled } = useSyncSetting()
 
   // Initialize task notifications
   useTaskNotifications()
@@ -78,6 +85,20 @@ export function MainLayout() {
     if (disabled) return
     closeMobile()
     navigate(path)
+  }
+
+  if (syncEnabled) {
+    if (isLoading) {
+      return (
+        <Center h="100vh">
+          <Loader />
+        </Center>
+      )
+    }
+
+    if (!isAuthenticated) {
+      return <AuthScreen onLogin={() => loginWithRedirect()} />
+    }
   }
 
   return (

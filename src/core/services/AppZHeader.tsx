@@ -5,12 +5,28 @@ import {
   Text,
   Flex,
   Image,
+  Avatar,
+  Menu,
+  Stack,
+  UnstyledButton,
+  Tooltip,
 } from '@mantine/core'
-import { IconSun, IconMoon, IconSettings } from '@tabler/icons-react'
+import {
+  IconSun,
+  IconMoon,
+  IconSettings,
+  IconLogout,
+  IconUser,
+  IconCloudCheck,
+  IconCloudOff,
+} from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import logo from '../../img/appz-logo.png'
 import appConfig from '../config/appConfig.json'
 import { NotificationBell } from '../components/NotificationBell'
+import { useAuth0 } from '@auth0/auth0-react'
+import { useAuthUser } from '../auth/useAuthUser'
+import { useSyncSetting } from '../hooks/useSyncSetting'
 
 interface AppZHeaderProps {
   mobileOpened: boolean
@@ -30,6 +46,12 @@ export function AppZHeader({
   colorScheme,
 }: AppZHeaderProps) {
   const navigate = useNavigate()
+  const { logout } = useAuth0()
+  const { profile } = useAuthUser()
+  const { syncEnabled, toggleSync } = useSyncSetting()
+  const displayName = profile?.name ?? 'User'
+  const displayEmail = profile?.email ?? 'No email'
+  const displayRole = profile?.roles?.[0]
 
   return (
     <Group h="100%" px="md" justify="space-between">
@@ -64,7 +86,64 @@ export function AppZHeader({
       </Group>
 
       <Group gap="xs">
+        <Menu width={240} position="bottom-end" withArrow>
+          <Menu.Target>
+            <UnstyledButton>
+              <Group gap="xs">
+                <Avatar
+                  src={profile?.image}
+                  radius="xl"
+                  size={32}
+                  name={displayName}
+                />
+                <Stack gap={0} visibleFrom="sm">
+                  <Text size="sm" fw={600} lineClamp={1}>
+                    {displayName}
+                  </Text>
+                  <Text size="xs" c="dimmed" lineClamp={1}>
+                    {displayEmail}
+                  </Text>
+                </Stack>
+              </Group>
+            </UnstyledButton>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Stack gap={2} px="sm" py="xs">
+              <Text size="sm" fw={600} lineClamp={1}>
+                {displayName}
+              </Text>
+              <Text size="xs" c="dimmed" lineClamp={1}>
+                {displayEmail}
+              </Text>
+              {displayRole && (
+                <Text size="xs" c="dimmed" lineClamp={1}>
+                  Role: {displayRole}
+                </Text>
+              )}
+            </Stack>
+            <Menu.Divider />
+            <Menu.Item leftSection={<IconUser size={16} />} onClick={() => navigate('/profile')}>
+              Profile
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconLogout size={16} />}
+              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+            >
+              Logout
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
         <NotificationBell />
+        <Tooltip label={syncEnabled ? 'Sync enabled' : 'Sync disabled'}>
+          <ActionIcon
+            variant="subtle"
+            color={syncEnabled ? 'green' : 'gray'}
+            onClick={toggleSync}
+            aria-label="Toggle sync"
+          >
+            {syncEnabled ? <IconCloudCheck size={20} /> : <IconCloudOff size={20} />}
+          </ActionIcon>
+        </Tooltip>
         <ActionIcon
           variant="subtle"
           color="gray"

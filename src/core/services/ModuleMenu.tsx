@@ -173,7 +173,7 @@ export function ModuleMenu({ modules, activeModule, activePath, onModuleClick }:
 
         <UnstyledButton
           className={classes.moduleLink}
-          onClick={() => {}}
+          onClick={() => navigate('/profile')}
           w="100%"
         >
           <Box component="span" style={{ fontSize: '1.25rem' }}>

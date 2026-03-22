@@ -97,6 +97,7 @@ export function useCreateTask() {
       isDeleted: false,
       isArchived: false,
       archivedAt: null,
+      completedAt: null,
     }),
     onSuccess: (taskId, variables) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
@@ -333,6 +334,7 @@ export function useCompleteTaskWithRecurrence() {
             recurrenceEndDate: null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
+            completedAt: null,
           }
           await taskRepository.createRecurrenceInstance(nextTask)
         }

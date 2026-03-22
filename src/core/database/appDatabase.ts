@@ -71,6 +71,41 @@ export class AppDatabase extends Dexie {
         isDeleted,
         isArchived,
         archivedAt,
+        completedAt,
+        isRecurring,
+        parentRecurrenceId,
+        recurrenceInstanceId,
+        recurrenceEndDate
+      `,
+      taskActivities: `
+        id,
+        taskId,
+        createdAt
+      `,
+      inAppNotifications: `
+        id,
+        type,
+        taskId,
+        isRead,
+        createdAt
+      `
+    })
+
+    // Version 4: Add completedAt field for completed task retention
+    this.version(4).stores({
+      tasks: `
+        id,
+        parentTaskId,
+        taskLevel,
+        status,
+        priority,
+        dueDate,
+        createdAt,
+        updatedAt,
+        isDeleted,
+        isArchived,
+        archivedAt,
+        completedAt,
         isRecurring,
         parentRecurrenceId,
         recurrenceInstanceId,

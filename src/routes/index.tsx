@@ -18,6 +18,7 @@ import { NotesSearchScreen } from '../modules/notes/presentation/screens/NotesSe
 import { NotesFavoritesScreen } from '../modules/notes/presentation/screens/NotesFavoritesScreen'
 import { NotesTrashScreen } from '../modules/notes/presentation/screens/NotesTrashScreen'
 import { SettingsScreen } from '../core/services/SettingsScreen'
+import { ProfileScreen } from '../core/services/ProfileScreen'
 
 export const router = createBrowserRouter([
   {
@@ -63,6 +64,10 @@ export const router = createBrowserRouter([
       {
         path: 'settings',
         element: <SettingsScreen />,
+      },
+      {
+        path: 'profile',
+        element: <ProfileScreen />,
       },
       {
         path: 'notes',
