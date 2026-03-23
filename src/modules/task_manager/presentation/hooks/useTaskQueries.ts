@@ -83,6 +83,9 @@ export function useCreateTask() {
       dueDate?: string | null
       parentTaskId?: string | null
       taskLevel: number
+      isRecurring?: boolean
+      recurrencePattern?: RecurrencePattern | null
+      recurrenceEndDate?: string | null
     }) => taskRepository.createTask({
       id: generateId(),
       parentTaskId: data.parentTaskId ?? null,
@@ -98,6 +101,9 @@ export function useCreateTask() {
       isArchived: false,
       archivedAt: null,
       completedAt: null,
+      isRecurring: data.isRecurring ?? false,
+      recurrencePattern: data.recurrencePattern ?? null,
+      recurrenceEndDate: data.recurrenceEndDate ?? null,
     }),
     onSuccess: (taskId, variables) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })

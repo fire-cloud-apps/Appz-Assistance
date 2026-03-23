@@ -19,6 +19,7 @@ import { NotesFavoritesScreen } from '../modules/notes/presentation/screens/Note
 import { NotesTrashScreen } from '../modules/notes/presentation/screens/NotesTrashScreen'
 import { SettingsScreen } from '../core/services/SettingsScreen'
 import { ProfileScreen } from '../core/services/ProfileScreen'
+import { NotificationsScreen } from '../core/screens/NotificationsScreen'
 
 export const router = createBrowserRouter([
   {
@@ -68,6 +69,10 @@ export const router = createBrowserRouter([
       {
         path: 'profile',
         element: <ProfileScreen />,
+      },
+      {
+        path: 'notifications',
+        element: <NotificationsScreen />,
       },
       {
         path: 'notes',

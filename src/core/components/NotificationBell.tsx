@@ -65,7 +65,7 @@ function NotificationItem({ notification, onMarkAsRead, onDelete, onNavigate }: 
   const IconComponent = iconConfig.icon
 
   return (
-    <Box 
+    <Box
       onClick={handleClick}
       style={{
         width: '100%',
@@ -73,8 +73,8 @@ function NotificationItem({ notification, onMarkAsRead, onDelete, onNavigate }: 
         cursor: 'pointer',
         transition: 'background-color 0.2s ease',
       }}
-      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)'}
-      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--mantine-color-default-hover)')}
+      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
     >
       <Box p="xs">
         <Group justify="space-between" wrap="nowrap" gap="sm">

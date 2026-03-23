@@ -1,181 +1,85 @@
 # AppZ - Task Manager Module Status
 
-**Last Updated:** March 22, 2026 (Session 4 - Auth0 Authentication)
-**Version:** 1.3.15
-**Build:** 2026.03.22-11
-**Status:** Reset to Defaults Added
+**Last Updated:** March 23, 2026 (Session 5 - Task Recurrence & Notifications)
+**Version:** 1.4.0
+**Build:** 2026.03.23-1
+**Status:** Production Ready ✅
 
 ---
 
 ## Executive Summary
 
-AppZ now includes **Auth0-based authentication** for the full application. Users are redirected to login before accessing modules, and authenticated user details (profile image, name, email, ID, role) are surfaced in the new Profile screen and header avatar menu. Logout is available from the header.
+AppZ now has fully functional **recurring task creation** with proper database storage, **in-app notifications** with a dedicated screen, and improved theme-aligned hover states. All critical bugs related to repeat task creation and notification navigation have been resolved.
 
 ---
 
-## Recent Enhancements (Session: March 22, 2026 - Session 4)
+## Recent Enhancements (Session: March 23, 2026 - Session 5)
 
-### Session 4 Focus: Auth0 Authentication + Profile UX
+### Session 5 Focus: Task Recurrence Fix + Notifications Screen
 
-#### 1. Auth0 SPA Integration
-**Change:** Added Auth0 SPA authentication provider and configuration.
+#### 1. Repeat Task Creation Fix
+**Issue:** When creating a new task with the Repeat feature enabled, the recurrence settings were not being saved. The feature only worked during task editing.
 
-**Implementation Highlights:**
-| Area | Details |
-|------|---------|
-| Provider | `Auth0Provider` added to app root with redirect + audience |
-| Login Gate | Unauthenticated users see a login screen |
-| Config | Environment-based Auth0 settings via `VITE_AUTH0_*` |
+**Root Cause:** The `useCreateTask` hook was not passing the recurrence fields (`isRecurring`, `recurrencePattern`, `recurrenceEndDate`) to the repository's `createTask` method.
 
-**Files Added/Updated:**
-- `src/core/auth/authConfig.ts` - Auth0 config + defaults
-- `src/core/auth/AuthScreen.tsx` - Login screen
-- `src/App.tsx` - Provider wiring
-- `src/core/services/MainLayout.tsx` - Auth gating
-
-#### 2. Profile Screen
-**Change:** New Profile screen displaying user name, email, ID, avatar, and roles.
-
-**Files Added/Updated:**
-- `src/core/services/ProfileScreen.tsx` - Profile UI
-- `src/routes/index.tsx` - `/profile` route
-- `src/core/services/ModuleMenu.tsx` - Profile navigation
-
-#### 3. Header Avatar + Logout
-**Change:** App header now shows user avatar with profile summary and logout action.
-
-**Files Updated:**
-- `src/core/services/AppZHeader.tsx` - Avatar menu + logout
-
-#### 4. Role Claim Fallbacks
-**Change:** Role lookup now checks ID token claims, user object claims, and access token claims.
-
-**Files Updated:**
-- `src/core/auth/useAuthUser.ts` - Role extraction fallbacks
-
-#### 5. Audience Configuration Fix
-**Change:** Default Auth0 audience updated and now optional in Auth0Provider params.
-
-**Files Updated:**
-- `src/core/auth/authConfig.ts` - Default audience to `/me/`
-- `src/App.tsx` - Optional audience param
-- `.env` and `.env.example` - Audience updated
-
-#### 6. Audience Authorization Error Fix
-**Change:** Removed default audience to prevent unauthorized resource server errors in SPA.
-
-**Files Updated:**
-- `src/core/auth/authConfig.ts` - Default audience cleared
-- `.env` and `.env.example` - Audience cleared
-
-#### 7. Auth0 Audience + Role Claim Configuration
-**Change:** Env updated per requested audience and role claim values.
-
-**Files Updated:**
-- `.env` and `.env.example` - Audience and role claim configured
-
-#### 8. Header Notification Order
-**Change:** Notification bell now appears after the user avatar in the header.
-
-**Files Updated:**
-- `src/core/services/AppZHeader.tsx` - Reordered avatar and bell
-
-#### 9. Sync Toggle + Login Gate
-**Change:** Added sync toggle; login screen appears only when sync is enabled.
-
-**Files Updated:**
-- `src/core/hooks/useSyncSetting.ts` - Persisted sync setting
-- `src/core/services/AppZHeader.tsx` - Sync toggle icon
-- `src/core/services/MainLayout.tsx` - Auth gate respects sync state
-
-#### 10. Completed Task Retention + Archive Purge
-**Change:** Completed tasks auto-archive after 90 days; archived tasks delete after 90 days.
-
-**Files Updated:**
-- `src/core/database/models.ts` - Added `completedAt`
-- `src/core/database/appDatabase.ts` - Indexed `completedAt`
-- `src/modules/task_manager/data/repositories/taskRepository.ts` - Completed retention helpers
-- `src/modules/task_manager/data/repositories/archiveCleanupService.ts` - Retention enforcement
-- `src/modules/task_manager/presentation/hooks/useTaskQueries.ts` - Initialize `completedAt`
-
-#### 11. Configurable Retention Periods
-**Change:** Added settings to configure completed-task archive and archive deletion retention days.
-
-**Files Updated:**
-- `src/core/services/userSettingsService.ts` - New setting getters/setters
-- `src/core/services/SettingsScreen.tsx` - New settings inputs + alerts
-- `src/modules/task_manager/data/repositories/archiveCleanupService.ts` - Read settings
-
-#### 12. Settings Default Merge
-**Change:** Deep-merge defaults so all configurable values fall back to defined defaults.
-
-**Files Updated:**
-- `src/core/services/userSettingsService.ts` - Deep merge defaults
-
-#### 13. Reset to Defaults
-**Change:** Added a reset button to restore default Task Manager settings.
-
-**Files Updated:**
-- `src/core/services/userSettingsService.ts` - Reset helper
-- `src/core/services/SettingsScreen.tsx` - Reset UI button
-
----
-
-## Recent Enhancements (Session: March 21, 2026 - Session 3)
-
-### Session 3 Focus: Navigation & Recurrence Fixes
-
-#### 1. Repeat Task Indicator - Complete Implementation
-**Issue:** Repeat task functionality was available in Task Add/Edit but not indicated in task listings.
-
-**Fixes Applied:**
-| Screen | Status | Details |
-|--------|--------|---------|
-| Task Add (`/tasks/create`) | ✅ Already working | Recurrence picker available |
-| Task Edit (`/tasks/edit/:id`) | ✅ Already working | Recurrence picker loads existing data |
-| Task List (All Tasks) | ✅ Already working | Shows "Repeats" badge with icon |
-| Task Card | ✅ Already working | Shows repeat indicator when expanded/collapsed |
-| **Task Dashboard (List View)** | 🔧 **FIXED** | Added "Repeat" column with indicator |
-
-**Color Update:** Changed from blue to **pink** (Mantine pink) for consistency across all screens.
+**Fix Applied:**
+- Updated `useCreateTask` mutation function in `useTaskQueries.ts` to include all three recurrence fields
+- Fields now properly saved when creating new recurring tasks
 
 **Files Modified:**
-- `TaskDashboardListViewScreen.tsx` - Added Repeat column with pink icon
-- `TaskAllTasksScreen.tsx` - Updated repeat indicator to pink
-- `TaskCard.tsx` - Updated repeat indicator text/icon to pink
-- `TaskDetailScreen.tsx` - Updated recurrence display to pink
+- `src/modules/task_manager/presentation/hooks/useTaskQueries.ts` - Added recurrence fields to createTask mutation
 
 ---
 
-#### 2. Navigation Fixes - Browser Back Behavior
-**Issue:** After viewing a task detail page, clicking back/close always redirected to `/tasks/dashboard` instead of returning to the originating page.
+#### 2. Recurring Task Archive Fix
+**Issue:** Tasks with Repeat enabled could not be archived.
 
-**Scenarios Fixed:**
-| User Action | Before | After |
-|-------------|--------|-------|
-| Open task from **All Tasks** → Click Back | Goes to `/tasks/dashboard` | ✅ Returns to **All Tasks** |
-| Open task from **Group Tasks** → Click Back | Goes to `/tasks/dashboard` | ✅ Returns to **Group Tasks** |
-| Open task from **Archive Tasks** → Click Back | Goes to `/tasks/dashboard` | ✅ Returns to **Archive Tasks** |
-| Open task from **Kanban Board** → Click Back | Goes to `/tasks/dashboard` | ✅ Returns to **Kanban Board** |
-| Delete task from detail page | Goes to `/tasks/dashboard` | ✅ Returns to previous page |
-| Archive task from detail page | Goes to `/tasks/dashboard` | ✅ Returns to previous page |
+**Root Cause:** The `recurrencePattern` field was missing from the IndexedDB schema, causing storage/retrieval issues for recurring tasks.
 
-**Implementation:** Changed all navigation calls from `navigate('/tasks/dashboard')` to `navigate(-1)` to mimic browser back button behavior.
+**Fix Applied:**
+- Added database version 5 with `recurrencePattern` field in the tasks table schema
+- Existing users will automatically migrate to the new schema on page reload
 
 **Files Modified:**
-- `TaskDetailScreen.tsx` - Back button uses `navigate(-1)`
-- `DeleteConfirmationModal.tsx` - Delete action uses `navigate(-1)`
-- `ArchiveConfirmationModal.tsx` - Archive action uses `navigate(-1)`
+- `src/core/database/appDatabase.ts` - Added version 5 schema with recurrencePattern
 
 ---
 
-#### 3. Invalid Route Fix
-**Issue:** Archive Tasks screen had invalid route `/task/new` for creating new tasks.
+#### 3. Notifications Screen & Route
+**Issue:** Clicking "View All" in the notification bell popover threw a 404 error: "No route matches URL '/notifications'"
 
-**Fix:** Changed to correct route `/tasks/create`.
+**Fix Applied:**
+- Created new `NotificationsScreen` component with full notification management features
+- Added `/notifications` route to the application router
+- Screen includes: view all, mark all as read, clear read, clear all, navigate to task
+
+**Features:**
+- Lists all in-app notifications with read/unread indicators
+- Shows notification icon by type (task_created, task_completed, etc.)
+- Click notification to navigate to related task
+- Mark individual notifications as read on click
+- Bulk actions: mark all as read, clear read, clear all
+- Theme-aligned hover states
+
+**Files Added:**
+- `src/core/screens/NotificationsScreen.tsx` - New notifications screen
 
 **Files Modified:**
-- `TaskArchiveScreen.tsx` (lines 151, 155) - Fixed `handleNewTask()` and `handleEmptyStateCreate()`
+- `src/routes/index.tsx` - Added /notifications route
+
+---
+
+#### 4. Theme-Aligned Hover States
+**Issue:** Notification list items showed white background on hover instead of theme-appropriate color.
+
+**Fix Applied:**
+- Changed hover background from `var(--mantine-color-gray-0)` to `var(--mantine-color-default-hover)`
+- Applies to both notification bell popover and notifications screen
+- Now respects light/dark theme automatically
+
+**Files Modified:**
+- `src/core/components/NotificationBell.tsx` - Fixed hover color
+- `src/core/screens/NotificationsScreen.tsx` - Fixed hover color
 
 ---
 

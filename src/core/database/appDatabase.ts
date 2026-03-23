@@ -92,8 +92,8 @@ export class AppDatabase extends Dexie {
       `
     })
 
-    // Version 4: Add completedAt field for completed task retention
-    this.version(4).stores({
+    // Version 5: Add recurrencePattern field for proper storage of recurring tasks
+    this.version(5).stores({
       tasks: `
         id,
         parentTaskId,
@@ -110,7 +110,8 @@ export class AppDatabase extends Dexie {
         isRecurring,
         parentRecurrenceId,
         recurrenceInstanceId,
-        recurrenceEndDate
+        recurrenceEndDate,
+        recurrencePattern
       `,
       taskActivities: `
         id,
