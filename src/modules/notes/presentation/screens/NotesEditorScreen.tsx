@@ -1,11 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Box, Stack, Loader, Center, Text, Button, Group, TextInput, Switch, TagsInput, ActionIcon, Tooltip } from '@mantine/core'
-import { IconArrowLeft, IconDeviceFloppy, IconPin, IconStar } from '@tabler/icons-react'
+import { IconArrowLeft, IconDeviceFloppy, IconPin, IconStar, IconCheck } from '@tabler/icons-react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useNoteById, useUpdateNote, useCreateNote, useFolderById } from '../hooks/useNoteQueries'
 import { Note } from '../../data/models/Note'
 import { NoteEditor } from '../components/NoteEditor'
+import { useDebouncedAutosave } from '../hooks/useDebouncedAutosave'
 import dayjs from 'dayjs'
+
+interface NoteData {
+  title: string
+  content: string
+  contentHtml: string
+  tags: string[]
+  isPinned: boolean
+  isFavorite: boolean
+}
 
 export function NotesEditorScreen() {
   const navigate = useNavigate()
@@ -19,8 +29,7 @@ export function NotesEditorScreen() {
   const [tags, setTags] = useState<string[]>([])
   const [isPinned, setIsPinned] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
-  const [isDirty, setIsDirty] = useState(false)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false)
 
   const isCreating = !id
   const { data: existingNote, isLoading: noteLoading } = useNoteById(id || '')
@@ -36,12 +45,23 @@ export function NotesEditorScreen() {
       setTags(existingNote.tags || [])
       setIsPinned(existingNote.isPinned)
       setIsFavorite(existingNote.isFavorite)
-      setLastSaved(new Date(existingNote.updatedAt))
+      setInitialLoadComplete(true)
+    } else if (isCreating) {
+      setInitialLoadComplete(true)
     }
-  }, [existingNote])
+  }, [existingNote, isCreating])
 
-  const handleSave = useCallback(async () => {
-    if (!title.trim()) return
+  const noteData: NoteData = {
+    title,
+    content,
+    contentHtml,
+    tags,
+    isPinned,
+    isFavorite,
+  }
+
+  const saveNote = useCallback(async (data: NoteData) => {
+    if (!data.title.trim()) return
 
     try {
       if (isCreating && folderIdParam) {
@@ -49,46 +69,54 @@ export function NotesEditorScreen() {
         const newNote: Note = {
           id: crypto.randomUUID(),
           folderId: folderIdParam,
-          title,
-          content,
-          contentHtml,
-          tags,
-          isPinned,
-          isFavorite,
+          title: data.title,
+          content: data.content,
+          contentHtml: data.contentHtml,
+          tags: data.tags,
+          isPinned: data.isPinned,
+          isFavorite: data.isFavorite,
           createdAt: now,
           updatedAt: now,
           isDeleted: false,
         }
         await createNote.mutateAsync(newNote)
         navigate(`/notes/editor/${newNote.id}`)
-      } else if (id) {
+      } else if (id && existingNote) {
         await updateNote.mutateAsync({
-          ...existingNote!,
-          title,
-          content,
-          contentHtml,
-          tags,
-          isPinned,
-          isFavorite,
+          ...existingNote,
+          title: data.title,
+          content: data.content,
+          contentHtml: data.contentHtml,
+          tags: data.tags,
+          isPinned: data.isPinned,
+          isFavorite: data.isFavorite,
           updatedAt: new Date().toISOString(),
         })
       }
-      setIsDirty(false)
-      setLastSaved(new Date())
     } catch (error) {
       console.error('Failed to save note:', error)
     }
-  }, [title, content, contentHtml, tags, isPinned, isFavorite, isCreating, folderIdParam, id, existingNote, navigate, createNote, updateNote])
+  }, [isCreating, folderIdParam, id, existingNote, navigate, createNote, updateNote])
+
+  const { isSaving, hasChanges, lastSaved, saveNow } = useDebouncedAutosave({
+    data: noteData,
+    onSave: saveNote,
+    delay: 2000,
+    enabled: initialLoadComplete && !isCreating,
+  })
+
+  const handleManualSave = useCallback(async () => {
+    if (!title.trim()) return
+    await saveNow()
+  }, [title, saveNow])
 
   const handleContentChange = (text: string, html: string) => {
     setContent(text)
     setContentHtml(html)
-    setIsDirty(true)
   }
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
-    setIsDirty(true)
   }
 
   const wordCount = content.split(/\s+/).filter(Boolean).length
@@ -99,6 +127,20 @@ export function NotesEditorScreen() {
         <Loader />
       </Center>
     )
+  }
+
+  const getStatusText = () => {
+    if (isSaving) return 'Saving...'
+    if (hasChanges) return 'Typing...'
+    if (lastSaved) return `Saved ${dayjs(lastSaved).fromNow()}`
+    if (isCreating) return 'New note'
+    return 'No changes'
+  }
+
+  const getStatusColor = () => {
+    if (isSaving) return 'blue'
+    if (hasChanges) return 'orange'
+    return 'dimmed'
   }
 
   return (
@@ -120,17 +162,18 @@ export function NotesEditorScreen() {
             )}
           </Group>
           <Group>
-            <Text size="xs" c={isDirty ? 'orange' : 'dimmed'}>
-              {isDirty ? 'Unsaved changes' : lastSaved ? `Saved ${dayjs(lastSaved).fromNow()}` : 'No changes'}
+            <Text size="xs" c={getStatusColor()}>
+              {getStatusText()}
             </Text>
-            <Tooltip label="Save">
+            <Tooltip label={isSaving ? 'Saving...' : 'Save now'}>
               <ActionIcon 
                 variant="filled" 
                 color="blue"
-                onClick={handleSave}
-                disabled={!title.trim() || createNote.isPending || updateNote.isPending}
+                onClick={handleManualSave}
+                disabled={!title.trim() || isSaving || createNote.isPending || updateNote.isPending}
+                loading={isSaving}
               >
-                <IconDeviceFloppy size={18} />
+                {isSaving ? <IconCheck size={18} /> : <IconDeviceFloppy size={18} />}
               </ActionIcon>
             </Tooltip>
           </Group>
@@ -151,10 +194,7 @@ export function NotesEditorScreen() {
           <TagsInput
             placeholder="Add tags"
             value={tags}
-            onChange={(value) => {
-              setTags(value)
-              setIsDirty(true)
-            }}
+            onChange={setTags}
             maxTags={10}
             style={{ flex: 1 }}
           />
@@ -163,10 +203,7 @@ export function NotesEditorScreen() {
             <Switch
               label="Pin"
               checked={isPinned}
-              onChange={(e) => {
-                setIsPinned(e.currentTarget.checked)
-                setIsDirty(true)
-              }}
+              onChange={(e) => setIsPinned(e.currentTarget.checked)}
             />
           </Group>
           <Group gap="xs">
@@ -174,10 +211,7 @@ export function NotesEditorScreen() {
             <Switch
               label="Favorite"
               checked={isFavorite}
-              onChange={(e) => {
-                setIsFavorite(e.currentTarget.checked)
-                setIsDirty(true)
-              }}
+              onChange={(e) => setIsFavorite(e.currentTarget.checked)}
             />
           </Group>
         </Group>

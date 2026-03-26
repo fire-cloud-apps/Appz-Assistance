@@ -15,6 +15,13 @@ Route: '/tasks/dashboard'
 Feature to Implement:  
 In the 'Task Dashboard' card, there are 'Total Tasks', 'Completed', etc. When I clicked on those Cards, the filter should be applied and displayed on the All Task Screen. 
 
+Module: 'Note Manager' 
+Screen: 'Note Edit'
+Route: '/notes/edit' 
+
+Feature to Implement:  
+I need an autosave of notes feature to be enabled.  Implement with full functioning code with all necessary settings and standards
+
 ---
 
 ### CLI Coder used
