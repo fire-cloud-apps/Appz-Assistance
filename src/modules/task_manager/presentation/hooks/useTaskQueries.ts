@@ -228,10 +228,58 @@ export function useCompleteTask() {
   return useMutation({
     mutationFn: async (taskId: string) => {
       const task = await taskRepository.getTaskById(taskId)
+      if (!task) throw new Error('Task not found')
+      
+      // Determine if this is a parent recurring task or an instance
+      const isParentRecurring = task.isRecurring && !task.parentRecurrenceId
+      const isRecurrenceInstance = !!task.parentRecurrenceId
+
+      // For parent recurring tasks, keep them open (don't mark as Completed)
+      // For instances and non-recurring tasks, mark as completed normally
+      if (!isParentRecurring) {
+        await taskRepository.completeTask(taskId)
+      } else if (isParentRecurring) {
+        // Update parent recurring task without marking complete
+        task.updatedAt = new Date().toISOString()
+        await taskRepository.updateTask(task)
+      }
+
+      // Generate next instance if this is a recurrence instance
+      if (isRecurrenceInstance && task.parentRecurrenceId) {
+        const parentTask = await taskRepository.getTaskById(task.parentRecurrenceId)
+        if (parentTask && parentTask.isRecurring && parentTask.recurrencePattern) {
+          // Use task's dueDate if available, otherwise use today
+          const baseDate = task.dueDate ? new Date(task.dueDate) : new Date()
+          
+          const nextDueDate = calculateNextOccurrence(
+            baseDate,
+            parentTask.recurrencePattern,
+            parentTask.recurrenceEndDate
+          )
+
+          if (nextDueDate) {
+            const nextTask: Task = {
+              ...task,
+              id: generateId(),
+              status: 'Pending',
+              dueDate: formatDateToISO(nextDueDate),
+              parentRecurrenceId: task.parentRecurrenceId,
+              recurrenceInstanceId: task.recurrenceInstanceId,
+              isRecurring: false,
+              recurrencePattern: null,
+              recurrenceEndDate: null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              completedAt: null,
+            }
+            await taskRepository.createRecurrenceInstance(nextTask)
+          }
+        }
+      }
+
       return { taskId, task }
     },
-    onSuccess: async ({ taskId, task }) => {
-      await taskRepository.completeTask(taskId)
+    onSuccess: async ({ task }) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
       notifications.show({
         title: 'Task Completed',
@@ -314,36 +362,94 @@ export function useCompleteTaskWithRecurrence() {
   return useMutation({
     mutationFn: async (taskId: string) => {
       const task = await taskRepository.getTaskById(taskId)
+      
       if (!task) throw new Error('Task not found')
 
-      // Complete the current task
-      await taskRepository.completeTask(taskId)
+      // Determine if this is a parent recurring task or an instance
+      const isParentRecurring = task.isRecurring && !task.parentRecurrenceId
+      const isRecurrenceInstance = !!task.parentRecurrenceId
 
-      // If it's a recurring task, create the next occurrence
-      if (task.isRecurring && task.recurrencePattern && task.dueDate) {
+      if (isParentRecurring) {
+        // For parent recurring tasks, DON'T mark as completed
+        // Parent should remain in Pending/InProgress state to keep generating instances
+        // Just mark createdAt to track when parent was last interacted with
+        const parentTask = await taskRepository.getTaskById(taskId)
+        if (parentTask) {
+          parentTask.updatedAt = new Date().toISOString()
+          await taskRepository.updateTask(parentTask)
+        }
+      } else if (isRecurrenceInstance) {
+        // For recurrence instances, mark only the instance as completed
+        await taskRepository.completeTask(taskId)
+      } else {
+        // For non-recurring tasks, mark normally as completed
+        await taskRepository.completeTask(taskId)
+      }
+
+      // If this is part of a recurring series, create the next occurrence
+      if (isRecurrenceInstance && task.parentRecurrenceId) {
+        // Get parent task to check recurrence pattern
+        const parentTask = await taskRepository.getTaskById(task.parentRecurrenceId)
+        if (parentTask && parentTask.isRecurring && parentTask.recurrencePattern) {
+          // Use task's dueDate if available, otherwise use today
+          const baseDate = task.dueDate ? new Date(task.dueDate) : new Date()
+          
+          const nextDueDate = calculateNextOccurrence(
+            baseDate,
+            parentTask.recurrencePattern,
+            parentTask.recurrenceEndDate
+          )
+
+          if (nextDueDate) {
+            const nextTask: Task = {
+              ...task,
+              id: generateId(),
+              status: 'Pending',
+              dueDate: formatDateToISO(nextDueDate),
+              parentRecurrenceId: task.parentRecurrenceId,
+              recurrenceInstanceId: task.recurrenceInstanceId,
+              isRecurring: false, // Instance is not recurring, only the parent
+              recurrencePattern: null,
+              recurrenceEndDate: null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              completedAt: null,
+            }
+            await taskRepository.createRecurrenceInstance(nextTask)
+          }
+        }
+      } else if (isParentRecurring && task.recurrencePattern) {
+        // If completing a parent recurring task directly (first instance scenario)
+        // Use task's dueDate if available, otherwise use today
+        const baseDate = task.dueDate ? new Date(task.dueDate) : new Date()
+        
         const nextDueDate = calculateNextOccurrence(
-          new Date(task.dueDate),
+          baseDate,
           task.recurrencePattern,
           task.recurrenceEndDate
         )
 
         if (nextDueDate) {
+          // Create new recurring task (not an instance, but a new recurring parent)
           const nextTask: Task = {
             ...task,
             id: generateId(),
             status: 'Pending',
             dueDate: formatDateToISO(nextDueDate),
-            parentRecurrenceId: task.id,
-            recurrenceInstanceId: task.recurrenceInstanceId || task.id,
-            isRecurring: false, // Instance is not recurring, only the parent
-            recurrencePattern: null,
-            recurrenceEndDate: null,
+            isRecurring: true,  // Keep repeat enabled for new task
+            recurrencePattern: task.recurrencePattern,  // Copy recurrence pattern
+            recurrenceEndDate: task.recurrenceEndDate,  // Copy recurrence end date
+            parentRecurrenceId: undefined,  // This is a new parent, not an instance
+            recurrenceInstanceId: undefined,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             completedAt: null,
           }
           await taskRepository.createRecurrenceInstance(nextTask)
         }
+        
+        // Mark the original parent task as Completed
+        await taskRepository.completeTask(taskId)
       }
 
       return { taskId, task }

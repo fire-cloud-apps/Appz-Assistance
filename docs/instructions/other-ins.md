@@ -9,11 +9,11 @@ Hope you understood? If yes, Create a task plan and proceed accord
 
 ### All Instructions to follow
 Module: 'Task Manager' 
-Screen: 'Task Dashboard'
-Route: '/tasks/dashboard' 
+Screen: 'Task'
+Route: '/tasks/' 
 
 Feature to Implement:  
-In the 'Task Dashboard' card, there are 'Total Tasks', 'Completed', etc. When I clicked on those Cards, the filter should be applied and displayed on the All Task Screen. 
+Repeat task: I expect that for a 'Repeat Task', once it’s created with repeat enabled, marking it as completed should only apply to the current instance, and it should still repeat. For example, if a weekly task is set up on Monday with repeat enabled, completing it that week should count only for that week. When the next Monday comes, a new task should appear with the same title and other fields filled in—a copy of the completed task—while the original parent task remains open and not fully marked completed. 
 
 Module: 'Note Manager' 
 Screen: 'Note Edit'

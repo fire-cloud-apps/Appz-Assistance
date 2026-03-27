@@ -5,7 +5,7 @@
 import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Paper, ThemeIcon, UnstyledButton, Divider, Tooltip, ActionIcon, Checkbox, TextInput } from '@mantine/core'
 import { IconPlus, IconSearch, IconRepeat, IconX } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
-import { useParentTasksPaged, useUpdateTask, useSearchTasksPaged } from '../hooks/useTaskQueries'
+import { useParentTasksPaged, useUpdateTask, useSearchTasksPaged, useCompleteTaskWithRecurrence } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskEmptyState } from '../components/TaskEmptyState'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
@@ -53,6 +53,7 @@ export function TaskAllTasksScreen() {
 
   const { data, isLoading } = debouncedSearchTerm.trim() ? searchQuery : parentQuery
   const updateTask = useUpdateTask()
+  const completeTaskMutation = useCompleteTaskWithRecurrence()
   const [totalTasks, setTotalTasks] = useState<number>(0)
 
   // Debounce search term
@@ -75,11 +76,21 @@ export function TaskAllTasksScreen() {
 
   const handleToggleComplete = async (task: Task, e: React.MouseEvent) => {
     e.stopPropagation()
-    const newStatus = task.status === 'Completed' ? 'Pending' : 'Completed'
-    await updateTask.mutateAsync({
-      ...task, // Pass the full task object
-      status: newStatus,
-    })
+    
+    // For recurring tasks, use the recurrence-aware completion handler
+    if (task.isRecurring) {
+      console.log('🔄 Completing recurring task:', { taskId: task.id, title: task.title })
+      completeTaskMutation.mutate(task.id)
+    } else if (task.status === 'Completed') {
+      // If uncompleting a task, use regular update
+      await updateTask.mutateAsync({
+        ...task,
+        status: 'Pending',
+      })
+    } else {
+      // For non-recurring tasks being completed, also use the handler (it handles all cases)
+      completeTaskMutation.mutate(task.id)
+    }
   }
 
   const tasks = data?.items ?? []

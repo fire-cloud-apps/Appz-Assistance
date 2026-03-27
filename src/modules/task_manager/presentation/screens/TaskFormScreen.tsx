@@ -26,6 +26,7 @@ import {
   useUpdateTask,
   useParentTasks,
   useTaskById,
+  useCompleteTaskWithRecurrence,
 } from '../hooks'
 import { getToday } from '../../../../core/utils/dateHelper'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -44,6 +45,7 @@ export function TaskFormScreen() {
   const { data: taskToEdit, isLoading: isLoadingTask } = useTaskById(taskId || '')
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
+  const completeTaskWithRecurrence = useCompleteTaskWithRecurrence()
   const { data: parentTasks = [] } = useParentTasks()
 
   // Recurrence state
@@ -108,20 +110,33 @@ export function TaskFormScreen() {
   const onSubmit = async (data: any) => { // Use any to bypass strict type checking temporarily
     try {
       if (isEditing) {
-        await updateTask.mutateAsync({
-          id: taskId!,
-          title: data.title,
-          description: data.description,
-          status: data.status,
-          priority: data.priority,
-          dueDate: data.dueDate,
-          parentTaskId: data.parentTaskId,
-          taskLevel: data.taskLevel,
-          updatedAt: new Date().toISOString(),
-          isRecurring: !!recurrencePattern,
-          recurrencePattern,
-          recurrenceEndDate,
-        } as Task) // Cast to Task for updateTask.mutateAsync
+        // Check if status is being changed to 'Completed' for a recurring task
+        const isMarkingComplete = data.status === 'Completed' && taskToEdit && taskToEdit.status !== 'Completed'
+        const isRecurringTask = taskToEdit && taskToEdit.isRecurring && !taskToEdit.parentRecurrenceId
+        
+        if (isMarkingComplete && isRecurringTask) {
+          // Use recurrence-aware completion for recurring tasks
+          await completeTaskWithRecurrence.mutateAsync(taskId!)
+        } else if (isMarkingComplete) {
+          // Use recurrence-aware completion for all tasks (handles instances too)
+          await completeTaskWithRecurrence.mutateAsync(taskId!)
+        } else {
+          // Regular update for non-completion changes
+          await updateTask.mutateAsync({
+            id: taskId!,
+            title: data.title,
+            description: data.description,
+            status: data.status,
+            priority: data.priority,
+            dueDate: data.dueDate,
+            parentTaskId: data.parentTaskId,
+            taskLevel: data.taskLevel,
+            updatedAt: new Date().toISOString(),
+            isRecurring: !!recurrencePattern,
+            recurrencePattern,
+            recurrenceEndDate,
+          } as Task)
+        }
       } else {
         await createTask.mutateAsync({
           ...data,

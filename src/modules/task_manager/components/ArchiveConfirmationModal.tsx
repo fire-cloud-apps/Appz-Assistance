@@ -11,6 +11,8 @@ import { useTaskStore } from '../presentation/hooks'
 import { useNavigate } from 'react-router-dom'
 import { TaskRepository } from '../data/repositories/taskRepository'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { taskKeys } from '../presentation/hooks/useTaskQueries'
 
 export function ArchiveConfirmationModal() {
   const {
@@ -20,6 +22,7 @@ export function ArchiveConfirmationModal() {
     archiveTaskTitle,
   } = useTaskStore()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleArchive = async () => {
@@ -29,6 +32,10 @@ export function ArchiveConfirmationModal() {
       setIsLoading(true)
       const taskRepository = new TaskRepository()
       await taskRepository.archiveTask(archiveTaskId)
+      
+      // Invalidate all task-related caches to force immediate refetch
+      queryClient.invalidateQueries({ queryKey: taskKeys.all })
+      
       closeArchiveModal()
       // Go back to the previous page (like browser back button)
       navigate(-1)
