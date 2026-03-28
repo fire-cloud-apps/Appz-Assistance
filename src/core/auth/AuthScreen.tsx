@@ -1,5 +1,4 @@
 import { Button, Card, Center, Group, Stack, Text, Title } from '@mantine/core'
-import { IconLogin } from '@tabler/icons-react'
 import appConfig from '../config/appConfig.json'
 import { isAuthConfigured } from './authConfig'
 
@@ -21,7 +20,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
           </Text>
           <Group grow w="100%">
             <Button
-              leftSection={<IconLogin size={18} />}
+              leftSection={<iconify-icon icon="lucide:log-in" width="18" height="18" />}
               onClick={onLogin}
               disabled={!isAuthConfigured}
             >

@@ -1,5 +1,4 @@
 import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Table } from '@mantine/core'
-import { IconRepeat } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useParentTasks } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
@@ -77,7 +76,7 @@ export function TaskDashboardListViewScreen() {
                     <Table.Td>
                       {task.isRecurring && task.recurrencePattern ? (
                         <Group gap="xs">
-                          <IconRepeat size={16} color="pink" />
+                          <iconify-icon icon="lucide:repeat" width={16} height={16} color="pink" />
                           <Text size="sm" c="pink">Yes</Text>
                         </Group>
                       ) : (

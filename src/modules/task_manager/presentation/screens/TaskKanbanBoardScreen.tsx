@@ -25,7 +25,6 @@ import {
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { useChildTasks } from '../hooks/useTaskQueries'
-import { IconGripVertical } from '@tabler/icons-react'
 
 type StatusKey = 'Pending' | 'InProgress' | 'Completed' | 'Cancelled'
 
@@ -303,7 +302,7 @@ function KanbanTaskCard({
               touchAction: 'none',
             }}
           >
-            <IconGripVertical size={16} />
+            <iconify-icon icon="lucide:grip-vertical" width="16" height="16" />
           </Box>
         </Group>
         {hasDescription && (

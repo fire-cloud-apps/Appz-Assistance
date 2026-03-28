@@ -15,7 +15,6 @@ import {
   ActionIcon,
   Alert,
 } from '@mantine/core'
-import { IconArrowLeft, IconEdit, IconArchive, IconPlus, IconRepeat } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTaskById, useChildTasks } from '../hooks' // Removed useUpdateTask
 import { useTaskStore } from '../hooks'
@@ -91,7 +90,7 @@ export function TaskDetailScreen() {
         {/* Header */}
         <Group>
           <ActionIcon variant="subtle" onClick={handleClose}>
-            <IconArrowLeft size={20} />
+            <iconify-icon icon="lucide:arrow-left" width={20} height={20} />
           </ActionIcon>
           <Title order={2}>{task.title || 'Untitled Task'}</Title>
         </Group>
@@ -121,7 +120,7 @@ export function TaskDetailScreen() {
                     variant="filled"
                     color="orange"
                     size="lg"
-                    leftSection={<IconArchive size={14} />}
+                    leftSection={<iconify-icon icon="lucide:archive" width={14} height={14} />}
                   >
                     Archived
                   </Badge>
@@ -129,11 +128,11 @@ export function TaskDetailScreen() {
               </Group>
               <Group>
                 <ActionIcon variant="light" onClick={handleEdit}>
-                  <IconEdit size={18} />
+                  <iconify-icon icon="lucide:edit" width={18} height={18} />
                 </ActionIcon>
                 {!task.isArchived && (
                   <ActionIcon variant="light" color="orange" onClick={handleArchive}>
-                    <IconArchive size={18} />
+                    <iconify-icon icon="lucide:archive" width={18} height={18} />
                   </ActionIcon>
                 )}
               </Group>
@@ -170,7 +169,7 @@ export function TaskDetailScreen() {
               {task.isRecurring && task.recurrencePattern && (
                 <Box>
                   <Group gap="xs">
-                    <IconRepeat size={16} color="pink" />
+                    <iconify-icon icon="lucide:repeat" width={16} height={16} color="pink" />
                     <Text size="sm" c="pink">
                       {getRecurrenceLabel(task.recurrencePattern)}
                     </Text>
@@ -195,7 +194,7 @@ export function TaskDetailScreen() {
                 <Button
                   size="compact-sm"
                   variant="light"
-                  leftSection={<IconPlus size={16} />}
+                  leftSection={<iconify-icon icon="lucide:plus" width={16} height={16} />}
                   onClick={() => openSubtaskModal()}
                 >
                   Add Subtask

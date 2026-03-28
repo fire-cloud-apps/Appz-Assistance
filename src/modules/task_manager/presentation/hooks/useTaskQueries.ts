@@ -1,7 +1,6 @@
 import React from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
-import { IconPlus, IconCheck, IconX, IconLoader, IconEdit, IconAlertCircle, type IconProps } from '@tabler/icons-react'
 import { Task, RecurrencePattern } from '../../data/models'
 import { TaskRepository } from '../../data/repositories'
 import { generateId } from '../../../../core/utils/idGenerator'
@@ -13,9 +12,9 @@ import { inAppNotificationRepository } from '../../../../core/database/inAppNoti
 
 const taskRepository = new TaskRepository()
 
-// Helper function to create icon elements
-const createIcon = (Icon: React.ComponentType<IconProps>) => {
-  return React.createElement(Icon, { size: 18 })
+// Helper function to create iconify-icon elements
+const createIconifyIcon = (iconName: string) => {
+  return React.createElement('iconify-icon', { icon: iconName, width: 18, height: 18 })
 }
 
 export const taskKeys = {
@@ -114,7 +113,7 @@ export function useCreateTask() {
         title: 'Task Created',
         message: variables.title,
         color: 'green',
-        icon: createIcon(IconPlus),
+        icon: createIconifyIcon('lucide:plus'),
       })
 
       // Create in-app notification
@@ -132,7 +131,7 @@ export function useCreateTask() {
         title: 'Failed to Create Task',
         message: error.message,
         color: 'red',
-        icon: createIcon(IconAlertCircle),
+        icon: createIconifyIcon('lucide:alert-circle'),
       })
     },
   })
@@ -162,28 +161,28 @@ export function useUpdateTask() {
           title: 'Task Completed',
           message: variables.title,
           color: 'green',
-          icon: createIcon(IconCheck),
+          icon: createIconifyIcon('lucide:check'),
         })
       } else if (variables.status === 'InProgress') {
         notifications.show({
           title: 'Task In Progress',
           message: variables.title,
           color: 'blue',
-          icon: createIcon(IconLoader),
+          icon: createIconifyIcon('lucide:loader'),
         })
       } else if (variables.status === 'Cancelled') {
         notifications.show({
           title: 'Task Cancelled',
           message: variables.title,
           color: 'red',
-          icon: createIcon(IconX),
+          icon: createIconifyIcon('lucide:x'),
         })
       } else {
         notifications.show({
           title: 'Task Updated',
           message: variables.title,
           color: 'blue',
-          icon: createIcon(IconEdit),
+          icon: createIconifyIcon('lucide:edit'),
         })
       }
 
@@ -202,7 +201,7 @@ export function useUpdateTask() {
         title: 'Failed to Update Task',
         message: error.message,
         color: 'red',
-        icon: createIcon(IconAlertCircle),
+        icon: createIconifyIcon('lucide:alert-circle'),
       })
     },
   })
@@ -285,7 +284,7 @@ export function useCompleteTask() {
         title: 'Task Completed',
         message: task?.title || 'Task completed successfully',
         color: 'green',
-        icon: createIcon(IconCheck),
+        icon: createIconifyIcon('lucide:check'),
       })
     },
     onError: (error) => {
@@ -293,7 +292,7 @@ export function useCompleteTask() {
         title: 'Failed to Complete Task',
         message: error.message,
         color: 'red',
-        icon: createIcon(IconAlertCircle),
+        icon: createIconifyIcon('lucide:alert-circle'),
       })
     },
   })
@@ -463,7 +462,7 @@ export function useCompleteTaskWithRecurrence() {
         title: 'Task Completed',
         message: task.title,
         color: 'green',
-        icon: createIcon(IconCheck),
+        icon: createIconifyIcon('lucide:check'),
       })
 
       // Create in-app notification
@@ -481,7 +480,7 @@ export function useCompleteTaskWithRecurrence() {
         title: 'Failed to Complete Task',
         message: error.message,
         color: 'red',
-        icon: createIcon(IconAlertCircle),
+        icon: createIconifyIcon('lucide:alert-circle'),
       })
     },
   })

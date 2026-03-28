@@ -5,7 +5,6 @@
  */
 
 import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Paper, Divider, Tooltip, ActionIcon } from '@mantine/core'
-import { IconArrowLeft, IconTrash, IconArchive } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useNavigate } from 'react-router-dom'
 import { Task } from '../../data/models'
@@ -219,7 +218,7 @@ export function TaskArchiveScreen() {
                         <Box style={{ minWidth: 0, flex: 1 }}>
                           <Group gap="xs" mb="xs">
                             <Text fw={600} size="sm" lineClamp={1}>{task.title}</Text>
-                            <Badge variant="filled" color="orange" size="sm" leftSection={<IconArchive size={12} />}>
+                            <Badge variant="filled" color="orange" size="sm" leftSection={<iconify-icon icon="lucide:archive" width={12} height={12} />}>
                               Archived
                             </Badge>
                           </Group>
@@ -262,7 +261,7 @@ export function TaskArchiveScreen() {
                               onClick={(e) => handleRestore(task.id, e)}
                               size="sm"
                             >
-                              <IconArrowLeft size={16} />
+                              <iconify-icon icon="lucide:arrow-left" width={16} height={16} />
                             </ActionIcon>
                           </Tooltip>
                           <Tooltip label="Permanently delete">
@@ -272,7 +271,7 @@ export function TaskArchiveScreen() {
                               onClick={(e) => handlePermanentDelete(task.id, e)}
                               size="sm"
                             >
-                              <IconTrash size={16} />
+                              <iconify-icon icon="lucide:trash" width={16} height={16} />
                             </ActionIcon>
                           </Tooltip>
                         </Group>

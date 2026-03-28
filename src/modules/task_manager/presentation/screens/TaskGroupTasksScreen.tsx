@@ -4,7 +4,6 @@
  */
 import React from 'react'
 import { Box, Button, Stack, Text, Loader, Center, Tabs, Group, Badge, Collapse, ThemeIcon, UnstyledButton, Tooltip, ActionIcon, Paper, rem } from '@mantine/core'
-import { IconListCheck, IconClockHour4, IconChevronDown, IconChevronRight, IconPlus, IconTarget, IconStatusChange } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useParentTasks, useChildTasks } from '../hooks/useTaskQueries'
 import { TaskCard } from '../../components/TaskCard'
@@ -155,19 +154,19 @@ export function TaskGroupTasksScreen() {
 
   const getGroupIcon = (key: string) => {
     const priorityIcons: Record<string, React.ReactNode> = {
-      Critical: <IconTarget size={18} />,
-      High: <IconTarget size={18} />,
-      Medium: <IconTarget size={18} />,
-      Low: <IconTarget size={18} />,
-      Cancelled: <IconListCheck size={18} />,
+      Critical: <iconify-icon icon="lucide:target" width="18" height="18" />,
+      High: <iconify-icon icon="lucide:target" width="18" height="18" />,
+      Medium: <iconify-icon icon="lucide:target" width="18" height="18" />,
+      Low: <iconify-icon icon="lucide:target" width="18" height="18" />,
+      Cancelled: <iconify-icon icon="lucide:circle-check" width="18" height="18" />,
     }
     const statusIcons: Record<string, React.ReactNode> = {
-      InProgress: <IconStatusChange size={18} />,
-      Pending: <IconClockHour4 size={18} />,
-      Completed: <IconListCheck size={18} />,
-      Cancelled: <IconListCheck size={18} />,
+      InProgress: <iconify-icon icon="lucide:clock" width="18" height="18" />,
+      Pending: <iconify-icon icon="lucide:clock" width="18" height="18" />,
+      Completed: <iconify-icon icon="lucide:circle-check" width="18" height="18" />,
+      Cancelled: <iconify-icon icon="lucide:circle-check" width="18" height="18" />,
     }
-    return groupBy === 'priority' ? priorityIcons[key] || <IconTarget size={18} /> : statusIcons[key] || <IconStatusChange size={18} />
+    return groupBy === 'priority' ? priorityIcons[key] || <iconify-icon icon="lucide:target" width="18" height="18" /> : statusIcons[key] || <iconify-icon icon="lucide:clock" width="18" height="18" />
   }
 
   if (isLoading) {
@@ -189,10 +188,10 @@ export function TaskGroupTasksScreen() {
           <Stack gap="md" pt="sm">
             <Tabs value={groupBy} onChange={(value) => handleGroupByChange(value as GroupByOption)} variant="pills">
               <Tabs.List grow mb="md">
-                <Tabs.Tab value="priority" leftSection={<IconTarget size={18} />}>
+                <Tabs.Tab value="priority" leftSection={<iconify-icon icon="lucide:target" width="18" height="18" />}>
                   Priority Group
                 </Tabs.Tab>
-                <Tabs.Tab value="status" leftSection={<IconStatusChange size={18} />}>
+                <Tabs.Tab value="status" leftSection={<iconify-icon icon="lucide:clock" width="18" height="18" />}>
                   Status Group
                 </Tabs.Tab>
               </Tabs.List>
@@ -255,7 +254,7 @@ export function TaskGroupTasksScreen() {
                             color={getGroupColor(key)}
                             size="sm"
                           >
-                            {expandedGroups[key] ? <IconChevronDown size={20} /> : <IconChevronRight size={20} />}
+                            {expandedGroups[key] ? <iconify-icon icon="lucide:chevron-down" width="20" height="20" /> : <iconify-icon icon="lucide:chevron-right" width="20" height="20" />}
                           </ThemeIcon>
                         </Group>
                       </Group>
@@ -310,7 +309,7 @@ export function TaskGroupTasksScreen() {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           }}
         >
-          <IconPlus size={28} />
+          <iconify-icon icon="lucide:plus" width="28" height="28" />
         </ActionIcon>
       </Tooltip>
 

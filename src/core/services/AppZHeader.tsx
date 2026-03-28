@@ -10,6 +10,7 @@ import {
   Stack,
   UnstyledButton,
   Tooltip,
+  Badge,
 } from '@mantine/core'
 import {
   IconSun,
@@ -19,6 +20,11 @@ import {
   IconUser,
   IconCloudCheck,
   IconCloudOff,
+  IconCoffee,
+  IconPlayerPlay,
+  IconPlayerPause,
+  IconPlayerStop,
+  IconBell,
 } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import logo from '../../img/appz-logo.png'
@@ -35,6 +41,12 @@ interface AppZHeaderProps {
   toggleDesktop: () => void
   toggleColorScheme: () => void
   colorScheme: 'light' | 'dark' | 'auto'
+  onStartBreakTimer?: () => void
+  onStopBreakTimer?: () => void
+  onPauseBreakTimer?: () => void
+  isBreakTimerRunning?: boolean
+  breakTimerTimeRemaining?: number
+  onNavigateToSettings?: () => void
 }
 
 export function AppZHeader({
@@ -44,6 +56,12 @@ export function AppZHeader({
   toggleDesktop,
   toggleColorScheme,
   colorScheme,
+  onStartBreakTimer,
+  onStopBreakTimer,
+  onPauseBreakTimer,
+  isBreakTimerRunning = false,
+  breakTimerTimeRemaining = 0,
+  onNavigateToSettings,
 }: AppZHeaderProps) {
   const navigate = useNavigate()
   const { logout } = useAuth0()
@@ -52,6 +70,12 @@ export function AppZHeader({
   const displayName = profile?.name ?? 'User'
   const displayEmail = profile?.email ?? 'No email'
   const displayRole = profile?.roles?.[0]
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
 
   return (
     <Group h="100%" px="md" justify="space-between">
@@ -86,6 +110,66 @@ export function AppZHeader({
       </Group>
 
       <Group gap="xs">
+        {/* Break Timer Menu */}
+        <Menu width={220} position="bottom-end" withArrow>
+          <Menu.Target>
+            <Tooltip label={isBreakTimerRunning ? `Break Timer: ${formatTime(breakTimerTimeRemaining)}` : 'Start Break Timer'}>
+              <ActionIcon
+                component="button"
+                variant={isBreakTimerRunning ? 'filled' : 'subtle'}
+                color={isBreakTimerRunning ? 'blue' : 'gray'}
+                aria-label="Break Timer"
+                style={{
+                  animation: isBreakTimerRunning ? 'pulse 2s infinite' : 'none',
+                }}
+              >
+                <IconCoffee size={20} />
+              </ActionIcon>
+            </Tooltip>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Break Timer</Menu.Label>
+            {isBreakTimerRunning ? (
+              <>
+                <Menu.Item
+                  leftSection={<IconPlayerPause size={16} />}
+                  onClick={onPauseBreakTimer}
+                >
+                  Pause Timer
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconPlayerStop size={16} />}
+                  onClick={onStopBreakTimer}
+                  color="red"
+                >
+                  Stop Timer
+                </Menu.Item>
+                <Menu.Divider />
+                <Stack gap="xs" px="sm" py="xs">
+                  <Text size="xs" c="dimmed">Time Remaining</Text>
+                  <Badge size="lg" color="blue" variant="filled">
+                    {formatTime(breakTimerTimeRemaining)}
+                  </Badge>
+                </Stack>
+              </>
+            ) : (
+              <Menu.Item
+                leftSection={<IconPlayerPlay size={16} />}
+                onClick={onStartBreakTimer}
+              >
+                Start Timer
+              </Menu.Item>
+            )}
+            <Menu.Divider />
+            <Menu.Item
+              leftSection={<IconBell size={16} />}
+              onClick={onNavigateToSettings}
+            >
+              Timer Settings
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+
         <Menu width={240} position="bottom-end" withArrow>
           <Menu.Target>
             <UnstyledButton>

@@ -2,11 +2,13 @@ import Dexie, { Table } from 'dexie'
 import { Task } from '../../modules/task_manager/data/models'
 import { InAppNotification } from './models/InAppNotification'
 import { TaskActivity } from './taskActivity'
+import { BreakSettings } from '../../modules/break_timer/data/models/BreakSettings' // New import
 
 export class AppDatabase extends Dexie {
   tasks!: Table<Task>
   taskActivities!: Table<TaskActivity>
   inAppNotifications!: Table<InAppNotification>
+  breakSettings!: Table<BreakSettings> // New table declaration
 
   constructor() {
     super('appzDB')
@@ -124,6 +126,15 @@ export class AppDatabase extends Dexie {
         taskId,
         isRead,
         createdAt
+      `
+    })
+
+    // Version 6: Add breakSettings table
+    this.version(6).stores({
+      breakSettings: `
+        id,
+        createdAt,
+        updatedAt
       `
     })
   }

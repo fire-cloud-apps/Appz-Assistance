@@ -3,7 +3,6 @@
  * Ref: routes/index.tsx
  */
 import { Box, Stack, Loader, Center, Tooltip, ActionIcon } from '@mantine/core'
-import { IconPlus } from '@tabler/icons-react'
 import { useParentTasks, useUpcomingTasks, useCompleteTaskWithRecurrence } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskStatsGrid } from '../components/TaskStatsGrid'
@@ -62,7 +61,7 @@ export function TaskDashboardScreen() {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           }}
         >
-          <IconPlus size={28} />
+          <iconify-icon icon="lucide:plus" width={28} height={28} />
         </ActionIcon>
       </Tooltip>
     </Box>

@@ -18,6 +18,7 @@ import { archiveCleanupService } from '../../modules/task_manager/data/repositor
 import { useAuth0 } from '@auth0/auth0-react'
 import { AuthScreen } from '../auth/AuthScreen'
 import { useSyncSetting } from '../hooks/useSyncSetting'
+import { useBreakTimer } from '../../modules/break_timer/presentation/hooks/useBreakTimer'
 
 export function MainLayout() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
@@ -27,6 +28,9 @@ export function MainLayout() {
   const location = useLocation()
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
   const { syncEnabled } = useSyncSetting()
+
+  // Break Timer - for starting timer from header
+  const { isTimerRunning, timeRemaining, startTimer, pauseTimer, stopTimer } = useBreakTimer();
 
   // Initialize task notifications
   useTaskNotifications()
@@ -119,6 +123,12 @@ export function MainLayout() {
           toggleDesktop={toggleDesktop}
           toggleColorScheme={toggleColorScheme}
           colorScheme={colorScheme === 'auto' ? 'light' : colorScheme}
+          onStartBreakTimer={startTimer}
+          onPauseBreakTimer={pauseTimer}
+          onStopBreakTimer={stopTimer}
+          isBreakTimerRunning={isTimerRunning}
+          breakTimerTimeRemaining={timeRemaining}
+          onNavigateToSettings={() => navigate('/settings/break-timer')}
         />
       </AppShell.Header>
 

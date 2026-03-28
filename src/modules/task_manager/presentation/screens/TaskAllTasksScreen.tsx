@@ -3,7 +3,6 @@
  * Ref: routes/index.tsx
  */
 import { Box, Button, Stack, Text, Loader, Center, Group, Badge, Paper, ThemeIcon, UnstyledButton, Divider, Tooltip, ActionIcon, Checkbox, TextInput } from '@mantine/core'
-import { IconPlus, IconSearch, IconRepeat, IconX } from '@tabler/icons-react'
 import { useTaskStore } from '../hooks/useTaskStore'
 import { useParentTasksPaged, useUpdateTask, useSearchTasksPaged, useCompleteTaskWithRecurrence } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
@@ -181,7 +180,7 @@ export function TaskAllTasksScreen() {
               size="compact-sm"
               color="gray"
               onClick={() => navigate('/tasks/all')}
-              leftSection={<IconX size={14} />}
+              leftSection={<iconify-icon icon="lucide:x" width={14} height={14} />}
             >
               Clear filter
             </Button>
@@ -190,7 +189,7 @@ export function TaskAllTasksScreen() {
 
         <TextInput
           placeholder="Search by title or description..."
-          leftSection={<IconSearch size={16} />}
+          leftSection={<iconify-icon icon="lucide:search" width={16} height={16} />}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.currentTarget.value)}
           size="md"
@@ -302,7 +301,7 @@ export function TaskAllTasksScreen() {
                         <Group gap="xs">
                           {task.isRecurring && task.recurrencePattern && (
                             <Group gap="xs">
-                              <IconRepeat size={14} color="pink" />
+                              <iconify-icon icon="lucide:repeat" width={14} height={14} color="pink" />
                               <Text size="xs" c="pink">Repeats</Text>
                             </Group>
                           )}
@@ -357,7 +356,7 @@ export function TaskAllTasksScreen() {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           }}
         >
-          <IconPlus size={28} />
+          <iconify-icon icon="lucide:plus" width={28} height={28} />
         </ActionIcon>
       </Tooltip>
     </Box>

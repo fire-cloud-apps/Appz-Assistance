@@ -13,7 +13,6 @@ import {
   ThemeIcon,
   Paper,
 } from '@mantine/core'
-import { IconBell, IconX, IconTrash, IconCheck, IconBellRinging, IconClock } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import {
   useUnreadNotificationCount,
@@ -47,22 +46,21 @@ function NotificationItem({ notification, onMarkAsRead, onDelete, onNavigate }: 
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'task_created':
-        return { icon: IconBellRinging, color: 'blue' }
+        return { icon: 'lucide:bell-ring', color: 'blue' }
       case 'task_updated':
-        return { icon: IconBellRinging, color: 'blue' }
+        return { icon: 'lucide:bell-ring', color: 'blue' }
       case 'task_completed':
-        return { icon: IconCheck, color: 'green' }
+        return { icon: 'lucide:check', color: 'green' }
       case 'task_due':
-        return { icon: IconClock, color: 'orange' }
+        return { icon: 'lucide:clock', color: 'orange' }
       case 'task_overdue':
-        return { icon: IconBellRinging, color: 'red' }
+        return { icon: 'lucide:bell-ring', color: 'red' }
       default:
-        return { icon: IconBellRinging, color: 'gray' }
+        return { icon: 'lucide:bell-ring', color: 'gray' }
     }
   }
 
   const iconConfig = getNotificationIcon(notification.type)
-  const IconComponent = iconConfig.icon
 
   return (
     <Box
@@ -79,14 +77,14 @@ function NotificationItem({ notification, onMarkAsRead, onDelete, onNavigate }: 
       <Box p="xs">
         <Group justify="space-between" wrap="nowrap" gap="sm">
           <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-            <ThemeIcon 
-              variant="light" 
-              color={iconConfig.color} 
-              radius="xl" 
+            <ThemeIcon
+              variant="light"
+              color={iconConfig.color}
+              radius="xl"
               size="sm"
               style={{ flexShrink: 0 }}
             >
-              <IconComponent size={14} />
+              <iconify-icon icon={iconConfig.icon} width="14" height="14" />
             </ThemeIcon>
             <Box style={{ flex: 1, minWidth: 0 }}>
               <Group gap="xs" wrap="nowrap" mb={2}>
@@ -127,7 +125,7 @@ function NotificationItem({ notification, onMarkAsRead, onDelete, onNavigate }: 
             aria-label="Delete notification"
             style={{ flexShrink: 0 }}
           >
-            <IconX size={14} />
+            <iconify-icon icon="lucide:x" width="14" height="14" />
           </ActionIcon>
         </Group>
       </Box>
@@ -185,7 +183,7 @@ export function NotificationBell() {
           pos="relative"
           onClick={() => setOpened(true)}
         >
-          <IconBell size={20} />
+          <iconify-icon icon="lucide:bell" width="20" height="20" />
           {hasUnread && (
             <Badge
               color="red"
@@ -227,7 +225,7 @@ export function NotificationBell() {
                     loading={markAllAsRead.isPending}
                     aria-label="Mark all as read"
                   >
-                    <IconCheck size={16} />
+                    <iconify-icon icon="lucide:check" width="16" height="16" />
                   </ActionIcon>
                 )}
                 {hasNotifications && (
@@ -239,7 +237,7 @@ export function NotificationBell() {
                     loading={deleteRead.isPending}
                     aria-label="Clear read notifications"
                   >
-                    <IconTrash size={16} />
+                    <iconify-icon icon="lucide:trash" width="16" height="16" />
                   </ActionIcon>
                 )}
               </Group>
@@ -256,7 +254,7 @@ export function NotificationBell() {
                   </Box>
                 ) : !hasNotifications ? (
                   <Box p="md" style={{ textAlign: 'center' }}>
-                    <IconBell size={24} color="var(--mantine-color-gray-5)" />
+                    <iconify-icon icon="lucide:bell" width="24" height="24" style={{ color: 'var(--mantine-color-gray-5)' }} />
                     <Text c="dimmed" mt="xs" size="xs">
                       No notifications
                     </Text>
@@ -288,7 +286,7 @@ export function NotificationBell() {
                     size="xs"
                     fullWidth
                     onClick={() => navigate('/notifications')}
-                    leftSection={<IconBellRinging size={14} />}
+                    leftSection={<iconify-icon icon="lucide:bell-ring" width="14" height="14" />}
                   >
                     View all
                   </Button>

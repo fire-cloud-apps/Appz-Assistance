@@ -42,6 +42,7 @@ export default defineConfig({
     target: 'esnext',
     chunkSizeWarningLimit: 800,
     rollupOptions: {
+      external: ['iconify-icon'],
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
@@ -61,9 +62,6 @@ export default defineConfig({
           }
           if (id.includes('node_modules/@mantine/tiptap')) {
             return 'mantine-tiptap'
-          }
-          if (id.includes('node_modules/@tabler/icons-react')) {
-            return 'icons'
           }
           if (id.includes('node_modules/@tiptap')) {
             return 'tiptap'

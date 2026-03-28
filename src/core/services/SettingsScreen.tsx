@@ -12,8 +12,8 @@ import {
   NumberInput,
   Switch,
 } from '@mantine/core'
-import { IconInfoCircle, IconTrash, IconBell, IconArchive } from '@tabler/icons-react'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import appConfig from '../config/appConfig.json'
 import {
   getUserSettings,
@@ -31,6 +31,7 @@ import {
 
 export function SettingsScreen() {
   const { colorScheme, setColorScheme } = useMantineColorScheme()
+  const navigate = useNavigate() // Initialized useNavigate
   const [clearDataLoading, setClearDataLoading] = useState(false)
   const [itemsPerPage, setItemsPerPage] = useState<number>(5)
   const [enableNotifications, setEnableNotifications] = useState<boolean>(false)
@@ -232,7 +233,7 @@ export function SettingsScreen() {
 
             {completedArchiveDays > 0 && (
               <Alert
-                icon={<IconArchive size={16} />}
+                icon={<iconify-icon icon="lucide:archive" width="16" height="16" />}
                 title="Completed Task Auto-Archive"
                 color="blue"
                 variant="light"
@@ -244,7 +245,7 @@ export function SettingsScreen() {
 
             {archiveRetentionDays > 0 && (
               <Alert
-                icon={<IconArchive size={16} />}
+                icon={<iconify-icon icon="lucide:archive" width="16" height="16" />}
                 title="Archive Auto-Deletion"
                 color="orange"
                 variant="light"
@@ -259,6 +260,27 @@ export function SettingsScreen() {
             <Group justify="flex-end">
               <Button variant="light" onClick={handleResetDefaults}>
                 Reset to Defaults
+              </Button>
+            </Group>
+          </Stack>
+        </Card>
+
+        {/* Break Timer Settings */}
+        <Card shadow="sm" p="lg" withBorder>
+          <Stack gap="md">
+            <Title order={4}>Break Timer</Title>
+            <Text size="sm" c="dimmed">
+              Configure your break reminders and intervals
+            </Text>
+
+            <Divider />
+
+            <Group justify="flex-end">
+              <Button
+                variant="light"
+                onClick={() => navigate('/settings/break-timer')}
+              >
+                Open Break Timer Settings
               </Button>
             </Group>
           </Stack>
@@ -310,7 +332,7 @@ export function SettingsScreen() {
 
             {enableNotifications && (
               <Alert
-                icon={<IconBell size={16} />}
+                icon={<iconify-icon icon="lucide:bell" width="16" height="16" />}
                 title="Notifications Active"
                 color="green"
                 variant="light"
@@ -334,7 +356,7 @@ export function SettingsScreen() {
             <Divider />
 
             <Alert
-              icon={<IconInfoCircle />}
+              icon={<iconify-icon icon="lucide:info-circle" width="16" height="16" />}
               title="Local Storage"
               color="blue"
               variant="light"
@@ -353,7 +375,7 @@ export function SettingsScreen() {
               <Button
                 color="red"
                 variant="light"
-                leftSection={<IconTrash size={18} />}
+                leftSection={<iconify-icon icon="lucide:trash" width="18" height="18" />}
                 onClick={handleClearData}
                 loading={clearDataLoading}
               >

@@ -20,6 +20,7 @@ import { NotesTrashScreen } from '../modules/notes/presentation/screens/NotesTra
 import { SettingsScreen } from '../core/services/SettingsScreen'
 import { ProfileScreen } from '../core/services/ProfileScreen'
 import { NotificationsScreen } from '../core/screens/NotificationsScreen'
+import { BreakTimerSettingsScreen } from '../modules/break_timer/presentation/screens/BreakTimerSettingsScreen' // New import
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +66,10 @@ export const router = createBrowserRouter([
       {
         path: 'settings',
         element: <SettingsScreen />,
+      },
+      {
+        path: 'settings/break-timer', // New route
+        element: <BreakTimerSettingsScreen />,
       },
       {
         path: 'profile',

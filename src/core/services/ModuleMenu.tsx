@@ -13,7 +13,6 @@ import {
   Collapse,
   Group,
 } from '@mantine/core'
-import { IconLock, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { StatusIcon } from '../components/StatusIcon'
@@ -77,7 +76,7 @@ export function ModuleMenu({ modules, activeModule, activePath, onModuleClick }:
                 component="span"
                 style={{ marginLeft: 'auto', display: 'inline-flex' }}
               >
-                {expandedModules['app-modules'] ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
+                {expandedModules['app-modules'] ? <iconify-icon icon="lucide:chevron-down" width="16" height="16" /> : <iconify-icon icon="lucide:chevron-right" width="16" height="16" />}
               </Box>
             </UnstyledButton>
           </Tooltip>
@@ -118,11 +117,11 @@ export function ModuleMenu({ modules, activeModule, activePath, onModuleClick }:
                         toggleExpanded(module.id)
                       }}
                     >
-                      {isExpanded ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
+                      {isExpanded ? <iconify-icon icon="lucide:chevron-down" width="16" height="16" /> : <iconify-icon icon="lucide:chevron-right" width="16" height="16" />}
                     </Box>
                   )}
                   {module.disabled && (
-                    <IconLock size={14} className={classes.lockIcon} />
+                    <iconify-icon icon="lucide:lock" width="14" height="14" className={classes.lockIcon} />
                   )}
                 </UnstyledButton>
               </Tooltip>
@@ -149,7 +148,7 @@ export function ModuleMenu({ modules, activeModule, activePath, onModuleClick }:
                           </Text>
                         </Group>
                         {child.disabled && (
-                          <IconLock size={12} className={classes.lockIcon} />
+                          <iconify-icon icon="lucide:lock" width="12" height="12" className={classes.lockIcon} />
                         )}
                       </UnstyledButton>
                     ))}

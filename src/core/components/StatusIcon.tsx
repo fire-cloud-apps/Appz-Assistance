@@ -2,8 +2,6 @@
  * Shared component for status icons
  * Used by: TaskStatsGrid, TaskAllTasksScreen, TaskGroupTasksScreen
  */
-import { Icon } from '@iconify/react'
-
 type StatusIconProps = {
   icon: string
   size?: number
@@ -13,11 +11,11 @@ type StatusIconProps = {
 
 export function StatusIcon({ icon, size = 20, color, label }: StatusIconProps) {
   return (
-    <Icon
+    <iconify-icon
       icon={icon}
       width={size}
       height={size}
-      color={color}
+      style={{ color }}
       aria-hidden={label ? undefined : true}
       aria-label={label}
     />

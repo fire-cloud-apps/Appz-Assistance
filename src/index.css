@@ -28,6 +28,18 @@ body {
   min-height: 100vh;
 }
 
+/* Break Timer Pulse Animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
 /* Mobile-first responsive utilities */
 @media (max-width: 768px) {
   .mantine-AppShell-main {
