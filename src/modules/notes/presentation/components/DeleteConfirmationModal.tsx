@@ -1,5 +1,5 @@
 import { Modal, Button, Stack, Text, Group } from '@mantine/core'
-import { IconTrash } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 
 interface DeleteConfirmationModalProps {
   opened: boolean
@@ -26,9 +26,9 @@ export function DeleteConfirmationModal({
           <Button variant="default" onClick={onClose}>
             Cancel
           </Button>
-          <Button 
-            color="red" 
-            leftSection={<IconTrash size={16} />}
+          <Button
+            color="red"
+            leftSection={<Icon icon="tabler:trash" width={16} />}
             onClick={onConfirm}
             loading={isLoading}
           >

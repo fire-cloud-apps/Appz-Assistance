@@ -1,7 +1,7 @@
 {
   "name": "appz",
   "private": true,
-  "version": "2026.03.28-15",
+  "version": "2026.03.29-1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -55,6 +55,6 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.1",
     "vite": "^8.0.0",
-    "vite-plugin-pwa": "^1.2.0"
+    "vite-plugin-pwa": "^0.21.0"
   }
 }

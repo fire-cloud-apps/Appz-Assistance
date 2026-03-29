@@ -18,15 +18,7 @@ import {
   ScrollArea,
   Alert,
 } from '@mantine/core'
-import {
-  IconBell,
-  IconBellRinging,
-  IconCheck,
-  IconTrash,
-  IconClock,
-  IconArrowLeft,
-  IconX,
-} from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useNavigate } from 'react-router-dom'
 import {
   useAllNotifications,
@@ -80,17 +72,17 @@ export function NotificationsScreen() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'task_created':
-        return { icon: IconBellRinging, color: 'blue' }
+        return { icon: 'tabler:bell-ringing', color: 'blue' }
       case 'task_updated':
-        return { icon: IconBellRinging, color: 'blue' }
+        return { icon: 'tabler:bell-ringing', color: 'blue' }
       case 'task_completed':
-        return { icon: IconCheck, color: 'green' }
+        return { icon: 'tabler:check', color: 'green' }
       case 'task_due':
-        return { icon: IconClock, color: 'orange' }
+        return { icon: 'tabler:clock', color: 'orange' }
       case 'task_overdue':
-        return { icon: IconBellRinging, color: 'red' }
+        return { icon: 'tabler:bell-ringing', color: 'red' }
       default:
-        return { icon: IconBell, color: 'gray' }
+        return { icon: 'tabler:bell', color: 'gray' }
     }
   }
 
@@ -104,7 +96,7 @@ export function NotificationsScreen() {
         {/* Header */}
         <Group>
           <ActionIcon variant="subtle" onClick={handleClose}>
-            <IconArrowLeft size={20} />
+            <Icon icon="tabler:arrow-left" width={20} />
           </ActionIcon>
           <Title order={2}>Notifications</Title>
           {unreadCount > 0 && (
@@ -122,7 +114,7 @@ export function NotificationsScreen() {
                 <Button
                   variant="outline"
                   size="compact-sm"
-                  leftSection={<IconCheck size={16} />}
+                  leftSection={<Icon icon="tabler:check" width={16} />}
                   onClick={handleMarkAllAsRead}
                   loading={markAllAsRead.isPending}
                 >
@@ -133,7 +125,7 @@ export function NotificationsScreen() {
                 variant="outline"
                 size="compact-sm"
                 color="red"
-                leftSection={<IconTrash size={16} />}
+                leftSection={<Icon icon="tabler:trash" width={16} />}
                 onClick={handleDeleteRead}
                 loading={deleteRead.isPending}
                 disabled={unreadCount === notifications.length}
@@ -145,7 +137,7 @@ export function NotificationsScreen() {
               variant="outline"
               size="compact-sm"
               color="red"
-              leftSection={<IconTrash size={16} />}
+              leftSection={<Icon icon="tabler:trash" width={16} />}
               onClick={handleDeleteAll}
               loading={deleteAll.isPending}
             >
@@ -163,7 +155,7 @@ export function NotificationsScreen() {
           </Box>
         ) : notifications.length === 0 ? (
           <Alert
-            icon={<IconBell size={24} />}
+            icon={<Icon icon="tabler:bell" width={24} />}
             title="No notifications"
             color="gray"
             variant="light"
@@ -176,7 +168,6 @@ export function NotificationsScreen() {
               <Stack gap={0}>
                 {notifications.map((notification, index) => {
                   const iconConfig = getNotificationIcon(notification.type)
-                  const IconComponent = iconConfig.icon
 
                   return (
                     <Box key={notification.id}>
@@ -209,7 +200,7 @@ export function NotificationsScreen() {
                           size="md"
                           style={{ flexShrink: 0 }}
                         >
-                          <IconComponent size={18} />
+                          <Icon icon={iconConfig.icon} width={18} />
                         </ThemeIcon>
 
                         <Box style={{ flex: 1, minWidth: 0 }}>
@@ -251,7 +242,7 @@ export function NotificationsScreen() {
                           aria-label="Delete notification"
                           style={{ flexShrink: 0 }}
                         >
-                          <IconX size={16} />
+                          <Icon icon="tabler:x" width={16} />
                         </ActionIcon>
                       </Group>
                       {index < notifications.length - 1 && (

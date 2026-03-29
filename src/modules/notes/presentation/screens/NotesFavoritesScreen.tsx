@@ -1,5 +1,5 @@
 import { Box, Stack, Loader, Center, Text } from '@mantine/core'
-import { IconStar } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useNavigate } from 'react-router-dom'
 import { useFavoriteNotes, useDeleteNote } from '../hooks/useNoteQueries'
 import { NoteListItem } from '../components/NoteListItem'
@@ -56,7 +56,7 @@ export function NotesFavoritesScreen() {
         
         {favoriteNotes.length === 0 ? (
           <Box p="xl" style={{ textAlign: 'center', background: 'var(--mantine-color-gray-0)', borderRadius: 'var(--mantine-radius-md)' }}>
-            <IconStar size={48} style={{ opacity: 0.3, marginBottom: 8 }} />
+            <Icon icon="tabler:star" width={48} style={{ opacity: 0.3, marginBottom: 8 }} />
             <Text c="dimmed">No favorite notes yet</Text>
           </Box>
         ) : (

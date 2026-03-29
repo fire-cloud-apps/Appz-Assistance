@@ -1,5 +1,5 @@
 import { Card, Group, Text, Badge, Checkbox, Stack, Box, ThemeIcon, Paper } from '@mantine/core'
-import { IconClock } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useNavigate } from 'react-router-dom'
 import { Task } from '../../data/models'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
@@ -113,11 +113,11 @@ export function UpcomingTasksCard({ tasks, onCompleteTask }: UpcomingTasksCardPr
                     
                     <Group gap="xs" wrap="nowrap">
                       {dueInfo && (
-                        <Badge 
-                          variant="light" 
-                          color={dueInfo.color} 
+                        <Badge
+                          variant="light"
+                          color={dueInfo.color}
                           size="sm"
-                          leftSection={<IconClock size={12} />}
+                          leftSection={<Icon icon="tabler:clock" width={12} />}
                         >
                           {dueInfo.text}
                         </Badge>

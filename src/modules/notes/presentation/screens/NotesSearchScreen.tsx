@@ -1,5 +1,5 @@
 import { Box, Stack, Loader, Center, Text, TextInput } from '@mantine/core'
-import { IconSearch } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useSearchParams } from 'react-router-dom'
 import { useSearchNotes } from '../hooks/useNoteQueries'
 import { NoteListItem } from '../components/NoteListItem'
@@ -23,7 +23,7 @@ export function NotesSearchScreen() {
         
         <TextInput
           placeholder="Search notes..."
-          leftSection={<IconSearch size={16} />}
+          leftSection={<Icon icon="tabler:search" width={16} />}
           defaultValue={query}
           onChange={(e) => {
             if (e.target.value) {

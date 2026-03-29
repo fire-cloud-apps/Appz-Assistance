@@ -12,7 +12,7 @@ import {
   Title,
   ActionIcon,
 } from '@mantine/core'
-import { IconTrash } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { formatDateTime } from '../../../core/utils/dateHelper'
 import { useActivities, useAddActivity, useDeleteActivity } from '../presentation/hooks'
 import { TaskActivity } from '../../../core/database/taskActivity'
@@ -119,7 +119,7 @@ export function ActivityLog({ taskId }: ActivityLogProps) {
                         size="sm"
                         onClick={() => handleDeleteActivity(activity.id)}
                       >
-                        <IconTrash size={16} />
+                        <Icon icon="tabler:trash" width={16} />
                       </ActionIcon>
                     </Group>
                   }

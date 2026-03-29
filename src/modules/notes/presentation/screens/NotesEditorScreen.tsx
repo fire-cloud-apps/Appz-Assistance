@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Box, Stack, Loader, Center, Text, Button, Group, TextInput, Switch, TagsInput, ActionIcon, Tooltip } from '@mantine/core'
-import { IconArrowLeft, IconDeviceFloppy, IconPin, IconStar, IconCheck } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useNoteById, useUpdateNote, useCreateNote, useFolderById } from '../hooks/useNoteQueries'
 import { Note } from '../../data/models/Note'
@@ -148,9 +148,9 @@ export function NotesEditorScreen() {
       <Stack gap="md" pt="sm">
         <Group justify="space-between" align="center">
           <Group>
-            <Button 
-              variant="subtle" 
-              leftSection={<IconArrowLeft size={16} />}
+            <Button
+              variant="subtle"
+              leftSection={<Icon icon="tabler:arrow-left" width={16} />}
               onClick={() => navigate(-1)}
             >
               Back
@@ -166,14 +166,14 @@ export function NotesEditorScreen() {
               {getStatusText()}
             </Text>
             <Tooltip label={isSaving ? 'Saving...' : 'Save now'}>
-              <ActionIcon 
-                variant="filled" 
+              <ActionIcon
+                variant="filled"
                 color="blue"
                 onClick={handleManualSave}
                 disabled={!title.trim() || isSaving || createNote.isPending || updateNote.isPending}
                 loading={isSaving}
               >
-                {isSaving ? <IconCheck size={18} /> : <IconDeviceFloppy size={18} />}
+                {isSaving ? <Icon icon="tabler:check" width={18} /> : <Icon icon="tabler:device-floppy" width={18} />}
               </ActionIcon>
             </Tooltip>
           </Group>
@@ -199,7 +199,7 @@ export function NotesEditorScreen() {
             style={{ flex: 1 }}
           />
           <Group gap="xs">
-            <IconPin size={16} style={{ opacity: isPinned ? 1 : 0.3 }} />
+            <Icon icon="tabler:pin" width={16} style={{ opacity: isPinned ? 1 : 0.3 }} />
             <Switch
               label="Pin"
               checked={isPinned}
@@ -207,7 +207,7 @@ export function NotesEditorScreen() {
             />
           </Group>
           <Group gap="xs">
-            <IconStar size={16} style={{ opacity: isFavorite ? 1 : 0.3 }} />
+            <Icon icon="tabler:star" width={16} style={{ opacity: isFavorite ? 1 : 0.3 }} />
             <Switch
               label="Favorite"
               checked={isFavorite}

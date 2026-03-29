@@ -1,5 +1,5 @@
 import { Card, Group, Text, Stack, ActionIcon, Menu } from '@mantine/core'
-import { IconFolder, IconDotsVertical, IconEdit, IconTrash, IconPlus } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { Folder } from '../../data/models/Folder'
 import { useNoteCountByFolder } from '../hooks/useNoteQueries'
 
@@ -34,7 +34,7 @@ export function FolderCard({
       <Group justify="space-between">
         <Group>
           <ActionIcon variant="light" size="lg" color={folder.color || 'blue'}>
-            <IconFolder size={20} />
+            <Icon icon="tabler:folder" width={20} />
           </ActionIcon>
           <Stack gap={0}>
             <Text fw={600}>{folder.name}</Text>
@@ -43,16 +43,16 @@ export function FolderCard({
         </Group>
         <Menu shadow="md" width={200} position="bottom-end">
           <Menu.Target>
-            <ActionIcon 
-              variant="subtle" 
+            <ActionIcon
+              variant="subtle"
               onClick={(e) => e.stopPropagation()}
             >
-              <IconDotsVertical size={18} />
+              <Icon icon="tabler:dots-vertical" width={18} />
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item 
-              leftSection={<IconPlus size={16} />}
+            <Menu.Item
+              leftSection={<Icon icon="tabler:plus" width={16} />}
               onClick={(e) => {
                 e.stopPropagation()
                 onAddNote?.()
@@ -61,8 +61,8 @@ export function FolderCard({
               New Note
             </Menu.Item>
             {canAddSubfolder && (
-              <Menu.Item 
-                leftSection={<IconFolder size={16} />}
+              <Menu.Item
+                leftSection={<Icon icon="tabler:folder" width={16} />}
                 onClick={(e) => {
                   e.stopPropagation()
                   onAddSubfolder?.()
@@ -72,8 +72,8 @@ export function FolderCard({
               </Menu.Item>
             )}
             <Menu.Divider />
-            <Menu.Item 
-              leftSection={<IconEdit size={16} />}
+            <Menu.Item
+              leftSection={<Icon icon="tabler:edit" width={16} />}
               onClick={(e) => {
                 e.stopPropagation()
                 onEdit?.()
@@ -81,9 +81,9 @@ export function FolderCard({
             >
               Edit
             </Menu.Item>
-            <Menu.Item 
+            <Menu.Item
               color="red"
-              leftSection={<IconTrash size={16} />}
+              leftSection={<Icon icon="tabler:trash" width={16} />}
               onClick={(e) => {
                 e.stopPropagation()
                 onDelete?.()

@@ -6,7 +6,7 @@ import {
   Alert,
   Group,
 } from '@mantine/core'
-import { IconAlertTriangle } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useTaskStore, useDeleteTask } from '../presentation/hooks'
 import { useNavigate } from 'react-router-dom'
 
@@ -42,7 +42,7 @@ export function DeleteConfirmationModal() {
     >
       <Stack gap="md">
         <Alert
-          icon={<IconAlertTriangle size={24} />}
+          icon={<Icon icon="tabler:alert-triangle" width={24} />}
           title="Warning"
           color="red"
           variant="light"

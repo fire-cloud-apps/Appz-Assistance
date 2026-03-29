@@ -1,5 +1,5 @@
 import { Card, Group, Text, Badge, Button, Stack, Box } from '@mantine/core'
-import { IconChevronRight, IconChevronDown, IconCalendar, IconList, IconPlus, IconRepeat } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { Task } from '../data/models'
 import { getRecurrenceLabel } from '../../../core/utils/recurrenceHelper'
 
@@ -64,7 +64,7 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
                 size="compact-sm"
                 onClick={handleToggleClick}
               >
-                {isExpanded ? <IconChevronDown size={18} /> : <IconChevronRight size={18} />}
+                {isExpanded ? <Icon icon="tabler:chevron-down" width={18} /> : <Icon icon="tabler:chevron-right" width={18} />}
               </Button>
             )}
             <Text fw={600} style={{ flex: 1 }}>
@@ -93,14 +93,14 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
               <Group gap="lg">
                 {task.dueDate && (
                   <Group gap="xs">
-                    <IconCalendar size={16} />
+                    <Icon icon="tabler:calendar" width={16} />
                     <Text size="sm" c="dimmed">
                       Due: {task.dueDate}
                     </Text>
                   </Group>
                 )}
                 <Group gap="xs">
-                  <IconList size={16} />
+                  <Icon icon="tabler:list" width={16} />
                   <Text size="sm" c="dimmed">
                     Level {task.taskLevel}
                   </Text>
@@ -112,19 +112,19 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
                 )}
                 {task.isRecurring && task.recurrencePattern && (
                   <Group gap="xs">
-                    <IconRepeat size={16} />
+                    <Icon icon="tabler:repeat" width={16} />
                     <Text size="sm" c="pink">
                       {getRecurrenceLabel(task.recurrencePattern)}
                     </Text>
                   </Group>
                 )}
               </Group>
-              
+
               {canAddSubtask && (
                 <Button
                   size="compact-sm"
                   variant="light"
-                  leftSection={<IconPlus size={16} />}
+                  leftSection={<Icon icon="tabler:plus" width={16} />}
                   onClick={handleAddSubtaskClick}
                   mt="xs"
                 >
@@ -144,7 +144,7 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
             )}
             <Group gap="xs">
               {task.isRecurring && task.recurrencePattern && (
-                <IconRepeat size={14} color="pink" />
+                <Icon icon="tabler:repeat" width={14} style={{ color: 'var(--mantine-color-pink-6)' }} />
               )}
               <Text size="xs" c="dimmed">
                 Level {task.taskLevel}

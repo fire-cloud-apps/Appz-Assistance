@@ -11,21 +11,9 @@ import {
   UnstyledButton,
   Tooltip,
   Badge,
+  Box,
 } from '@mantine/core'
-import {
-  IconSun,
-  IconMoon,
-  IconSettings,
-  IconLogout,
-  IconUser,
-  IconCloudCheck,
-  IconCloudOff,
-  IconCoffee,
-  IconPlayerPlay,
-  IconPlayerPause,
-  IconPlayerStop,
-  IconBell,
-} from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useNavigate } from 'react-router-dom'
 import logo from '../../img/appz-logo.png'
 import appConfig from '../config/appConfig.json'
@@ -46,7 +34,6 @@ interface AppZHeaderProps {
   onPauseBreakTimer?: () => void
   isBreakTimerRunning?: boolean
   breakTimerTimeRemaining?: number
-  onNavigateToSettings?: () => void
 }
 
 export function AppZHeader({
@@ -61,7 +48,6 @@ export function AppZHeader({
   onPauseBreakTimer,
   isBreakTimerRunning = false,
   breakTimerTimeRemaining = 0,
-  onNavigateToSettings,
 }: AppZHeaderProps) {
   const navigate = useNavigate()
   const { logout } = useAuth0()
@@ -110,67 +96,53 @@ export function AppZHeader({
       </Group>
 
       <Group gap="xs">
-        {/* Break Timer Menu */}
-        <Menu width={220} position="bottom-end" withArrow>
-          <Menu.Target>
-            <Tooltip label={isBreakTimerRunning ? `Break Timer: ${formatTime(breakTimerTimeRemaining)}` : 'Start Break Timer'}>
-              <ActionIcon
-                component="button"
-                variant={isBreakTimerRunning ? 'filled' : 'subtle'}
-                color={isBreakTimerRunning ? 'blue' : 'gray'}
-                aria-label="Break Timer"
-                style={{
-                  animation: isBreakTimerRunning ? 'pulse 2s infinite' : 'none',
-                }}
-              >
-                <IconCoffee size={20} />
-              </ActionIcon>
-            </Tooltip>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Label>Break Timer</Menu.Label>
-            {isBreakTimerRunning ? (
-              <>
-                <Menu.Item
-                  leftSection={<IconPlayerPause size={16} />}
-                  onClick={onPauseBreakTimer}
-                >
-                  Pause Timer
-                </Menu.Item>
-                <Menu.Item
-                  leftSection={<IconPlayerStop size={16} />}
-                  onClick={onStopBreakTimer}
-                  color="red"
-                >
-                  Stop Timer
-                </Menu.Item>
-                <Menu.Divider />
-                <Stack gap="xs" px="sm" py="xs">
-                  <Text size="xs" c="dimmed">Time Remaining</Text>
-                  <Badge size="lg" color="blue" variant="filled">
-                    {formatTime(breakTimerTimeRemaining)}
-                  </Badge>
-                </Stack>
-              </>
-            ) : (
-              <Menu.Item
-                leftSection={<IconPlayerPlay size={16} />}
-                onClick={onStartBreakTimer}
-              >
-                Start Timer
-              </Menu.Item>
-            )}
-            <Menu.Divider />
-            <Menu.Item
-              leftSection={<IconBell size={16} />}
-              onClick={onNavigateToSettings}
-            >
-              Timer Settings
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
+        <NotificationBell />
 
-        <Menu width={240} position="bottom-end" withArrow>
+        {/* Break Timer - Appears when running, shows time on hover */}
+        {isBreakTimerRunning && (
+          <Tooltip
+            label={formatTime(breakTimerTimeRemaining)}
+            withArrow
+            position="bottom"
+            arrowSize={10}
+            arrowOffset={15}
+          >
+            <ActionIcon
+              component="button"
+              variant="light"
+              color="blue"
+              size="lg"
+              aria-label="Break Timer Running"
+              style={{
+                animation: 'pulse 2s infinite',
+                position: 'relative',
+              }}
+            >
+              <Icon icon="tabler:coffee" width={22} />
+              {/* Pulsing dot indicator */}
+              <Box
+                style={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: 'var(--mantine-color-blue-filled)',
+                  animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite',
+                }}
+              />
+            </ActionIcon>
+          </Tooltip>
+        )}
+
+        <Menu
+          width={280}
+          position="bottom-end"
+          withArrow
+          shadow="md"
+          withinPortal
+        >
           <Menu.Target>
             <UnstyledButton>
               <Group gap="xs">
@@ -191,7 +163,13 @@ export function AppZHeader({
               </Group>
             </UnstyledButton>
           </Menu.Target>
-          <Menu.Dropdown>
+          <Menu.Dropdown
+            style={{
+              zIndex: 1000,
+              maxHeight: '80vh',
+              overflowY: 'auto',
+            }}
+          >
             <Stack gap={2} px="sm" py="xs">
               <Text size="sm" fw={600} lineClamp={1}>
                 {displayName}
@@ -206,44 +184,79 @@ export function AppZHeader({
               )}
             </Stack>
             <Menu.Divider />
-            <Menu.Item leftSection={<IconUser size={16} />} onClick={() => navigate('/profile')}>
+            
+            {/* Break Timer Section */}
+            <Menu.Label>Break Timer</Menu.Label>
+            {isBreakTimerRunning ? (
+              <>
+                <Menu.Item
+                  leftSection={<Icon icon="tabler:player-pause" width={16} />}
+                  onClick={onPauseBreakTimer}
+                >
+                  Pause Timer
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<Icon icon="tabler:player-stop" width={16} />}
+                  onClick={onStopBreakTimer}
+                  color="red"
+                >
+                  Stop Timer
+                </Menu.Item>
+                <Menu.Divider />
+                <Stack gap="xs" px="sm" py="xs">
+                  <Text size="xs" c="dimmed">Time Remaining</Text>
+                  <Badge size="lg" color="blue" variant="filled">
+                    {formatTime(breakTimerTimeRemaining)}
+                  </Badge>
+                </Stack>
+              </>
+            ) : (
+              <Menu.Item
+                leftSection={<Icon icon="tabler:player-play" width={16} />}
+                onClick={onStartBreakTimer}
+              >
+                Start Break Timer
+              </Menu.Item>
+            )}
+            
+            <Menu.Divider />
+            
+            {/* Settings Section */}
+            <Menu.Label>Settings</Menu.Label>
+            <Menu.Item
+              leftSection={<Icon icon="tabler:settings" width={16} />}
+              onClick={() => navigate('/settings')}
+            >
+              Settings
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<Icon icon={syncEnabled ? 'tabler:cloud-check' : 'tabler:cloud-off'} width={16} />}
+              onClick={toggleSync}
+              color={syncEnabled ? 'green' : undefined}
+            >
+              Sync {syncEnabled ? 'Enabled' : 'Disabled'}
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<Icon icon={colorScheme === 'dark' ? 'tabler:sun' : 'tabler:moon'} width={16} />}
+              onClick={toggleColorScheme}
+            >
+              {colorScheme === 'dark' ? 'Light' : 'Dark'} Mode
+            </Menu.Item>
+            
+            <Menu.Divider />
+            
+            {/* Account Section */}
+            <Menu.Item leftSection={<Icon icon="tabler:user" width={16} />} onClick={() => navigate('/profile')}>
               Profile
             </Menu.Item>
             <Menu.Item
-              leftSection={<IconLogout size={16} />}
+              leftSection={<Icon icon="tabler:logout" width={16} />}
               onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
             >
               Logout
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
-        <NotificationBell />
-        <Tooltip label={syncEnabled ? 'Sync enabled' : 'Sync disabled'}>
-          <ActionIcon
-            variant="subtle"
-            color={syncEnabled ? 'green' : 'gray'}
-            onClick={toggleSync}
-            aria-label="Toggle sync"
-          >
-            {syncEnabled ? <IconCloudCheck size={20} /> : <IconCloudOff size={20} />}
-          </ActionIcon>
-        </Tooltip>
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          onClick={() => navigate('/settings')}
-          aria-label="Settings"
-        >
-          <IconSettings size={20} />
-        </ActionIcon>
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          onClick={toggleColorScheme}
-          aria-label="Toggle color scheme"
-        >
-          {colorScheme === 'dark' ? <IconSun size={20} /> : <IconMoon size={20} />}
-        </ActionIcon>
       </Group>
     </Group>
   )

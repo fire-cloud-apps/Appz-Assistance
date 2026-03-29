@@ -6,7 +6,7 @@ import {
   Alert,
   Group,
 } from '@mantine/core'
-import { IconArchive } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useTaskStore } from '../presentation/hooks'
 import { useNavigate } from 'react-router-dom'
 import { TaskRepository } from '../data/repositories/taskRepository'
@@ -55,7 +55,7 @@ export function ArchiveConfirmationModal() {
     >
       <Stack gap="md">
         <Alert
-          icon={<IconArchive size={24} />}
+          icon={<Icon icon="tabler:archive" width={24} />}
           title="Archive Task"
           color="blue"
           variant="light"

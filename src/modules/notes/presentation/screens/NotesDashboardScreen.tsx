@@ -1,5 +1,5 @@
 import { Box, Grid, Stack, Loader, Center, Text, Button, Group } from '@mantine/core'
-import { IconPlus, IconFolder } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useNavigate } from 'react-router-dom'
 import { useRootFolders, useRecentNotes, useFavoriteNotes, useDeleteFolder, useDeleteNote } from '../hooks/useNoteQueries'
 import { FolderCard } from '../components/FolderCard'
@@ -90,8 +90,8 @@ export function NotesDashboardScreen() {
       <Stack gap="md" pt="sm">
         <Group justify="space-between" align="center">
           <Text size="xl" fw={700}>Notes</Text>
-          <Button 
-            leftSection={<IconPlus size={16} />}
+          <Button
+            leftSection={<Icon icon="tabler:plus" width={16} />}
             onClick={() => openCreateFolderModal()}
           >
             New Folder
@@ -101,7 +101,7 @@ export function NotesDashboardScreen() {
         <Text size="lg" fw={600}>Folders</Text>
         {folders.length === 0 ? (
           <Box p="xl" style={{ textAlign: 'center', background: 'var(--mantine-color-gray-0)', borderRadius: 'var(--mantine-radius-md)' }}>
-            <IconFolder size={48} style={{ opacity: 0.3, marginBottom: 8 }} />
+            <Icon icon="tabler:folder" width={48} style={{ opacity: 0.3, marginBottom: 8 }} />
             <Text c="dimmed">No folders yet</Text>
             <Button 
               variant="light" 

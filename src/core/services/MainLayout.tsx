@@ -128,7 +128,6 @@ export function MainLayout() {
           onStopBreakTimer={stopTimer}
           isBreakTimerRunning={isTimerRunning}
           breakTimerTimeRemaining={timeRemaining}
-          onNavigateToSettings={() => navigate('/settings/break-timer')}
         />
       </AppShell.Header>
 

@@ -3,7 +3,7 @@
  * Ref: /tasks/all, /tasks/groups
  */
 import { Box, Button, Center, Stack, Text } from '@mantine/core'
-import { IconPlus } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 
 type TaskEmptyStateProps = {
   onCreate: () => void
@@ -19,7 +19,7 @@ export function TaskEmptyState({ onCreate, title, description }: TaskEmptyStateP
         <Text c="dimmed" size="lg">{title ?? 'No tasks yet'}</Text>
         <Text c="dimmed" size="sm">{description ?? 'Create your first task to get started'}</Text>
         <Button
-          leftSection={<IconPlus size={18} />}
+          leftSection={<Icon icon="tabler:plus" width={18} />}
           onClick={onCreate}
           variant="outline"
         >

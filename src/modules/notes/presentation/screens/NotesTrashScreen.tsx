@@ -1,5 +1,5 @@
 import { Box, Stack, Loader, Center, Text, Button, Group } from '@mantine/core'
-import { IconTrash, IconRestore, IconTrashOff } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useDeletedNotes, useRestoreNote, usePermanentlyDeleteNote } from '../hooks/useNoteQueries'
 
 export function NotesTrashScreen() {
@@ -30,7 +30,7 @@ export function NotesTrashScreen() {
         
         {deletedNotes.length === 0 ? (
           <Box p="xl" style={{ textAlign: 'center', background: 'var(--mantine-color-gray-0)', borderRadius: 'var(--mantine-radius-md)' }}>
-            <IconTrash size={48} style={{ opacity: 0.3, marginBottom: 8 }} />
+            <Icon icon="tabler:trash" width={48} style={{ opacity: 0.3, marginBottom: 8 }} />
             <Text c="dimmed">Trash is empty</Text>
           </Box>
         ) : (
@@ -53,19 +53,19 @@ export function NotesTrashScreen() {
                     </Text>
                   </Box>
                   <Group gap="xs">
-                    <Button 
-                      size="xs" 
+                    <Button
+                      size="xs"
                       variant="light"
-                      leftSection={<IconRestore size={14} />}
+                      leftSection={<Icon icon="tabler:restore" width={14} />}
                       onClick={() => handleRestoreNote(note.id)}
                     >
                       Restore
                     </Button>
-                    <Button 
-                      size="xs" 
+                    <Button
+                      size="xs"
                       variant="light"
                       color="red"
-                      leftSection={<IconTrashOff size={14} />}
+                      leftSection={<Icon icon="tabler:trash-x" width={14} />}
                       onClick={() => handlePermanentlyDeleteNote(note.id)}
                     >
                       Delete Forever

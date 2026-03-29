@@ -22,5 +22,5 @@ It is a complete Personalized Application can be used by any individuals. This A
 - [On End](instructions/onEnd.md)
 
 ## Icon Preference
-- My Preference is 'https://icon-sets.iconify.design/' for all icons.
+- For all icons use only 'https://icon-sets.iconify.design/' for all icons. (@iconify/react) Package.
 

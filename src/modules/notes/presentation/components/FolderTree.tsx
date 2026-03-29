@@ -1,5 +1,5 @@
 import { Accordion, Text, Box } from '@mantine/core'
-import { IconFolder } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { Folder } from '../../data/models/Folder'
 import { Note } from '../../data/models/Note'
 import { NoteListItem } from './NoteListItem'
@@ -21,8 +21,8 @@ export function FolderTree({ folders, notes, onFolderSelect, onNoteSelect }: Fol
 
     return (
       <Accordion.Item key={folder.id} value={folder.id}>
-        <Accordion.Control 
-          icon={<IconFolder size={18} />}
+        <Accordion.Control
+          icon={<Icon icon="tabler:folder" width={18} />}
           onClick={() => onFolderSelect(folder.id)}
         >
           <Text fw={500}>{folder.name}</Text>

@@ -1,5 +1,5 @@
 import { Box, Stack, Loader, Center, Text, Button, Group, Breadcrumbs, Anchor } from '@mantine/core'
-import { IconPlus, IconArrowLeft } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useFolderById, useSubFolders, useNotesByFolder, useDeleteFolder, useDeleteNote, useRootFolders } from '../hooks/useNoteQueries'
 import { FolderCard } from '../components/FolderCard'
@@ -107,9 +107,9 @@ export function NotesFolderViewScreen() {
     <Box style={{ position: 'relative', minHeight: '100%' }}>
       <Stack gap="md" pt="sm">
         <Group>
-          <Button 
-            variant="subtle" 
-            leftSection={<IconArrowLeft size={16} />}
+          <Button
+            variant="subtle"
+            leftSection={<Icon icon="tabler:arrow-left" width={16} />}
             onClick={() => navigate(parentFolder ? `/notes/folder/${parentFolder.id}` : '/notes')}
           >
             Back
@@ -129,17 +129,17 @@ export function NotesFolderViewScreen() {
         <Group justify="space-between" align="center">
           <Text size="xl" fw={700}>{folder.name}</Text>
           <Group>
-            <Button 
+            <Button
               variant="light"
-              leftSection={<IconPlus size={16} />}
+              leftSection={<Icon icon="tabler:plus" width={16} />}
               onClick={() => openCreateNoteModal()}
             >
               New Note
             </Button>
             {folder.level === 1 && (
-              <Button 
+              <Button
                 variant="light"
-                leftSection={<IconPlus size={16} />}
+                leftSection={<Icon icon="tabler:plus" width={16} />}
                 onClick={() => openCreateFolderModal()}
               >
                 New Subfolder

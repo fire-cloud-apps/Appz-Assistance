@@ -1,5 +1,5 @@
 import { UnstyledButton, Paper, Group, Stack, Text, Badge, ActionIcon, Menu } from '@mantine/core'
-import { IconPin, IconStar, IconDotsVertical, IconTrash, IconEdit } from '@tabler/icons-react'
+import { Icon } from '@iconify/react'
 import { Note } from '../../data/models/Note'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -36,8 +36,8 @@ export function NoteListItem({ note, onClick, onEdit, onDelete }: NoteListItemPr
         <Group justify="space-between" wrap="nowrap" align="flex-start">
           <Stack gap={4} style={{ flex: 1, overflow: 'hidden' }}>
             <Group gap="xs" wrap="nowrap">
-              {note.isPinned && <IconPin size={14} color="var(--mantine-color-orange-6)" />}
-              {note.isFavorite && <IconStar size={14} color="var(--mantine-color-yellow-6)" fill="var(--mantine-color-yellow-6)" />}
+              {note.isPinned && <Icon icon="tabler:pin" width={14} style={{ color: 'var(--mantine-color-orange-6)' }} />}
+              {note.isFavorite && <Icon icon="tabler:star" width={14} style={{ color: 'var(--mantine-color-yellow-6)', fill: 'var(--mantine-color-yellow-6)' }} />}
               <Text fw={500} lineClamp={1}>{note.title}</Text>
             </Group>
             {previewContent && (
@@ -60,17 +60,17 @@ export function NoteListItem({ note, onClick, onEdit, onDelete }: NoteListItemPr
             </Text>
             <Menu shadow="md" width={160} position="bottom-end">
               <Menu.Target>
-                <ActionIcon 
-                  variant="subtle" 
+                <ActionIcon
+                  variant="subtle"
                   size="sm"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <IconDotsVertical size={16} />
+                  <Icon icon="tabler:dots-vertical" width={16} />
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item 
-                  leftSection={<IconEdit size={14} />}
+                <Menu.Item
+                  leftSection={<Icon icon="tabler:edit" width={14} />}
                   onClick={(e) => {
                     e.stopPropagation()
                     onEdit?.()
@@ -79,9 +79,9 @@ export function NoteListItem({ note, onClick, onEdit, onDelete }: NoteListItemPr
                   Edit
                 </Menu.Item>
                 <Menu.Divider />
-                <Menu.Item 
+                <Menu.Item
                   color="red"
-                  leftSection={<IconTrash size={14} />}
+                  leftSection={<Icon icon="tabler:trash" width={14} />}
                   onClick={(e) => {
                     e.stopPropagation()
                     onDelete?.()
