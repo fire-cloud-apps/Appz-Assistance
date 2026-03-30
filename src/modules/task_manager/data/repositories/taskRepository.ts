@@ -142,6 +142,24 @@ export class TaskRepository {
     return upcomingTasks.slice(0, limit)
   }
 
+  async getOverdueTasks(limit: number = 5): Promise<Task[]> {
+    const today = new Date().toISOString().split('T')[0]
+
+    const allTasks = await db.tasks.toArray()
+    const overdueTasks = allTasks
+      .filter(task =>
+        !task.isDeleted &&
+        !task.isArchived &&
+        task.status !== 'Completed' &&
+        task.status !== 'Cancelled' &&
+        task.dueDate &&
+        task.dueDate < today
+      )
+      .sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''))
+
+    return overdueTasks.slice(0, limit)
+  }
+
   async searchTasks(searchTerm: string): Promise<Task[]> {
     const allTasks = await db.tasks.toArray()
     const normalizedTerm = searchTerm.toLowerCase().trim()

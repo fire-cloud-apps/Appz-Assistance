@@ -8,8 +8,13 @@ import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
+import Color from '@tiptap/extension-color'
+import { TextStyle } from '@tiptap/extension-text-style'
+import TaskItem from '@tiptap/extension-task-item'
+import TaskList from '@tiptap/extension-task-list'
 import { RichTextEditor } from '@mantine/tiptap'
 import '@mantine/tiptap/styles.css'
+import classes from './NoteEditor.module.css'
 
 interface NoteEditorProps {
   content: string
@@ -38,6 +43,12 @@ export function NoteEditor({ content, onChange, placeholder = 'Start writing you
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Subscript,
       Superscript,
+      Color,
+      TextStyle,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -60,8 +71,8 @@ export function NoteEditor({ content, onChange, placeholder = 'Start writing you
   }
 
   return (
-    <RichTextEditor editor={editor}>
-      <RichTextEditor.Toolbar>
+    <RichTextEditor editor={editor} className={classes.notesEditor}>
+      <RichTextEditor.Toolbar sticky stickyOffset="74px">
         <RichTextEditor.ControlsGroup>
           <RichTextEditor.Bold />
           <RichTextEditor.Italic />
@@ -103,6 +114,14 @@ export function NoteEditor({ content, onChange, placeholder = 'Start writing you
         <RichTextEditor.ControlsGroup>
           <RichTextEditor.Undo />
           <RichTextEditor.Redo />
+        </RichTextEditor.ControlsGroup>
+
+        <RichTextEditor.ControlsGroup>
+          <RichTextEditor.ColorPicker colors={['#252525', '#800000', '#008000', '#000080', '#4B0082', '#B9510D', '#808000', '#008080']} />
+        </RichTextEditor.ControlsGroup>
+
+        <RichTextEditor.ControlsGroup>
+          <RichTextEditor.TaskList />
         </RichTextEditor.ControlsGroup>
       </RichTextEditor.Toolbar>
 

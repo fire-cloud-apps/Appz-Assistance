@@ -32,7 +32,7 @@ export function MainLayout() {
   // Break Timer - for starting timer from header
   const { isTimerRunning, timeRemaining, startTimer, pauseTimer, stopTimer } = useBreakTimer();
 
-  // Initialize task notifications
+  // Initialize task notifications (must always be called)
   useTaskNotifications()
 
   // Initialize archive cleanup service
@@ -43,6 +43,22 @@ export function MainLayout() {
       archiveCleanupService.stopCleanupJob()
     }
   }, [])
+
+  // Check auth state for rendering
+  const showAuthLoading = syncEnabled && isLoading
+  const showAuthScreen = syncEnabled && !isLoading && !isAuthenticated
+
+  if (showAuthLoading) {
+    return (
+      <Center h="100vh">
+        <Loader />
+      </Center>
+    )
+  }
+
+  if (showAuthScreen) {
+    return <AuthScreen onLogin={() => loginWithRedirect()} />
+  }
 
   const modules = [
     {
@@ -89,20 +105,6 @@ export function MainLayout() {
     if (disabled) return
     closeMobile()
     navigate(path)
-  }
-
-  if (syncEnabled) {
-    if (isLoading) {
-      return (
-        <Center h="100vh">
-          <Loader />
-        </Center>
-      )
-    }
-
-    if (!isAuthenticated) {
-      return <AuthScreen onLogin={() => loginWithRedirect()} />
-    }
   }
 
   return (

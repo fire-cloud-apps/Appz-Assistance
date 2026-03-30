@@ -43,7 +43,8 @@ export const useBreakTimer = () => {
     setTimeRemaining,
   } = useBreakTimerStore();
 
-  const timerRef = useRef<number | null>(null);
+  const workerRef = useRef<Worker | null>(null);
+  const notificationSentRef = useRef<boolean>(false);
 
   // Function to load settings on startup
   const loadSettings = useCallback(async () => {
@@ -55,6 +56,35 @@ export const useBreakTimer = () => {
     loadSettings();
   }, [loadSettings]);
 
+  // Initialize Web Worker for accurate timing
+  useEffect(() => {
+    workerRef.current = new Worker(new URL('../../workers/breakTimerWorker.ts', import.meta.url), {
+      type: 'module',
+    });
+
+    workerRef.current.onmessage = (event: MessageEvent<{
+      type: 'tick';
+      payload: {
+        remaining: number;
+        isComplete: boolean;
+      };
+    }>) => {
+      const { remaining, isComplete } = event.data.payload;
+      
+      setTimeRemaining(remaining);
+      
+      // Send notification when timer completes
+      if (isComplete && !notificationSentRef.current) {
+        notificationSentRef.current = true;
+        sendBreakNotification();
+      }
+    };
+
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, [setTimeRemaining]);
+
   // Send break notification
   const sendBreakNotification = useCallback(async () => {
     const { quote, author } = getRandomQuote();
@@ -65,65 +95,26 @@ export const useBreakTimer = () => {
       showNotification('Time for a break!', {
         body: notificationBody,
         requireInteraction: false,
+        tag: 'break-timer',
       });
     }
 
-    // Schedule Mantine in-app notification after 5 minutes (300000 ms)
-    setTimeout(() => {
-      notifications.show({
-        title: 'Time for a break!',
-        message: notificationBody,
-        color: 'blue',
-        autoClose: 10000,
-        withCloseButton: true,
-      });
-    }, 5 * 60 * 1000);
+    // Also show Mantine in-app notification
+    notifications.show({
+      title: 'Time for a break!',
+      message: notificationBody,
+      color: 'blue',
+      autoClose: 10000,
+      withCloseButton: true,
+    });
   }, []);
 
-  // Main timer logic
+  // Reset notification flag when timer is stopped or settings change
   useEffect(() => {
-    if (!breakSettings || !isTimerRunning) return;
-
-    const { workingHoursStart, workingHoursEnd, breakInterval } = breakSettings;
-
-    const checkWorkingHours = () => {
-      const now = new Date();
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
-
-      const [startHour, startMinute] = workingHoursStart.split(':').map(Number);
-      const [endHour, endMinute] = workingHoursEnd.split(':').map(Number);
-
-      const isWithinWorkingHours =
-        (currentHour > startHour || (currentHour === startHour && currentMinute >= startMinute)) &&
-        (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute));
-
-      return isWithinWorkingHours;
-    };
-
-    const handleTimerTick = () => {
-      const currentRemaining = useBreakTimerStore.getState().timeRemaining;
-
-      if (currentRemaining <= 1) {
-        if (checkWorkingHours()) {
-          sendBreakNotification();
-        }
-        setTimeRemaining(breakInterval * 60);
-      } else {
-        setTimeRemaining(currentRemaining - 1);
-      }
-    };
-
-    if (isTimerRunning) {
-      timerRef.current = setInterval(handleTimerTick, 1000);
+    if (!isTimerRunning) {
+      notificationSentRef.current = false;
     }
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [isTimerRunning, breakSettings, sendBreakNotification, setTimeRemaining]);
+  }, [isTimerRunning]);
 
   // Start the timer
   const startTimer = useCallback(async () => {
@@ -134,19 +125,52 @@ export const useBreakTimer = () => {
       return;
     }
 
-    const { setIsTimerRunning, setTimeRemaining } = useBreakTimerStore.getState();
+    const { setIsTimerRunning } = useBreakTimerStore.getState();
+    
+    // Only start if within working hours
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const [startHour, startMinute] = currentSettings.workingHoursStart.split(':').map(Number);
+    const [endHour, endMinute] = currentSettings.workingHoursEnd.split(':').map(Number);
+
+    const isWithinWorkingHours =
+      (currentHour > startHour || (currentHour === startHour && currentMinute >= startMinute)) &&
+      (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute));
+
+    if (!isWithinWorkingHours) {
+      notifications.show({
+        title: 'Outside Working Hours',
+        message: `Break timer only runs during working hours (${currentSettings.workingHoursStart} - ${currentSettings.workingHoursEnd})`,
+        color: 'orange',
+        autoClose: 5000,
+      });
+      return;
+    }
+
     setIsTimerRunning(true);
-    setTimeRemaining(currentSettings.breakInterval * 60);
+    notificationSentRef.current = false;
+    
+    // Start the web worker timer
+    workerRef.current?.postMessage({
+      type: 'start',
+      payload: {
+        breakIntervalSeconds: currentSettings.breakInterval * 60,
+      },
+    });
   }, [loadSettings]);
 
   // Pause the timer
   const pauseTimer = useCallback(() => {
     useBreakTimerStore.getState().setIsTimerRunning(false);
+    workerRef.current?.postMessage({ type: 'pause' });
   }, []);
 
   // Stop the timer
   const stopTimer = useCallback(() => {
     useBreakTimerStore.getState().stopTimer();
+    notificationSentRef.current = false;
+    workerRef.current?.postMessage({ type: 'stop' });
   }, []);
 
   return {

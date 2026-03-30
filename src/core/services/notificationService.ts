@@ -11,6 +11,10 @@ export interface NotificationPermission {
   timestamp?: string
 }
 
+export interface AppNotificationOptions extends NotificationOptions {
+  tag?: string
+}
+
 export function requestNotificationPermission(): Promise<boolean> {
   return new Promise((resolve) => {
     if (!('Notification' in window)) {
@@ -54,7 +58,7 @@ export function hasNotificationPermission(): boolean {
   return Notification.permission === 'granted'
 }
 
-export function showNotification(title: string, options?: NotificationOptions) {
+export function showNotification(title: string, options?: AppNotificationOptions) {
   if (!hasNotificationPermission()) {
     console.warn('Notification permission not granted')
     return

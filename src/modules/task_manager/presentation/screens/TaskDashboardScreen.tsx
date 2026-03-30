@@ -3,16 +3,18 @@
  * Ref: routes/index.tsx
  */
 import { Box, Stack, Loader, Center, Tooltip, ActionIcon } from '@mantine/core'
-import { useParentTasks, useUpcomingTasks, useCompleteTaskWithRecurrence } from '../hooks/useTaskQueries'
+import { useParentTasks, useUpcomingTasks, useOverdueTasks, useCompleteTaskWithRecurrence } from '../hooks/useTaskQueries'
 import { TaskDashboardHeader } from '../components/TaskDashboardHeader'
 import { TaskStatsGrid } from '../components/TaskStatsGrid'
 import { UpcomingTasksCard } from '../components/UpcomingTasksCard'
+import { OverdueTasksCard } from '../components/OverdueTasksCard'
 import { useNavigate } from 'react-router-dom'
 
 export function TaskDashboardScreen() {
   const navigate = useNavigate()
   const { data: tasks = [], isLoading } = useParentTasks()
   const { data: upcomingTasks = [] } = useUpcomingTasks(5)
+  const { data: overdueTasks = [] } = useOverdueTasks(5)
   const completeTaskMutation = useCompleteTaskWithRecurrence()
 
   const handleCompleteTask = (taskId: string) => {
@@ -42,6 +44,7 @@ export function TaskDashboardScreen() {
       <Stack gap="md" pt="sm">
         <TaskDashboardHeader title="Task Dashboard" onNewTask={() => navigate('/tasks/create')} />
         <TaskStatsGrid tasks={tasks} onStatClick={handleStatClick} />
+        <OverdueTasksCard tasks={overdueTasks} onCompleteTask={handleCompleteTask} />
         <UpcomingTasksCard tasks={upcomingTasks} onCompleteTask={handleCompleteTask} />
       </Stack>
 

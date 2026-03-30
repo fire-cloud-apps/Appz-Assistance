@@ -144,8 +144,8 @@ export function NotesEditorScreen() {
   }
 
   return (
-    <Box style={{ position: 'relative', minHeight: '100%' }}>
-      <Stack gap="md" pt="sm">
+    <Box style={{ position: 'relative', minHeight: '100vh', maxHeight: '100vh', overflow: 'auto' }}>
+      <Stack gap="md" pt="sm" pb="lg">
         <Group justify="space-between" align="center">
           <Group>
             <Button

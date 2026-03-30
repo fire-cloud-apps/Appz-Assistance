@@ -305,6 +305,13 @@ export function useUpcomingTasks(limit: number = 5) {
   })
 }
 
+export function useOverdueTasks(limit: number = 5) {
+  return useQuery<Task[]>({
+    queryKey: [...taskKeys.all, 'overdue', limit],
+    queryFn: () => taskRepository.getOverdueTasks(limit),
+  })
+}
+
 export function useSearchTasksPaged(searchTerm: string, page: number, pageSize: number) {
   return useQuery<{ items: Task[]; total: number }>({
     queryKey: [...taskKeys.all, 'search', searchTerm, page, pageSize],

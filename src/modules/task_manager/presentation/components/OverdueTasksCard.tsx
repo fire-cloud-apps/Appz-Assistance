@@ -5,12 +5,12 @@ import { Task } from '../../data/models'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
 import dayjs from 'dayjs'
 
-interface UpcomingTasksCardProps {
+interface OverdueTasksCardProps {
   tasks: Task[]
   onCompleteTask: (taskId: string) => void
 }
 
-export function UpcomingTasksCard({ tasks, onCompleteTask }: UpcomingTasksCardProps) {
+export function OverdueTasksCard({ tasks, onCompleteTask }: OverdueTasksCardProps) {
   const navigate = useNavigate()
 
   const getPriorityColor = (priority: string) => {
@@ -23,18 +23,17 @@ export function UpcomingTasksCard({ tasks, onCompleteTask }: UpcomingTasksCardPr
     return colors[priority] || 'gray'
   }
 
-  const getDaysUntilDue = (dueDate: string) => {
+  const getDaysOverdue = (dueDate: string) => {
     const today = dayjs().startOf('day')
     const due = dayjs(dueDate)
-    return due.diff(today, 'day')
+    return today.diff(due, 'day')
   }
 
-  const formatDueDate = (dueDate: string) => {
-    const days = getDaysUntilDue(dueDate)
-    if (days < 0) return { text: `${Math.abs(days)} days overdue`, color: 'red' }
+  const formatOverdue = (dueDate: string) => {
+    const days = getDaysOverdue(dueDate)
     if (days === 0) return { text: 'Due today', color: 'orange' }
-    if (days === 1) return { text: 'Due tomorrow', color: 'yellow' }
-    return { text: `${days} days left`, color: 'blue' }
+    if (days === 1) return { text: '1 day overdue', color: 'red' }
+    return { text: `${days} days overdue`, color: 'red' }
   }
 
   return (
@@ -42,30 +41,30 @@ export function UpcomingTasksCard({ tasks, onCompleteTask }: UpcomingTasksCardPr
       <Stack gap="md">
         <Group justify="space-between" align="center">
           <Group gap="sm">
-            <ThemeIcon variant="light" color="orange" size="lg" radius="md">
-              <StatusIcon icon="lucide:alarm-clock" size={20} />
+            <ThemeIcon variant="light" color="red" size="lg" radius="md">
+              <StatusIcon icon="lucide:alert-octagon" size={20} />
             </ThemeIcon>
             <Box>
-              <Text fw={700} size="lg">Upcoming Tasks</Text>
-              <Text size="xs" c="dimmed">Tasks reaching due date</Text>
+              <Text fw={700} size="lg">Overdue Tasks</Text>
+              <Text size="xs" c="dimmed">Tasks past due date</Text>
             </Box>
           </Group>
-          <Badge variant="light" color="orange" size="lg" radius="md">
+          <Badge variant="light" color="red" size="lg" radius="md">
             {tasks.length} tasks
           </Badge>
         </Group>
 
         {tasks.length === 0 ? (
           <Paper p="xl" withBorder style={{ textAlign: 'center' }} bg="var(--mantine-color-body)">
-            <StatusIcon icon="lucide:calendar-check" size={40} color="var(--mantine-color-gray-5)" />
-            <Text c="dimmed" mt="md">No upcoming tasks</Text>
-            <Text size="sm" c="dimmed">All caught up!</Text>
+            <StatusIcon icon="lucide:check-circle" size={40} color="var(--mantine-color-green-5)" />
+            <Text c="dimmed" mt="md">No overdue tasks</Text>
+            <Text size="sm" c="dimmed">All tasks are on track!</Text>
           </Paper>
         ) : (
           <Stack gap="sm">
             {tasks.map((task) => {
-              const dueInfo = task.dueDate ? formatDueDate(task.dueDate) : null
-              
+              const overdueInfo = task.dueDate ? formatOverdue(task.dueDate) : null
+
               return (
                 <Paper
                   key={task.id}
@@ -87,11 +86,11 @@ export function UpcomingTasksCard({ tasks, onCompleteTask }: UpcomingTasksCardPr
                         aria-label={`Mark ${task.title} as complete`}
                       />
                       <Box style={{ flex: 1, minWidth: 0 }}>
-                        <Text 
-                          fw={500} 
-                          size="sm" 
+                        <Text
+                          fw={500}
+                          size="sm"
                           lineClamp={1}
-                          style={{ 
+                          style={{
                             textDecoration: task.status === 'Completed' ? 'line-through' : 'none',
                             color: task.status === 'Completed' ? 'dimmed' : 'inherit',
                             cursor: 'pointer'
@@ -110,21 +109,21 @@ export function UpcomingTasksCard({ tasks, onCompleteTask }: UpcomingTasksCardPr
                         )}
                       </Box>
                     </Group>
-                    
+
                     <Group gap="xs" wrap="nowrap">
-                      {dueInfo && (
+                      {overdueInfo && (
                         <Badge
                           variant="light"
-                          color={dueInfo.color}
+                          color={overdueInfo.color}
                           size="sm"
-                          leftSection={<Icon icon="tabler:clock" width={12} />}
+                          leftSection={<Icon icon="tabler:alert-triangle" width={12} />}
                         >
-                          {dueInfo.text}
+                          {overdueInfo.text}
                         </Badge>
                       )}
-                      <Badge 
-                        variant="light" 
-                        color={getPriorityColor(task.priority)} 
+                      <Badge
+                        variant="light"
+                        color={getPriorityColor(task.priority)}
                         size="sm"
                       >
                         {task.priority}
