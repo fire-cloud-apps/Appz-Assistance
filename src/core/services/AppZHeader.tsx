@@ -34,6 +34,7 @@ interface AppZHeaderProps {
   onPauseBreakTimer?: () => void
   isBreakTimerRunning?: boolean
   breakTimerTimeRemaining?: number
+  onLogoClick?: () => void
 }
 
 export function AppZHeader({
@@ -48,6 +49,7 @@ export function AppZHeader({
   onPauseBreakTimer,
   isBreakTimerRunning = false,
   breakTimerTimeRemaining = 0,
+  onLogoClick,
 }: AppZHeaderProps) {
   const navigate = useNavigate()
   const { logout } = useAuth0()
@@ -79,13 +81,17 @@ export function AppZHeader({
           size="sm"
         />
         <Flex align="center" gap="xs">
-          <Image src={logo} h={32} w={32} fit="contain" alt="AppZ Logo" />
-          <Text fw={700} size="xl" visibleFrom="sm">
-            {appConfig.app.name}
-          </Text>
-          <Text fw={700} size="lg" hiddenFrom="sm">
-            {appConfig.app.name}
-          </Text>
+          <UnstyledButton onClick={onLogoClick}>
+            <Group gap="xs">
+              <Image src={logo} h={32} w={32} fit="contain" alt="AppZ Logo" />
+              <Text fw={700} size="xl" visibleFrom="sm">
+                {appConfig.app.name}
+              </Text>
+              <Text fw={700} size="lg" hiddenFrom="sm">
+                {appConfig.app.name}
+              </Text>
+            </Group>
+          </UnstyledButton>
           <Text c="dimmed" size="sm" visibleFrom="sm">
             {appConfig.app.tagline}
           </Text>

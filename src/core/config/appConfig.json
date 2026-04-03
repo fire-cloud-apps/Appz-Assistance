@@ -1,10 +1,12 @@
 {
   "app": {
     "name": "AppZ",
-    "tagline": "Orchestrate"
+    "tagline": "Orchestrate",
+    "message": "This application helps you orchestrate your daily tasks and personal goals.",
+    "feedbackEmail": "feedback@appz.com"
   },
   "version": {
-    "current": "1.5.6",
-    "buildDate": "2026.04.03-20"
+    "current": "1.5.7",
+    "buildDate": "2026.04.03-21"
   }
 }

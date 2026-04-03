@@ -19,11 +19,13 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { AuthScreen } from '../auth/AuthScreen'
 import { useSyncSetting } from '../hooks/useSyncSetting'
 import { useBreakTimer } from '../../modules/break_timer/presentation/hooks/useBreakTimer'
+import { AboutModal } from '../components/AboutModal'
 
 export function MainLayout() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure(false)
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
+  const [aboutModalOpened, { open: openAboutModal, close: closeAboutModal }] = useDisclosure(false);
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
@@ -153,6 +155,7 @@ export function MainLayout() {
           onStopBreakTimer={stopTimer}
           isBreakTimerRunning={isTimerRunning}
           breakTimerTimeRemaining={timeRemaining}
+          onLogoClick={openAboutModal}
         />
       </AppShell.Header>
 
@@ -165,9 +168,11 @@ export function MainLayout() {
         />
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main style={{ overflowX: 'hidden' }}>
         <Outlet />
       </AppShell.Main>
+
+      <AboutModal opened={aboutModalOpened} onClose={closeAboutModal} />
     </AppShell>
   )
 }

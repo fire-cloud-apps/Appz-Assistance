@@ -5,11 +5,6 @@
     3. Other Close: 'As per the closing plan give me the release-notes and store release notes under the folder
 @docs/release-notes/ with defined naming.'
 
-
-## Other Commands for flexibility
-Hope you understood? If yes, Create a task plan and proceed accord
-
-
 --- 
 
 ### All Instructions to follow

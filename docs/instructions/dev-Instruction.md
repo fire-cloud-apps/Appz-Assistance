@@ -23,8 +23,7 @@ Upon the completion of each sub-task, perform the following:
 
 ### **Deployment Workflow**
 1.  **Integrity Check:** Execute `npm run build`.
-2.  **Git Synchronization:** If the build is successful, initiate a `git push`.
-3.  **Final Sync:** Request user confirmation, then initiate a `git pull` to ensure the local environment is synchronized with the remote repository.
+2.  **Error Fixing:** If any errors are encountered, Fix them and repeat steps 1-3.
 
 ---
 
