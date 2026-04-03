@@ -4,14 +4,16 @@ It is a complete Personalized Application can be used by any individuals. This A
 
 ## Modules
 
-- Tools Modules
+- Productivity
     - [TaskManager](modules/TaskManager.md)
     - [Notes](modules/Notes.md)
     - Knowledge Base
-- Finance Modules
-    - Personal Finance
-    - Family Tree
-    - Finance Goals 
+- Tools
+    - [SIP](modules/sip.md)
+    - [Loan](modules/loan.md)
+- Finance
+    - Personal Finance    
+    - [Finance Goals](modules/finance-goals.md)
 
 ## Skills 
 - [Skills](common/Skills.md)

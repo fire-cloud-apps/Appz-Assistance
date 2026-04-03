@@ -1,6 +1,7 @@
 ## Start (Vibe Code)
     1. Start : " Read the @docs/README.md, file and understand completely and let me know once you are ready. "
-    2. Close: " I am good to close the session, initiate the close actions. "
+    2. Close: " I am good to close the session, read the @docs/instructions/dev-Instruction.md 
+                for 'Session Closure & Deployment', and proceed.  "
     3. Other Close: 'As per the closing plan give me the release-notes and store release notes under the folder
 @docs/release-notes/ with defined naming.'
 

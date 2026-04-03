@@ -21,6 +21,7 @@ import { SettingsScreen } from '../core/services/SettingsScreen'
 import { ProfileScreen } from '../core/services/ProfileScreen'
 import { NotificationsScreen } from '../core/screens/NotificationsScreen'
 import { BreakTimerSettingsScreen } from '../modules/break_timer/presentation/screens/BreakTimerSettingsScreen' // New import
+import { HomeScreen } from '../core/screens/HomeScreen'
 
 export const router = createBrowserRouter([
   {
@@ -29,7 +30,11 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/tasks/dashboard" replace />,
+        element: <Navigate to="/home" replace />,
+      },
+      {
+        path: 'home',
+        element: <HomeScreen />,
       },
       {
         path: 'tasks/dashboard',

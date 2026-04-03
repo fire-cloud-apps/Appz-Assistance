@@ -60,42 +60,65 @@ export function MainLayout() {
     return <AuthScreen onLogin={() => loginWithRedirect()} />
   }
 
-  const modules = [
+  const moduleGroups = [
     {
-      id: 'task-manager',
-      label: 'Task Manager',
-      icon: '📋',
-      path: '/tasks/dashboard',
-      disabled: false,
-      children: [
-        { id: 'task-dashboard', label: 'Task Dashboard', path: '/tasks/dashboard', icon: 'lucide:layout-dashboard' },
-        { id: 'task-all', label: 'All Tasks', path: '/tasks/all', icon: 'lucide:list-checks' },
-        { id: 'task-groups', label: 'Group Tasks', path: '/tasks/groups', icon: 'lucide:layers' },
-        { id: 'task-kanban', label: 'Kanban Board', path: '/tasks/kanban', icon: 'lucide:columns-3' },
-        { id: 'task-archive', label: 'Archive Tasks', path: '/tasks/archive', icon: 'lucide:archive' },
+      id: 'productivity',
+      label: 'Productivity',
+      modules: [
+        {
+          id: 'task-manager',
+          label: 'Task Manager',
+          icon: '📋',
+          path: '/tasks/dashboard',
+          disabled: false,
+          children: [
+            { id: 'task-dashboard', label: 'Task Dashboard', path: '/tasks/dashboard', icon: 'lucide:layout-dashboard' },
+            { id: 'task-all', label: 'All Tasks', path: '/tasks/all', icon: 'lucide:list-checks' },
+            { id: 'task-groups', label: 'Group Tasks', path: '/tasks/groups', icon: 'lucide:layers' },
+            { id: 'task-kanban', label: 'Kanban Board', path: '/tasks/kanban', icon: 'lucide:columns-3' },
+            { id: 'task-archive', label: 'Archive Tasks', path: '/tasks/archive', icon: 'lucide:archive' },
+          ],
+        },
+        {
+          id: 'notes',
+          label: 'Notes',
+          icon: '📝',
+          path: '/notes',
+          disabled: false,
+          children: [
+            { id: 'notes-dashboard', label: 'Dashboard', path: '/notes', icon: 'lucide:layout-dashboard' },
+            { id: 'notes-favorites', label: 'Favorites', path: '/notes/favorites', icon: 'lucide:star' },
+            { id: 'notes-trash', label: 'Trash', path: '/notes/trash', icon: 'lucide:trash' },
+          ],
+        },
+        { id: 'knowledge', label: 'Knowledge Base', icon: '📚', path: '/knowledge', disabled: true },
       ],
     },
     {
-      id: 'notes',
-      label: 'Notes',
-      icon: '📝',
-      path: '/notes',
-      disabled: false,
-      children: [
-        { id: 'notes-dashboard', label: 'Dashboard', path: '/notes', icon: 'lucide:layout-dashboard' },
-        { id: 'notes-favorites', label: 'Favorites', path: '/notes/favorites', icon: 'lucide:star' },
-        { id: 'notes-trash', label: 'Trash', path: '/notes/trash', icon: 'lucide:trash' },
+      id: 'tools',
+      label: 'Tools',
+      modules: [
+        { id: 'sip', label: 'SIP', icon: '🧮', path: '/sip', disabled: true },
+        { id: 'loan', label: 'Loan', icon: '🏦', path: '/loan', disabled: true },
       ],
     },
-    { id: 'knowledge', label: 'Knowledge Base', icon: '📚', path: '/knowledge', disabled: true },
-{ id: 'finance', label: 'Personal Finance', icon: '💰', path: '/finance', disabled: true },
-    { id: 'family-tree', label: 'Family Tree', icon: '🌳', path: '/family-tree', disabled: true },
-    { id: 'financial-goals', label: 'Financial Goals', icon: '🎯', path: '/financial-goals', disabled: true },
+    {
+      id: 'finance',
+      label: 'Finance',
+      modules: [
+        { id: 'finance', label: 'Personal Finance', icon: '💰', path: '/finance', disabled: true },
+        { id: 'financial-goals', label: 'Finance Goals', icon: '🎯', path: '/financial-goals', disabled: true },
+      ],
+    },
   ]
+
+  const modules = moduleGroups.flatMap((group) => group.modules)
 
   const activePath = location.pathname
   const activeModule =
-    activePath === '/' || activePath.startsWith('/tasks') || activePath.startsWith('/task')
+    activePath === '/home'
+      ? 'dashboard'
+      : activePath === '/' || activePath.startsWith('/tasks') || activePath.startsWith('/task')
       ? 'task-manager'
       : activePath.startsWith('/notes')
         ? 'notes'
@@ -135,7 +158,7 @@ export function MainLayout() {
 
       <AppShell.Navbar p="xs">
         <ModuleMenu
-          modules={modules}
+          moduleGroups={moduleGroups}
           activeModule={activeModule}
           activePath={activePath}
           onModuleClick={handleModuleClick}
