@@ -1,7 +1,7 @@
 import { createTheme, MantineThemeOverride } from '@mantine/core'
+import { PrimaryColor } from '../services/userSettingsService'
 
-export const theme: MantineThemeOverride = createTheme({
-  primaryColor: 'blue',
+const baseTheme: Omit<MantineThemeOverride, 'primaryColor'> = {
   fontFamily: 'system-ui, Avenir, Helvetica, Arial, sans-serif',
   defaultRadius: 'md',
   cursorType: 'pointer',
@@ -25,4 +25,16 @@ export const theme: MantineThemeOverride = createTheme({
       },
     },
   },
+}
+
+export function createAppTheme(primaryColor: PrimaryColor): MantineThemeOverride {
+  return createTheme({
+    ...baseTheme,
+    primaryColor,
+  })
+}
+
+export const theme: MantineThemeOverride = createTheme({
+  ...baseTheme,
+  primaryColor: 'blue',
 })

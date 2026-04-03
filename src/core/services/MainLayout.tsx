@@ -13,13 +13,14 @@ import { AppZHeader } from './AppZHeader'
 import { ModuleMenu } from './ModuleMenu'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTaskNotifications } from '../hooks/useTaskNotifications'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { archiveCleanupService } from '../../modules/task_manager/data/repositories/archiveCleanupService'
 import { useAuth0 } from '@auth0/auth0-react'
 import { AuthScreen } from '../auth/AuthScreen'
 import { useSyncSetting } from '../hooks/useSyncSetting'
 import { useBreakTimer } from '../../modules/break_timer/presentation/hooks/useBreakTimer'
 import { AboutModal } from '../components/AboutModal'
+import { getModuleVisibility } from './userSettingsService'
 
 export function MainLayout() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
@@ -62,7 +63,7 @@ export function MainLayout() {
     return <AuthScreen onLogin={() => loginWithRedirect()} />
   }
 
-  const moduleGroups = [
+  const allModuleGroups = [
     {
       id: 'productivity',
       label: 'Productivity',
@@ -113,6 +114,30 @@ export function MainLayout() {
       ],
     },
   ]
+
+  const moduleGroups = useMemo(() => {
+    return allModuleGroups
+      .map((group) => ({
+        ...group,
+        modules: group.modules.filter((module) => {
+          const moduleIdMap: Record<string, 'taskManager' | 'notes' | 'knowledge' | 'sip' | 'loan' | 'personalFinance' | 'financeGoals'> = {
+            'task-manager': 'taskManager',
+            'notes': 'notes',
+            'knowledge': 'knowledge',
+            'sip': 'sip',
+            'loan': 'loan',
+            'finance': 'personalFinance',
+            'financial-goals': 'financeGoals',
+          }
+          const settingKey = moduleIdMap[module.id]
+          if (settingKey) {
+            return getModuleVisibility(settingKey)
+          }
+          return !module.disabled
+        }),
+      }))
+      .filter((group) => group.modules.length > 0)
+  }, [])
 
   const modules = moduleGroups.flatMap((group) => group.modules)
 

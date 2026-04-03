@@ -3,9 +3,11 @@ import { MantineProvider, ColorSchemeScript } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Auth0Provider } from '@auth0/auth0-react'
-import { theme } from './core/theme'
+import { createAppTheme } from './core/theme/appTheme'
 import { router } from './routes'
 import { authConfig } from './core/auth/authConfig'
+import { getPrimaryColor, PrimaryColor } from './core/services/userSettingsService'
+import { useState, useEffect } from 'react'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,6 +19,20 @@ const queryClient = new QueryClient({
 })
 
 function App() {
+  const [primaryColor, setPrimaryColor] = useState<PrimaryColor>('blue')
+
+  useEffect(() => {
+    setPrimaryColor(getPrimaryColor())
+  }, [])
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setPrimaryColor(getPrimaryColor())
+    }
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
+
   const authorizationParams = {
     redirect_uri: authConfig.redirectUri,
     scope: authConfig.scope,
@@ -34,7 +50,7 @@ function App() {
           cacheLocation="localstorage"
           useRefreshTokens
         >
-          <MantineProvider theme={theme} defaultColorScheme="auto">
+          <MantineProvider theme={createAppTheme(primaryColor)} defaultColorScheme="auto">
             <Notifications
               position="top-right"
               autoClose={4000}

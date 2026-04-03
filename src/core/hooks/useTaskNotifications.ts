@@ -1,6 +1,6 @@
 /**
  * Task Notifications Hook
- * Monitors tasks and shows notifications when they reach due date
+ * Monitors tasks and shows notifications when they reach due date and time
  */
 import { useEffect, useRef } from 'react'
 import { useTasks } from '../../modules/task_manager/presentation/hooks/useTaskQueries'
@@ -35,7 +35,9 @@ export function useTaskNotifications() {
 
     // Check for due tasks
     const checkDueTasks = () => {
-      const today = new Date().toISOString().split('T')[0]
+      const now = new Date()
+      const today = now.toISOString().split('T')[0]
+      const currentTime = now.toTimeString().slice(0, 5) // HH:MM format
       const notifiedTasks = getNotifiedTasks()
 
       tasks.forEach((task) => {
@@ -52,15 +54,26 @@ export function useTaskNotifications() {
         // Check if task due date is today
         const taskDueDate = task.dueDate.split('T')[0]
         if (taskDueDate === today) {
-          // Show notification
-          showNotification('Task Due Today!', {
-            body: `${task.title} is due today.`,
-            tag: `task-${task.id}`,
-            requireInteraction: false,
-          })
-
-          // Mark as notified
-          addNotifiedTask(task.id)
+          // If task has a due time, only notify if current time >= due time
+          if (task.dueTime) {
+            if (currentTime >= task.dueTime) {
+              const timeLabel = ` at ${task.dueTime}`
+              showNotification('Task Due Now!', {
+                body: `${task.title} is due${timeLabel}.`,
+                tag: `task-${task.id}`,
+                requireInteraction: false,
+              })
+              addNotifiedTask(task.id)
+            }
+          } else {
+            // No due time set, notify if task is due today
+            showNotification('Task Due Today!', {
+              body: `${task.title} is due today.`,
+              tag: `task-${task.id}`,
+              requireInteraction: false,
+            })
+            addNotifiedTask(task.id)
+          }
         }
       })
     }

@@ -23,17 +23,34 @@ export function OverdueTasksCard({ tasks, onCompleteTask }: OverdueTasksCardProp
     return colors[priority] || 'gray'
   }
 
-  const getDaysOverdue = (dueDate: string) => {
+  const getDaysOverdue = (dueDate: string, dueTime?: string | null) => {
     const today = dayjs().startOf('day')
     const due = dayjs(dueDate)
-    return today.diff(due, 'day')
+    const days = today.diff(due, 'day')
+    
+    // If same day and has due time, check if time has passed
+    if (days === 0 && dueTime) {
+      const now = dayjs().format('HH:mm')
+      if (now >= dueTime) {
+        return { days: 0, isPastDueTime: true }
+      }
+      return { days: 0, isPastDueTime: false }
+    }
+    
+    return { days, isPastDueTime: days > 0 }
   }
 
-  const formatOverdue = (dueDate: string) => {
-    const days = getDaysOverdue(dueDate)
-    if (days === 0) return { text: 'Due today', color: 'orange' }
-    if (days === 1) return { text: '1 day overdue', color: 'red' }
-    return { text: `${days} days overdue`, color: 'red' }
+  const formatOverdue = (dueDate: string, dueTime?: string | null) => {
+    const { days, isPastDueTime } = getDaysOverdue(dueDate, dueTime)
+    
+    if (days === 0 && !isPastDueTime) {
+      return { text: `Due today at ${dueTime}`, color: 'orange' }
+    }
+    if (days === 0 && isPastDueTime) {
+      return { text: `Overdue at ${dueTime}`, color: 'red' }
+    }
+    if (days === 1) return { text: `1 day overdue${dueTime ? ` (was at ${dueTime})` : ''}`, color: 'red' }
+    return { text: `${days} days overdue${dueTime ? ` (was at ${dueTime})` : ''}`, color: 'red' }
   }
 
   return (
@@ -63,7 +80,7 @@ export function OverdueTasksCard({ tasks, onCompleteTask }: OverdueTasksCardProp
         ) : (
           <Stack gap="sm">
             {tasks.map((task) => {
-              const overdueInfo = task.dueDate ? formatOverdue(task.dueDate) : null
+              const overdueInfo = task.dueDate ? formatOverdue(task.dueDate, task.dueTime) : null
 
               return (
                 <Paper

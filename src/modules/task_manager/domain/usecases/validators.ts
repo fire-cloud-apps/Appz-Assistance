@@ -31,6 +31,10 @@ export const createTaskSchema = z.object({
     .string()
     .nullable()
     .optional(),
+  dueTime: z
+    .string()
+    .nullable()
+    .optional(),
   parentTaskId: z
     .string()
     .nullable()

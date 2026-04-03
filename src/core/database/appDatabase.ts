@@ -137,6 +137,47 @@ export class AppDatabase extends Dexie {
         updatedAt
       `
     })
+
+    // Version 7: Add dueTime field to tasks
+    this.version(7).stores({
+      tasks: `
+        id,
+        parentTaskId,
+        taskLevel,
+        status,
+        priority,
+        dueDate,
+        dueTime,
+        createdAt,
+        updatedAt,
+        isDeleted,
+        isArchived,
+        archivedAt,
+        completedAt,
+        isRecurring,
+        parentRecurrenceId,
+        recurrenceInstanceId,
+        recurrenceEndDate,
+        recurrencePattern
+      `,
+      taskActivities: `
+        id,
+        taskId,
+        createdAt
+      `,
+      inAppNotifications: `
+        id,
+        type,
+        taskId,
+        isRead,
+        createdAt
+      `,
+      breakSettings: `
+        id,
+        createdAt,
+        updatedAt
+      `
+    })
   }
 }
 

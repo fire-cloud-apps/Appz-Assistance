@@ -10,9 +10,11 @@ import {
   Group,
   Text,
 } from '@mantine/core'
+import { TimeInput } from '@mantine/dates'
 import { createTaskSchema } from '../domain/usecases/validators'
 import { useTaskStore, useCreateTask } from '../presentation/hooks'
 import { getToday } from '../../../core/utils/dateHelper'
+import { useState } from 'react'
 
 interface SubtaskModalProps {
   parentTaskId: string
@@ -23,6 +25,7 @@ interface SubtaskModalProps {
 export function SubtaskModal({ parentTaskId, parentTaskTitle, parentTaskLevel }: SubtaskModalProps) {
   const { isSubtaskModalOpen, closeSubtaskModal } = useTaskStore()
   const createTask = useCreateTask()
+  const [dueTime, setDueTime] = useState<string | null>(null)
 
   const {
     register,
@@ -38,6 +41,7 @@ export function SubtaskModal({ parentTaskId, parentTaskTitle, parentTaskLevel }:
       status: 'Pending',
       priority: 'Medium',
       dueDate: null as string | null,
+      dueTime: null as string | null,
       parentTaskId: parentTaskId,
       taskLevel: parentTaskLevel + 1,
     },
@@ -51,9 +55,11 @@ export function SubtaskModal({ parentTaskId, parentTaskTitle, parentTaskLevel }:
         ...data,
         taskLevel,
         dueDate: data.dueDate || null,
+        dueTime,
         parentTaskId: parentTaskId,
       })
       reset()
+      setDueTime(null)
       closeSubtaskModal()
     } catch (error) {
       console.error('Failed to create subtask:', error)
@@ -62,6 +68,7 @@ export function SubtaskModal({ parentTaskId, parentTaskTitle, parentTaskLevel }:
 
   const handleClose = () => {
     reset()
+    setDueTime(null)
     closeSubtaskModal()
   }
 
@@ -113,14 +120,25 @@ export function SubtaskModal({ parentTaskId, parentTaskTitle, parentTaskLevel }:
             error={errors.status?.message as string}
           />
 
-          <TextInput
-            label="Due Date"
-            type="date"
-            placeholder="Select due date"
-            min={getToday()}
-            onChange={(e) => setValue('dueDate', e.target.value || null)}
-            error={errors.dueDate?.message as string}
-          />
+          <Group grow>
+            <TextInput
+              label="Due Date"
+              type="date"
+              placeholder="Select due date"
+              min={getToday()}
+              onChange={(e) => setValue('dueDate', e.target.value || null)}
+              error={errors.dueDate?.message as string}
+            />
+            <TimeInput
+              label="Due Time"
+              placeholder="Select due time"
+              value={dueTime || ''}
+              onChange={(e) => {
+                const value = e.currentTarget.value
+                setDueTime(value || null)
+              }}
+            />
+          </Group>
 
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>

@@ -95,7 +95,7 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
                   <Group gap="xs">
                     <Icon icon="tabler:calendar" width={16} />
                     <Text size="sm" c="dimmed">
-                      Due: {task.dueDate}
+                      Due: {task.dueDate}{task.dueTime ? ` at ${task.dueTime}` : ''}
                     </Text>
                   </Group>
                 )}
@@ -139,7 +139,7 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
           <Group gap="xs" justify="space-between">
             {task.dueDate && (
               <Text size="xs" c="dimmed">
-                Due: {task.dueDate}
+                Due: {task.dueDate}{task.dueTime ? ` at ${task.dueTime}` : ''}
               </Text>
             )}
             <Group gap="xs">

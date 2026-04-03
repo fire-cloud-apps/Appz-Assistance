@@ -23,18 +23,38 @@ export function UpcomingTasksCard({ tasks, onCompleteTask }: UpcomingTasksCardPr
     return colors[priority] || 'gray'
   }
 
-  const getDaysUntilDue = (dueDate: string) => {
+  const getDaysUntilDue = (dueDate: string, dueTime?: string | null) => {
     const today = dayjs().startOf('day')
     const due = dayjs(dueDate)
-    return due.diff(today, 'day')
+    const days = due.diff(today, 'day')
+    
+    // If same day and has due time, check if time has passed
+    if (days === 0 && dueTime) {
+      const now = dayjs().format('HH:mm')
+      if (now > dueTime) {
+        return { days, isPastDueTime: true }
+      }
+      return { days, isPastDueTime: false }
+    }
+    
+    return { days, isPastDueTime: days < 0 }
   }
 
-  const formatDueDate = (dueDate: string) => {
-    const days = getDaysUntilDue(dueDate)
-    if (days < 0) return { text: `${Math.abs(days)} days overdue`, color: 'red' }
+  const formatDueDate = (dueDate: string, dueTime?: string | null) => {
+    const { days, isPastDueTime } = getDaysUntilDue(dueDate, dueTime)
+    
+    if (isPastDueTime && dueTime) {
+      return { text: `Overdue at ${dueTime}`, color: 'red' }
+    }
+    if (isPastDueTime) {
+      return { text: `${Math.abs(days)} days overdue`, color: 'red' }
+    }
+    if (days === 0 && dueTime) {
+      return { text: `Due today at ${dueTime}`, color: 'orange' }
+    }
     if (days === 0) return { text: 'Due today', color: 'orange' }
     if (days === 1) return { text: 'Due tomorrow', color: 'yellow' }
-    return { text: `${days} days left`, color: 'blue' }
+    return { text: `${days} days left${dueTime ? ` (at ${dueTime})` : ''}`, color: 'blue' }
   }
 
   return (
@@ -64,7 +84,7 @@ export function UpcomingTasksCard({ tasks, onCompleteTask }: UpcomingTasksCardPr
         ) : (
           <Stack gap="sm">
             {tasks.map((task) => {
-              const dueInfo = task.dueDate ? formatDueDate(task.dueDate) : null
+              const dueInfo = task.dueDate ? formatDueDate(task.dueDate, task.dueTime) : null
               
               return (
                 <Paper

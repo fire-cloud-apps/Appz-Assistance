@@ -15,7 +15,7 @@ import {
   Box,
   Text,
 } from '@mantine/core' // Added Mantine components
-import { DateInput } from '@mantine/dates' // Added DateInput
+import { DateInput, TimeInput } from '@mantine/dates' // Added DateInput, TimeInput
 
 import {
   createTaskSchema,
@@ -52,6 +52,7 @@ export function TaskFormScreen() {
   const [recurrencePickerOpened, setRecurrencePickerOpened] = useState(false)
   const [recurrencePattern, setRecurrencePattern] = useState<RecurrencePattern | null>(null)
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<string | null>(null)
+  const [dueTime, setDueTime] = useState<string | null>(null)
 
   const {
     register,
@@ -68,6 +69,7 @@ export function TaskFormScreen() {
       status: 'Pending',
       priority: 'Medium',
       dueDate: null,
+      dueTime: null,
       parentTaskId: null,
       taskLevel: 1,
     },
@@ -81,9 +83,11 @@ export function TaskFormScreen() {
         status: taskToEdit.status,
         priority: taskToEdit.priority,
         dueDate: taskToEdit.dueDate ? new Date(taskToEdit.dueDate).toISOString().split('T')[0] : null,
+        dueTime: taskToEdit.dueTime || null,
         parentTaskId: taskToEdit.parentTaskId || null,
         taskLevel: taskToEdit.taskLevel,
       })
+      setDueTime(taskToEdit.dueTime || null)
       // Load recurrence data
       if (taskToEdit.recurrencePattern) {
         setRecurrencePattern(taskToEdit.recurrencePattern)
@@ -99,9 +103,11 @@ export function TaskFormScreen() {
         status: 'Pending',
         priority: 'Medium',
         dueDate: null,
+        dueTime: null,
         parentTaskId: null,
         taskLevel: 1,
       })
+      setDueTime(null)
       setRecurrencePattern(null)
       setRecurrenceEndDate(null)
     }
@@ -109,6 +115,14 @@ export function TaskFormScreen() {
 
   const onSubmit = async (data: any) => { // Use any to bypass strict type checking temporarily
     try {
+      const taskData = {
+        ...data,
+        dueTime: dueTime,
+        isRecurring: !!recurrencePattern,
+        recurrencePattern,
+        recurrenceEndDate,
+      }
+      
       if (isEditing) {
         // Check if status is being changed to 'Completed' for a recurring task
         const isMarkingComplete = data.status === 'Completed' && taskToEdit && taskToEdit.status !== 'Completed'
@@ -123,27 +137,13 @@ export function TaskFormScreen() {
         } else {
           // Regular update for non-completion changes
           await updateTask.mutateAsync({
+            ...taskData,
             id: taskId!,
-            title: data.title,
-            description: data.description,
-            status: data.status,
-            priority: data.priority,
-            dueDate: data.dueDate,
-            parentTaskId: data.parentTaskId,
-            taskLevel: data.taskLevel,
             updatedAt: new Date().toISOString(),
-            isRecurring: !!recurrencePattern,
-            recurrencePattern,
-            recurrenceEndDate,
           } as Task)
         }
       } else {
-        await createTask.mutateAsync({
-          ...data,
-          isRecurring: !!recurrencePattern,
-          recurrencePattern,
-          recurrenceEndDate,
-        })
+        await createTask.mutateAsync(taskData)
       }
       navigate(-1) // Go back to the previous screen
     } catch (error) {
@@ -228,15 +228,27 @@ export function TaskFormScreen() {
             value={watch('status')}
           />
 
-          <DateInput
-            label="Due Date"
-            placeholder="Select due date"
-            minDate={new Date(getToday())}
-            valueFormat="YYYY-MM-DD"
-            value={watch('dueDate') as string | null}
-            onChange={(value) => setValue('dueDate', value || null)}
-            error={errors.dueDate?.message as string}
-          />
+          <Group grow>
+            <DateInput
+              label="Due Date"
+              placeholder="Select due date"
+              minDate={new Date(getToday())}
+              valueFormat="YYYY-MM-DD"
+              value={watch('dueDate') as string | null}
+              onChange={(value) => setValue('dueDate', value || null)}
+              error={errors.dueDate?.message as string}
+            />
+            <TimeInput
+              label="Due Time"
+              placeholder="Select due time"
+              value={dueTime || ''}
+              onChange={(event) => {
+                const value = event.currentTarget.value
+                setDueTime(value || null)
+                setValue('dueTime', value || null)
+              }}
+            />
+          </Group>
 
           {/* Recurrence Picker Button */}
           <Box>

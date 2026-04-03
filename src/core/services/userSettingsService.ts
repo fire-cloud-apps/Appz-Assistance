@@ -5,6 +5,32 @@
 
 const SETTINGS_KEY = 'appz_user_settings'
 
+export type PrimaryColor = 
+  | 'dark' | 'gray' | 'red' | 'pink' | 'grape' | 'violet' 
+  | 'indigo' | 'blue' | 'cyan' | 'teal' | 'green' | 'lime' 
+  | 'yellow' | 'orange'
+
+export const PRIMARY_COLORS: { value: PrimaryColor; label: string; color: string }[] = [
+  { value: 'dark', label: 'Dark', color: '#2e2e2e' },
+  { value: 'gray', label: 'Gray', color: '#868e96' },
+  { value: 'red', label: 'Red', color: '#fa5252' },
+  { value: 'pink', label: 'Pink', color: '#e64980' },
+  { value: 'grape', label: 'Grape', color: '#be4bdb' },
+  { value: 'violet', label: 'Violet', color: '#7950f2' },
+  { value: 'indigo', label: 'Indigo', color: '#4c6ef5' },
+  { value: 'blue', label: 'Blue', color: '#228be6' },
+  { value: 'cyan', label: 'Cyan', color: '#15aabf' },
+  { value: 'teal', label: 'Teal', color: '#12b886' },
+  { value: 'green', label: 'Green', color: '#40c057' },
+  { value: 'lime', label: 'Lime', color: '#82c91e' },
+  { value: 'yellow', label: 'Yellow', color: '#fab005' },
+  { value: 'orange', label: 'Orange', color: '#fd7e14' },
+]
+
+export interface ModuleVisibility {
+  enabled: boolean
+}
+
 export interface UserSettings {
   taskManager: {
     defaultItemsPerPage: number
@@ -12,6 +38,18 @@ export interface UserSettings {
     enableDueDateNotifications: boolean
     archiveRetentionDays: number // days before auto-deletion
     completedArchiveDays: number // days before completed tasks are archived
+  }
+  modules: {
+    taskManager: ModuleVisibility
+    notes: ModuleVisibility
+    knowledge: ModuleVisibility
+    sip: ModuleVisibility
+    loan: ModuleVisibility
+    personalFinance: ModuleVisibility
+    financeGoals: ModuleVisibility
+  }
+  appearance: {
+    primaryColor: PrimaryColor
   }
 }
 
@@ -22,6 +60,18 @@ const defaultSettings: UserSettings = {
     enableDueDateNotifications: false,
     archiveRetentionDays: 90, // Default: 90 days retention
     completedArchiveDays: 90, // Default: 90 days before archive
+  },
+  modules: {
+    taskManager: { enabled: true },
+    notes: { enabled: true },
+    knowledge: { enabled: false }, // Coming soon
+    sip: { enabled: false }, // Coming soon
+    loan: { enabled: false }, // Coming soon
+    personalFinance: { enabled: false }, // Coming soon
+    financeGoals: { enabled: false }, // Coming soon
+  },
+  appearance: {
+    primaryColor: 'blue',
   },
 }
 
@@ -36,6 +86,14 @@ export function getUserSettings(): UserSettings {
         taskManager: {
           ...defaultSettings.taskManager,
           ...parsed.taskManager,
+        },
+        modules: {
+          ...defaultSettings.modules,
+          ...parsed.modules,
+        },
+        appearance: {
+          ...defaultSettings.appearance,
+          ...parsed.appearance,
         },
       }
     }
@@ -52,6 +110,14 @@ export function setUserSettings(settings: Partial<UserSettings>): void {
       taskManager: {
         ...current.taskManager,
         ...settings.taskManager,
+      },
+      modules: {
+        ...current.modules,
+        ...settings.modules,
+      },
+      appearance: {
+        ...current.appearance,
+        ...settings.appearance,
       },
     }
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(updated))
@@ -115,5 +181,37 @@ export function getCompletedArchiveDays(): number {
 export function setCompletedArchiveDays(value: number): void {
   const current = getUserSettings()
   current.taskManager.completedArchiveDays = value
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
+}
+
+export type ModuleId = 'taskManager' | 'notes' | 'knowledge' | 'sip' | 'loan' | 'personalFinance' | 'financeGoals'
+
+export function getModuleVisibility(moduleId: ModuleId): boolean {
+  return getUserSettings().modules[moduleId].enabled
+}
+
+export function setModuleVisibility(moduleId: ModuleId, enabled: boolean): void {
+  const current = getUserSettings()
+  current.modules[moduleId].enabled = enabled
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
+}
+
+export function getAllModuleVisibility(): UserSettings['modules'] {
+  return getUserSettings().modules
+}
+
+export function setAllModuleVisibility(modules: UserSettings['modules']): void {
+  const current = getUserSettings()
+  current.modules = modules
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
+}
+
+export function getPrimaryColor(): PrimaryColor {
+  return getUserSettings().appearance.primaryColor
+}
+
+export function setPrimaryColor(color: PrimaryColor): void {
+  const current = getUserSettings()
+  current.appearance.primaryColor = color
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
 }

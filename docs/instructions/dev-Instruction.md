@@ -20,10 +20,8 @@ Upon the completion of each sub-task, perform the following:
 * **Release Notes:** Summarize all activities and changes. Save this file in the `/release-notes` directory using the naming convention: `YYYY.mm.DD.release.md`.
 * **Version Increment:** Increment the current internal versioning to the next major version by picking the file 'appConfig.json'-> Version -> current -> 1.5.{increment}.
 * **Final Build Stamp:** Perform a final update to the build version number following the standard `{YYYY.mm.DD-{#}}` syntax. on the file 'appConfig.json' -> version -> buildDate -> {YYYY.mm.DD}.
-
-### **Deployment Workflow**
-1.  **Integrity Check:** Execute `npm run build`.
-2.  **Error Fixing:** If any errors are encountered, Fix them and repeat steps 1-3.
+*  **Integrity Check:** Execute `npm run build`.
+*  **Error Fixing:** If any errors are encountered, Fix them and repeat steps 1-3.
 
 ---
 
