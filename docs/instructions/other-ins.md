@@ -10,11 +10,9 @@
 ### All Instructions to follow
 Module: 'Task Manager' 
 Screen: 'Task'
-Route: '//' 
+Route: '/' 
 
 Feature to Implement:  
-
-
 
 ---
 

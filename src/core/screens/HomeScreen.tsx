@@ -13,12 +13,14 @@ import {
   Group,
   Badge,
   ThemeIcon,
+  Tooltip,
 } from '@mantine/core'
 import { Icon } from '@iconify/react'
 import { useNavigate } from 'react-router-dom'
 import classes from './HomeScreen.module.css'
 import { useTasks } from '../../modules/task_manager/presentation/hooks/useTaskQueries'
 import { useRootFolders } from '../../modules/notes/presentation/hooks/useNoteQueries'
+import { useGoals, useInvestor, usePortfolio, useSIP } from '../../modules/finance-goal/presentation/hooks'
 import { useQuery } from '@tanstack/react-query'
 import { noteRepository } from '../../modules/notes/data/repositories'
 import { useMemo } from 'react'
@@ -50,6 +52,10 @@ export function HomeScreen() {
   const navigate = useNavigate()
   const { data: tasks = [] } = useTasks()
   const { data: rootFolders = [] } = useRootFolders()
+  const { goals } = useGoals()
+  const { sips } = useSIP()
+  const { portfolios } = usePortfolio()
+  const { investors } = useInvestor()
 
   const activeTasks = useMemo(
     () => tasks.filter((task) => !task.isDeleted && !task.isArchived),
@@ -104,6 +110,21 @@ export function HomeScreen() {
     },
     enabled: rootFolders.length > 0,
   })
+
+  const financeGoalsChart = useMemo<ChartBar[]>(() => {
+    const entries = [
+      { label: 'Goals', value: goals.length, color: 'var(--mantine-color-indigo-6)' },
+      { label: 'SIPs', value: sips.length, color: 'var(--mantine-color-orange-6)' },
+      { label: 'Portfolios', value: portfolios.length, color: 'var(--mantine-color-teal-6)' },
+      { label: 'Investors', value: investors.length, color: 'var(--mantine-color-blue-6)' },
+    ]
+    if (entries.every((entry) => entry.value === 0)) return []
+    return entries
+  }, [goals.length, sips.length, portfolios.length, investors.length])
+
+  const financeGoalsSummary = useMemo(() => {
+    return `Goals: ${goals.length} • SIPs: ${sips.length} • Portfolios: ${portfolios.length} • Investors: ${investors.length}`
+  }, [goals.length, sips.length, portfolios.length, investors.length])
 
   const sections: DashboardSection[] = [
     {
@@ -183,12 +204,11 @@ export function HomeScreen() {
         {
           id: 'financial-goals',
           title: 'Finance Goals',
-          description: 'Set goals and monitor progress over time.',
+          description: financeGoalsSummary,
           icon: 'tabler:target-arrow',
           color: 'indigo',
-          path: '/financial-goals',
-          disabled: true,
-          chart: [],
+          path: '/finance/dashboard',
+          chart: financeGoalsChart,
         },
       ],
     },
@@ -272,27 +292,42 @@ export function HomeScreen() {
                       </Badge>
                     )}
                   </Box>
-                  <Text fw={700} className={classes.cardTitle}>
-                    {card.title}
-                  </Text>
-                  <Text size="sm" className={classes.cardDesc}>
-                    {card.description}
-                  </Text>
-                  {card.chart && card.chart.length > 0 && (
-                    <Box className={classes.cardChart}>
-                      {card.chart.map((bar, barIndex) => (
-                        <span
-                          key={`${card.id}-bar-${barIndex}`}
-                          className={classes.cardBar}
-                          data-label={bar.label}
-                          style={{
-                            height: `${Math.max(bar.value, 1) * 3}px`,
-                            ['--bar-color' as never]: bar.color,
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  )}
+                  <Box className={classes.cardBody}>
+                    <Text fw={700} className={classes.cardTitle}>
+                      {card.title}
+                    </Text>
+                    <Text size="sm" className={classes.cardDesc}>
+                      {card.description}
+                    </Text>
+                  </Box>
+                    {card.chart && card.chart.length > 0 && (
+                      <Box className={classes.cardStacked}>
+                        {(() => {
+                          const total = card.chart.reduce((sum, item) => sum + item.value, 0)
+                          return card.chart.map((segment, index) => {
+                            const widthPercent = total > 0 ? (segment.value / total) * 100 : 0
+                            const labelPercent = total > 0 ? Math.round(widthPercent) : 0
+                            return (
+                              <Tooltip
+                                key={`${card.id}-segment-${index}`}
+                                label={`${segment.label}: ${segment.value} (${labelPercent}%)`}
+                                withArrow
+                                position="top"
+                                offset={6}
+                              >
+                                <span
+                                  className={classes.cardStackedSegment}
+                                  style={{
+                                    ['--segment-color' as never]: segment.color,
+                                    ['--segment-width' as never]: `${Math.max(widthPercent, 8)}%`,
+                                  }}
+                                />
+                              </Tooltip>
+                            )
+                          })
+                        })()}
+                      </Box>
+                    )}
                   <Box className={classes.cardFooter}>
                     <Text size="xs" c="dimmed">
                       Open module

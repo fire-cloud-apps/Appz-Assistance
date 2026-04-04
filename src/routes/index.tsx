@@ -22,6 +22,13 @@ import { ProfileScreen } from '../core/services/ProfileScreen'
 import { NotificationsScreen } from '../core/screens/NotificationsScreen'
 import { BreakTimerSettingsScreen } from '../modules/break_timer/presentation/screens/BreakTimerSettingsScreen' // New import
 import { HomeScreen } from '../core/screens/HomeScreen'
+import {
+  FinanceGoalDashboardPage,
+  FinanceGoalPortfolioPage,
+  FinanceGoalSIPPage,
+  FinanceGoalGoalsPage,
+  FinanceGoalInvestorsPage,
+} from '../modules/finance-goal/presentation/pages'
 
 export const router = createBrowserRouter([
   {
@@ -118,7 +125,27 @@ export const router = createBrowserRouter([
       },
       {
         path: 'finance',
-        element: <ComingSoonScreen moduleName="Personal Finance" />,
+        element: <FinanceGoalDashboardPage />,
+      },
+      {
+        path: 'finance/dashboard',
+        element: <FinanceGoalDashboardPage />,
+      },
+      {
+        path: 'finance/portfolio',
+        element: <FinanceGoalPortfolioPage />,
+      },
+      {
+        path: 'finance/sip',
+        element: <FinanceGoalSIPPage />,
+      },
+      {
+        path: 'finance/goals',
+        element: <FinanceGoalGoalsPage />,
+      },
+      {
+        path: 'finance/investors',
+        element: <FinanceGoalInvestorsPage />,
       },
       {
         path: 'family-tree',
@@ -126,7 +153,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'financial-goals',
-        element: <ComingSoonScreen moduleName="Financial Goals" />,
+        element: <Navigate to="/finance/dashboard" replace />,
       },
     ],
   },

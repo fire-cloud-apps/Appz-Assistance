@@ -178,6 +178,8 @@ export class AppDatabase extends Dexie {
         updatedAt
       `
     })
+
+    // Version 8: Reserved for future schema changes
   }
 }
 

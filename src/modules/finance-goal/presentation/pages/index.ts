@@ -1,0 +1,5 @@
+export { FinanceGoalDashboardPage } from './FinanceGoalDashboardPage'
+export { FinanceGoalPortfolioPage } from './FinanceGoalPortfolioPage'
+export { FinanceGoalSIPPage } from './FinanceGoalSIPPage'
+export { FinanceGoalGoalsPage } from './FinanceGoalGoalsPage'
+export { FinanceGoalInvestorsPage } from './FinanceGoalInvestorsPage'

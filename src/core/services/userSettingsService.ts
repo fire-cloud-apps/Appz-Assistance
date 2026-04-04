@@ -67,8 +67,8 @@ const defaultSettings: UserSettings = {
     knowledge: { enabled: false }, // Coming soon
     sip: { enabled: false }, // Coming soon
     loan: { enabled: false }, // Coming soon
-    personalFinance: { enabled: false }, // Coming soon
-    financeGoals: { enabled: false }, // Coming soon
+    personalFinance: { enabled: true },
+    financeGoals: { enabled: true },
   },
   appearance: {
     primaryColor: 'blue',

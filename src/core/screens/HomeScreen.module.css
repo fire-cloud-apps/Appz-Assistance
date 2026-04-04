@@ -87,6 +87,9 @@
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
   animation: riseIn 420ms ease both;
   cursor: pointer;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
 }
 
 .card::before {
@@ -158,6 +161,14 @@
   border-radius: 12px;
 }
 
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+  flex: 1;
+}
+
 .cardTitle {
   font-size: 18px;
 }
@@ -165,57 +176,53 @@
 .cardDesc {
   color: var(--mantine-color-dimmed);
   margin-top: 4px;
-  min-height: 40px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .cardFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 16px;
+  margin-top: auto;
+  padding-top: 14px;
   color: var(--mantine-color-gray-6);
 }
 
-.cardChart {
+.cardStacked {
   display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  margin-top: 12px;
-  margin-bottom: 4px;
-  height: 48px;
-  overflow: visible;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  margin-bottom: 10px;
+  height: 22px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--mantine-color-default-border);
+  padding: 4px;
 }
 
-.cardBar {
-  flex: 1;
-  min-width: 6px;
-  border-radius: 4px 4px 2px 2px;
-  background: var(--bar-color, linear-gradient(180deg, var(--mantine-color-blue-5), var(--mantine-color-blue-1)));
-  transition: transform 160ms ease, opacity 160ms ease;
+.cardStackedSegment {
+  height: 100%;
+  width: var(--segment-width, 10%);
+  min-width: 8%;
+  border-radius: 999px;
+  background: var(--segment-color, var(--mantine-color-blue-5));
   position: relative;
-  min-height: 6px;
-  overflow: visible;
+  transition: transform 160ms ease, opacity 160ms ease;
 }
 
-.card:hover .cardBar {
-  transform: translateY(-2px);
+.card:hover .cardStackedSegment {
+  transform: translateY(-1px);
   opacity: 0.95;
 }
 
-.cardBar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 70%);
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.cardBar::after {
+.cardStackedSegment::after {
   content: attr(data-label);
   position: absolute;
   left: 50%;
-  transform: translateX(-50%) translateY(-8px);
+  transform: translateX(-50%) translateY(-6px);
   bottom: 100%;
   background: var(--mantine-color-default);
   color: var(--mantine-color-text);
@@ -229,9 +236,9 @@
   transition: opacity 140ms ease, transform 140ms ease;
 }
 
-.cardBar:hover::after {
+.cardStackedSegment:hover::after {
   opacity: 1;
-  transform: translateX(-50%) translateY(-14px);
+  transform: translateX(-50%) translateY(-10px);
 }
 
 @keyframes riseIn {

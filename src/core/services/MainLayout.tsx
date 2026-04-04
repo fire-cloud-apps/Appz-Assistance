@@ -109,8 +109,20 @@ export function MainLayout() {
       id: 'finance',
       label: 'Finance',
       modules: [
-        { id: 'finance', label: 'Personal Finance', icon: '💰', path: '/finance', disabled: true },
-        { id: 'financial-goals', label: 'Finance Goals', icon: '🎯', path: '/financial-goals', disabled: true },
+        {
+          id: 'financial-goals',
+          label: 'Finance Goals',
+          icon: '🎯',
+          path: '/finance/dashboard',
+          disabled: false,
+          children: [
+            { id: 'finance-dashboard', label: 'Dashboard', path: '/finance/dashboard', icon: 'lucide:layout-dashboard' },
+            { id: 'finance-portfolio', label: 'Portfolio', path: '/finance/portfolio', icon: 'lucide:pie-chart' },
+            { id: 'finance-sip', label: 'SIP', path: '/finance/sip', icon: 'lucide:repeat' },
+            { id: 'finance-goals', label: 'Goals', path: '/finance/goals', icon: 'lucide:target' },
+            { id: 'finance-investors', label: 'Investors', path: '/finance/investors', icon: 'lucide:users' },
+          ],
+        },
       ],
     },
   ]
@@ -120,13 +132,12 @@ export function MainLayout() {
       .map((group) => ({
         ...group,
         modules: group.modules.filter((module) => {
-          const moduleIdMap: Record<string, 'taskManager' | 'notes' | 'knowledge' | 'sip' | 'loan' | 'personalFinance' | 'financeGoals'> = {
+          const moduleIdMap: Record<string, 'taskManager' | 'notes' | 'knowledge' | 'sip' | 'loan' | 'financeGoals'> = {
             'task-manager': 'taskManager',
             'notes': 'notes',
             'knowledge': 'knowledge',
             'sip': 'sip',
             'loan': 'loan',
-            'finance': 'personalFinance',
             'financial-goals': 'financeGoals',
           }
           const settingKey = moduleIdMap[module.id]
@@ -149,7 +160,11 @@ export function MainLayout() {
       ? 'task-manager'
       : activePath.startsWith('/notes')
         ? 'notes'
-        : modules.find((module) => activePath.startsWith(module.path))?.id || 'task-manager'
+        : activePath.startsWith('/finance')
+          ? 'financial-goals'
+          : activePath.startsWith('/financial-goals')
+            ? 'financial-goals'
+            : modules.find((module) => activePath.startsWith(module.path))?.id || 'task-manager'
 
   const handleModuleClick = (_moduleId: string, path: string, disabled?: boolean) => {
     if (disabled) return
