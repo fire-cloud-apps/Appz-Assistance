@@ -12,27 +12,66 @@ import {
   Alert,
   Progress,
   Anchor,
+  TextInput,
+  Select,
 } from '@mantine/core'
-import { useRef, useState } from 'react'
+import { useRef, useState, useMemo } from 'react'
 import { usePortfolio, useInvestor } from '../hooks'
 import { PortfolioModal, PortfolioTable } from '../../components'
 import type { Portfolio } from '../../domain/entities'
+import { useFinanceGoalStore } from '../store/useFinanceGoalStore'
 import {
   downloadPortfolioExport,
   exportPortfolioRecords,
   importPortfolioJsonFile,
+  importPortfolioExcelFile,
 } from '../../data/services/financeGoalImportExportService'
 import { StatusIcon } from '../../../../core/components/StatusIcon'
 
 export function FinanceGoalPortfolioPage() {
-  const { portfolios, addPortfolio, updatePortfolio, removePortfolio, error } = usePortfolio()
+  const { 
+    portfolios, 
+    addPortfolio, 
+    updatePortfolio, 
+    removePortfolio, 
+    error,
+    page,
+    pageSize,
+    total,
+    totalPages,
+    changePage,
+    changePageSize,
+    reload,
+    applyFilters,
+    clearFilters,
+    filters,
+  } = usePortfolio()
   const { investors } = useInvestor()
   const [modalOpened, setModalOpened] = useState(false)
   const [selected, setSelected] = useState<Portfolio | null>(null)
   const [importMessage, setImportMessage] = useState<string | null>(null)
   const [isImporting, setIsImporting] = useState(false)
   const [importProgress, setImportProgress] = useState(0)
+  const [searchValue, setSearchValue] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const investorOptions = useMemo(() => 
+    investors.map(inv => ({ value: inv.id, label: inv.name })),
+    [investors]
+  )
+
+  const amcOptions = useMemo(() => {
+    const store = useFinanceGoalStore.getState()
+    const amcs = new Set<string>()
+    store.investors.forEach((inv) => {
+      store.portfolios
+        .filter(p => p.investorId === inv.id)
+        .forEach(p => {
+          if (p.amcName) amcs.add(p.amcName)
+        })
+    })
+    return Array.from(amcs).map(amc => ({ value: amc, label: amc }))
+  }, [investors])
 
   const handleCreate = () => {
     setSelected(null)
@@ -74,12 +113,29 @@ export function FinanceGoalPortfolioPage() {
     setImportProgress(5)
     try {
       setImportProgress(30)
-      const summary = await importPortfolioJsonFile(file)
+      let summary
+      let errors: string[] = []
+      
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        const result = await importPortfolioExcelFile(file)
+        summary = result.summary
+        errors = result.errors
+      } else {
+        summary = await importPortfolioJsonFile(file)
+      }
+      
       setImportProgress(90)
-      setImportMessage(
-        `Imported: ${summary.createdPortfolios} created, ${summary.updatedPortfolios} updated, ${summary.createdInvestors} new investors.`
-      )
+      
+      let message = `Imported: ${summary.createdPortfolios} created, ${summary.updatedPortfolios} updated, ${summary.createdInvestors} new investors.`
+      if (summary.rejected > 0) {
+        message += ` Rejected: ${summary.rejected} portfolio(s) with zero values.`
+      }
+      if (errors.length > 0) {
+        message += ` Warnings: ${errors.slice(0, 3).join('; ')}${errors.length > 3 ? '...' : ''}`
+      }
+      setImportMessage(message)
       setImportProgress(100)
+      reload()
     } catch (error) {
       setImportMessage((error as Error).message)
     } finally {
@@ -90,6 +146,40 @@ export function FinanceGoalPortfolioPage() {
       event.target.value = ''
     }
   }
+
+  const handleSearch = (value: string) => {
+    setSearchValue(value)
+    if (value) {
+      applyFilters({ ...filters, schemeSearch: value })
+    } else {
+      clearFilters()
+    }
+  }
+
+  const handleInvestorChange = (value: string | null) => {
+    if (value) {
+      applyFilters({ ...filters, investorId: value })
+    } else {
+      const { investorId, ...rest } = filters
+      applyFilters(rest)
+    }
+  }
+
+  const handleAmcChange = (value: string | null) => {
+    if (value) {
+      applyFilters({ ...filters, amcName: value })
+    } else {
+      const { amcName, ...rest } = filters
+      applyFilters(rest)
+    }
+  }
+
+  const handleClearFilters = () => {
+    setSearchValue('')
+    clearFilters()
+  }
+
+  const hasActiveFilters = Object.keys(filters).length > 0
 
   return (
     <Box>
@@ -102,7 +192,7 @@ export function FinanceGoalPortfolioPage() {
           <Stack gap={6} align="flex-end">
             <Group gap="sm">
               <Badge variant="light" color="blue">
-                Total: {portfolios.length}
+                Total: {total}
               </Badge>
               <Button
                 variant="light"
@@ -118,29 +208,59 @@ export function FinanceGoalPortfolioPage() {
                 leftSection={<StatusIcon icon="lucide:upload" size={14} />}
                 onClick={handleImportClick}
               >
-                Import JSON
+                Import
               </Button>
               <Button leftSection={<StatusIcon icon="lucide:plus" size={14} />} onClick={handleCreate}>
                 Add Portfolio
               </Button>
             </Group>
             <Text size="sm" c="dimmed">
-              Download or refer to a sample portfolio valuation format before uploading your JSON file.{' '}
+              Import portfolio data from JSON or Excel (.xlsx) files. Export your data as JSON for backup.{' '}
               <Anchor
                 href="https://www.camsonline.com/Investors/Statements/Portfolio-Valuation-Statement"
                 target="_blank"
                 rel="noreferrer"
               >
-                Download Sample JSON Schema
+                Download CAS Sample
               </Anchor>
             </Text>
           </Stack>
         </Group>
 
+        <Group gap="md">
+          <TextInput
+            placeholder="Search by Scheme Name"
+            value={searchValue}
+            onChange={(e) => handleSearch(e.target.value)}
+            style={{ flex: 1, maxWidth: 300 }}
+          />
+          <Select
+            placeholder="Filter by Investor"
+            data={[{ value: '', label: 'All Investors' }, ...investorOptions]}
+            value={filters.investorId || ''}
+            onChange={(value) => handleInvestorChange(value || null)}
+            style={{ width: 200 }}
+            clearable
+          />
+          <Select
+            placeholder="Filter by AMC"
+            data={[{ value: '', label: 'All AMCs' }, ...amcOptions]}
+            value={filters.amcName || ''}
+            onChange={(value) => handleAmcChange(value || null)}
+            style={{ width: 200 }}
+            clearable
+          />
+          {hasActiveFilters && (
+            <Button variant="subtle" onClick={handleClearFilters}>
+              Clear Filters
+            </Button>
+          )}
+        </Group>
+
         <input
           ref={fileInputRef}
           type="file"
-          accept="application/json"
+          accept=".json,.xlsx,.xls"
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />
@@ -166,7 +286,17 @@ export function FinanceGoalPortfolioPage() {
           </Alert>
         )}
 
-        <PortfolioTable portfolios={portfolios} onEdit={handleEdit} onDelete={handleDelete} />
+        <PortfolioTable 
+          portfolios={portfolios} 
+          onEdit={handleEdit} 
+          onDelete={handleDelete}
+          page={page}
+          pageSize={pageSize}
+          total={total}
+          totalPages={totalPages}
+          onPageChange={changePage}
+          onPageSizeChange={changePageSize}
+        />
       </Stack>
 
       <PortfolioModal

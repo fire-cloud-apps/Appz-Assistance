@@ -8,12 +8,13 @@
 --- 
 
 ### All Instructions to follow
-Module: 'Task Manager' 
-Screen: 'Task'
+Module: 'Finance Goals' 
+Screen: '/'
 Route: '/' 
 
 Feature to Implement:  
-
+On the Module, Finance Goals I made the implementation of Portfolio import based on the JSON File, But I need to change that completely with excel, and follow the new schema. Read and understand the existing code and also read the file @docs\modules\fg-new-bl.md undertand completely, plan and implement it. 
+The excel template is @docs\modules\cas_details.xlsx. refer that as well.
 ---
 
 ### CLI Coder used

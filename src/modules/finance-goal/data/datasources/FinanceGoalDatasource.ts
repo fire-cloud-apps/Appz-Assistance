@@ -1,6 +1,11 @@
 import type { FinancialGoalModel, InvestorModel, PortfolioModel, SIPModel } from '../models'
 import { financeDb } from './FinanceGoalDatabase'
 
+interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+}
+
 export class FinanceGoalDatasource {
   async addPortfolio(model: PortfolioModel): Promise<string> {
     return financeDb.portfolios.add(model)
@@ -20,6 +25,47 @@ export class FinanceGoalDatasource {
 
   async getPortfolios(): Promise<PortfolioModel[]> {
     return financeDb.portfolios.toArray()
+  }
+
+  async getPortfoliosPaginated(page: number, pageSize: number): Promise<PaginatedResponse<PortfolioModel>> {
+    const offset = (page - 1) * pageSize
+    const data = await financeDb.portfolios.offset(offset).limit(pageSize).toArray()
+    const total = await financeDb.portfolios.count()
+    return { data, total }
+  }
+
+  async getPortfoliosFiltered(
+    page: number, 
+    pageSize: number, 
+    filters: {
+      investorId?: string
+      amcName?: string
+      schemeSearch?: string
+    }
+  ): Promise<PaginatedResponse<PortfolioModel>> {
+    let collection = financeDb.portfolios.toCollection()
+    
+    let filteredData: PortfolioModel[] = await collection.toArray()
+    
+    if (filters.investorId) {
+      filteredData = filteredData.filter(p => p.investorId === filters.investorId)
+    }
+    
+    if (filters.amcName) {
+      const normalizedAmc = filters.amcName.toLowerCase()
+      filteredData = filteredData.filter(p => p.amcName.toLowerCase().includes(normalizedAmc))
+    }
+    
+    if (filters.schemeSearch) {
+      const normalizedScheme = filters.schemeSearch.toLowerCase()
+      filteredData = filteredData.filter(p => p.scheme.toLowerCase().includes(normalizedScheme))
+    }
+    
+    const total = filteredData.length
+    const offset = (page - 1) * pageSize
+    const paginatedData = filteredData.slice(offset, offset + pageSize)
+    
+    return { data: paginatedData, total }
   }
 
   async getPortfoliosByInvestorId(investorId: string): Promise<PortfolioModel[]> {

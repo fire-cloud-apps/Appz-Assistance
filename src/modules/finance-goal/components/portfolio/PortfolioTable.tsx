@@ -1,13 +1,36 @@
-import { ActionIcon, Card, Group, Table, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Card, Group, Table, Text, Tooltip, Pagination, Select } from '@mantine/core'
 import type { Portfolio } from '../../domain/entities'
 
 interface PortfolioTableProps {
   portfolios: Portfolio[]
   onEdit?: (portfolio: Portfolio) => void
   onDelete?: (portfolio: Portfolio) => void
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
+  onPageChange: (page: number) => void
+  onPageSizeChange: (pageSize: number) => void
 }
 
-export function PortfolioTable({ portfolios, onEdit, onDelete }: PortfolioTableProps) {
+const PAGE_SIZE_OPTIONS = [
+  { value: '5', label: '5 per page' },
+  { value: '10', label: '10 per page' },
+  { value: '25', label: '25 per page' },
+  { value: '50', label: '50 per page' },
+]
+
+export function PortfolioTable({ 
+  portfolios, 
+  onEdit, 
+  onDelete,
+  page,
+  pageSize,
+  total,
+  totalPages,
+  onPageChange,
+  onPageSizeChange,
+}: PortfolioTableProps) {
   return (
     <Card withBorder radius="md" padding="lg">
       <Table striped highlightOnHover withTableBorder withColumnBorders>
@@ -65,6 +88,27 @@ export function PortfolioTable({ portfolios, onEdit, onDelete }: PortfolioTableP
           )}
         </Table.Tbody>
       </Table>
+      
+      {total > 0 && (
+        <Group justify="space-between" mt="md">
+          <Select
+            size="xs"
+            value={String(pageSize)}
+            data={PAGE_SIZE_OPTIONS}
+            onChange={(value) => value && onPageSizeChange(Number(value))}
+            style={{ width: 120 }}
+          />
+          <Text size="sm" c="dimmed">
+            Showing {((page - 1) * pageSize) + 1} - {Math.min(page * pageSize, total)} of {total}
+          </Text>
+          <Pagination
+            size="sm"
+            total={totalPages}
+            value={page}
+            onChange={onPageChange}
+          />
+        </Group>
+      )}
     </Card>
   )
 }

@@ -7,13 +7,17 @@ import { useInvestor, usePortfolio } from '../hooks'
 import { InvestorModal, InvestorsTable } from '../../components'
 import type { Investor } from '../../domain/entities'
 
+interface InvestorHolding extends Investor {
+  totalValue: number
+}
+
 export function FinanceGoalInvestorsPage() {
   const { investors, addInvestor, updateInvestor, removeInvestor, error } = useInvestor()
   const { portfolios } = usePortfolio()
   const [modalOpened, setModalOpened] = useState(false)
   const [selected, setSelected] = useState<Investor | null>(null)
 
-  const investorTotals = investors.map((investor) => {
+  const investorTotals: InvestorHolding[] = investors.map((investor) => {
     const totalValue = portfolios
       .filter((portfolio) => portfolio.investorId === investor.id)
       .reduce((sum, portfolio) => sum + portfolio.currentValue, 0)
@@ -25,12 +29,12 @@ export function FinanceGoalInvestorsPage() {
     setModalOpened(true)
   }
 
-  const handleEdit = (investor: Investor) => {
-    setSelected(investor)
+  const handleEdit = (investor: InvestorHolding) => {
+    setSelected({ id: investor.id, name: investor.name, mobile: investor.mobile, pan: investor.pan })
     setModalOpened(true)
   }
 
-  const handleDelete = async (investor: Investor) => {
+  const handleDelete = async (investor: InvestorHolding) => {
     if (!window.confirm(`Delete investor ${investor.name}?`)) return
     await removeInvestor(investor.id)
   }
@@ -67,8 +71,8 @@ export function FinanceGoalInvestorsPage() {
 
         <InvestorsTable
           investors={investorTotals}
-          onEdit={(value) => handleEdit({ id: value.id, name: value.name })}
-          onDelete={(value) => handleDelete({ id: value.id, name: value.name })}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
       </Stack>
 

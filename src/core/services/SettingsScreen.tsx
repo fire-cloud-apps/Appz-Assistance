@@ -614,6 +614,7 @@ export function SettingsScreen() {
                   data={[
                     { value: 'tasks', label: 'Task Manager' },
                     { value: 'notes', label: 'Notes' },
+                    { value: 'financeGoals', label: 'Finance Goals' },
                   ]}
                   value={exportModule}
                   onChange={(value) => setExportModule(value as ExportModule | null)}
@@ -651,6 +652,7 @@ export function SettingsScreen() {
                   data={[
                     { value: 'tasks', label: 'Task Manager' },
                     { value: 'notes', label: 'Notes' },
+                    { value: 'financeGoals', label: 'Finance Goals' },
                   ]}
                   value={importModule}
                   onChange={(value) => {

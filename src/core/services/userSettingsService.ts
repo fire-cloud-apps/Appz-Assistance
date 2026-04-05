@@ -39,6 +39,9 @@ export interface UserSettings {
     archiveRetentionDays: number // days before auto-deletion
     completedArchiveDays: number // days before completed tasks are archived
   }
+  financeGoals: {
+    defaultItemsPerPage: number
+  }
   modules: {
     taskManager: ModuleVisibility
     notes: ModuleVisibility
@@ -60,6 +63,9 @@ const defaultSettings: UserSettings = {
     enableDueDateNotifications: false,
     archiveRetentionDays: 90, // Default: 90 days retention
     completedArchiveDays: 90, // Default: 90 days before archive
+  },
+  financeGoals: {
+    defaultItemsPerPage: 5,
   },
   modules: {
     taskManager: { enabled: true },
@@ -87,6 +93,10 @@ export function getUserSettings(): UserSettings {
           ...defaultSettings.taskManager,
           ...parsed.taskManager,
         },
+        financeGoals: {
+          ...defaultSettings.financeGoals,
+          ...parsed.financeGoals,
+        },
         modules: {
           ...defaultSettings.modules,
           ...parsed.modules,
@@ -110,6 +120,10 @@ export function setUserSettings(settings: Partial<UserSettings>): void {
       taskManager: {
         ...current.taskManager,
         ...settings.taskManager,
+      },
+      financeGoals: {
+        ...current.financeGoals,
+        ...settings.financeGoals,
       },
       modules: {
         ...current.modules,
@@ -213,5 +227,15 @@ export function getPrimaryColor(): PrimaryColor {
 export function setPrimaryColor(color: PrimaryColor): void {
   const current = getUserSettings()
   current.appearance.primaryColor = color
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
+}
+
+export function getFinanceGoalsItemsPerPage(): number {
+  return getUserSettings().financeGoals.defaultItemsPerPage
+}
+
+export function setFinanceGoalsItemsPerPage(value: number): void {
+  const current = getUserSettings()
+  current.financeGoals.defaultItemsPerPage = value
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(current))
 }

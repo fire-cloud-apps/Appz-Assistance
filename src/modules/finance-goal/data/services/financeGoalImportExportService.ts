@@ -2,12 +2,14 @@ import { z } from 'zod'
 import type { Investor, Portfolio } from '../../domain/entities'
 import { FinanceGoalDatasource } from '../datasources/FinanceGoalDatasource'
 import { InvestorRepository, PortfolioRepository } from '../repositories'
+import { parseExcelFile, getExcelSheetsInfo, maskMobileNumber, maskPAN, type ExcelPortfolioRow, type ExcelSheetsInfo } from './excelParser'
 
 export interface PortfolioImportSummary {
   createdInvestors: number
   createdPortfolios: number
   updatedPortfolios: number
   skipped: number
+  rejected: number
 }
 
 export interface PortfolioExportRecord {
@@ -31,6 +33,8 @@ const portfolioRecordSchema = z.object({
   Type: z.string().min(1),
   Folio: z.string().min(1),
   InvestorName: z.string().min(1),
+  InvestorMobile: z.string().optional(),
+  InvestorPAN: z.string().optional(),
   UnitBal: z.coerce.number(),
   NAVDate: z.string().min(1),
   CurrentValue: z.coerce.number(),
@@ -42,7 +46,7 @@ const portfolioRecordSchema = z.object({
 
 const portfolioImportSchema = z.array(portfolioRecordSchema)
 
-type PortfolioImportRecord = z.infer<typeof portfolioRecordSchema>
+export type PortfolioImportRecord = z.infer<typeof portfolioRecordSchema>
 
 const datasource = new FinanceGoalDatasource()
 const portfolioRepository = new PortfolioRepository(datasource)
@@ -105,6 +109,25 @@ export async function importPortfolioJsonFile(file: File): Promise<PortfolioImpo
 }
 
 export async function importPortfolioRecords(records: PortfolioImportRecord[]): Promise<PortfolioImportSummary> {
+  const hasNonZeroValues = (record: PortfolioImportRecord): boolean => {
+    return (
+      record.CostValue !== 0 ||
+      record.CurrentValue !== 0 ||
+      record.UnitBal !== 0
+    )
+  }
+
+  const validRecords: PortfolioImportRecord[] = []
+  const rejectedRecords: PortfolioImportRecord[] = []
+
+  for (const record of records) {
+    if (hasNonZeroValues(record)) {
+      validRecords.push(record)
+    } else {
+      rejectedRecords.push(record)
+    }
+  }
+
   const investors = await investorRepository.getAll()
   const portfolios = await portfolioRepository.getAll()
 
@@ -135,12 +158,17 @@ export async function importPortfolioRecords(records: PortfolioImportRecord[]): 
   let updatedPortfolios = 0
   let skipped = 0
 
-  for (const record of records) {
+  for (const record of validRecords) {
     const investorKey = normalize(record.InvestorName)
     let investor = investorsByName.get(investorKey)
 
     if (!investor) {
-      investor = { id: crypto.randomUUID(), name: record.InvestorName }
+      investor = { 
+        id: crypto.randomUUID(), 
+        name: record.InvestorName,
+        mobile: record.InvestorMobile ? maskMobileNumber(record.InvestorMobile) : undefined,
+        pan: record.InvestorPAN ? maskPAN(record.InvestorPAN) : undefined,
+      }
       await investorRepository.create(investor)
       investorsByName.set(investorKey, investor)
       investorNameById.set(investor.id, investor.name)
@@ -179,7 +207,7 @@ export async function importPortfolioRecords(records: PortfolioImportRecord[]): 
     createdPortfolios += 1
   }
 
-  return { createdInvestors, createdPortfolios, updatedPortfolios, skipped }
+  return { createdInvestors, createdPortfolios, updatedPortfolios, skipped, rejected: rejectedRecords.length }
 }
 
 export async function exportPortfolioRecords(): Promise<PortfolioExportRecord[]> {
@@ -217,3 +245,50 @@ export function downloadPortfolioExport(records: PortfolioExportRecord[]): void 
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 }
+
+function excelRowToImportRecord(row: ExcelPortfolioRow, investorName: string, mobile?: string, pan?: string): PortfolioImportRecord {
+  return {
+    AMCName: row.amcName,
+    Scheme: row.scheme,
+    Type: row.type,
+    Folio: row.folio,
+    InvestorName: investorName,
+    InvestorMobile: mobile,
+    InvestorPAN: pan,
+    UnitBal: row.unitBal,
+    NAVDate: row.navDate,
+    CurrentValue: row.currentValue,
+    CostValue: row.costValue,
+    Appreciation: row.appreciation,
+    WtgAvg: row.weightedAvg,
+    'Annualised XIRR': row.xirr,
+  }
+}
+
+export interface ExcelImportResult {
+  summary: PortfolioImportSummary
+  errors: string[]
+}
+
+export async function importPortfolioExcelFile(file: File, preferredSheet?: string): Promise<ExcelImportResult> {
+  const arrayBuffer = await file.arrayBuffer()
+  const parsed = parseExcelFile(arrayBuffer, preferredSheet)
+  
+  if (parsed.portfolios.length === 0 && parsed.errors.length > 0) {
+    throw new Error(parsed.errors.join('; '))
+  }
+  
+  const records = parsed.portfolios.map((row) =>
+    excelRowToImportRecord(row, parsed.header.investorName, parsed.header.mobileNumber, parsed.header.pan)
+  )
+  
+  const summary = await importPortfolioRecords(records)
+  
+  return {
+    summary,
+    errors: parsed.errors,
+  }
+}
+
+export { getExcelSheetsInfo }
+export type { ExcelSheetsInfo }

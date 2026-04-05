@@ -3,6 +3,14 @@ import type { IPortfolioRepository } from '../../domain/interfaces'
 import type { PortfolioModel } from '../models'
 import { FinanceGoalDatasource } from '../datasources/FinanceGoalDatasource'
 
+export interface PaginatedResult<T> {
+  data: T[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 export class PortfolioRepository implements IPortfolioRepository {
   constructor(private datasource: FinanceGoalDatasource) {}
 
@@ -36,6 +44,36 @@ export class PortfolioRepository implements IPortfolioRepository {
   async getByIds(ids: string[]): Promise<Portfolio[]> {
     const items = await this.datasource.getPortfoliosByIds(ids)
     return items.map((item) => this.toEntity(item))
+  }
+
+  async getPaginated(page: number, pageSize: number): Promise<PaginatedResult<Portfolio>> {
+    const { data, total } = await this.datasource.getPortfoliosPaginated(page, pageSize)
+    return {
+      data: data.map((item) => this.toEntity(item)),
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    }
+  }
+
+  async getFiltered(
+    page: number, 
+    pageSize: number, 
+    filters: {
+      investorId?: string
+      amcName?: string
+      schemeSearch?: string
+    }
+  ): Promise<PaginatedResult<Portfolio>> {
+    const { data, total } = await this.datasource.getPortfoliosFiltered(page, pageSize, filters)
+    return {
+      data: data.map((item) => this.toEntity(item)),
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    }
   }
 
   private toModel(entity: Portfolio): PortfolioModel {

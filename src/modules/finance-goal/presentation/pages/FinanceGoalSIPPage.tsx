@@ -1,20 +1,25 @@
-/**
- * Route: /finance/sip
- */
+import { useEffect } from 'react'
 import { Box, Group, Stack, Text, Title, Badge, Button, Alert, Tabs } from '@mantine/core'
 import { useMemo, useState } from 'react'
-import { useInvestor, usePortfolio, useSIP } from '../hooks'
+import { useInvestor, useSIP, usePortfolio } from '../hooks'
 import { SIPModal, SIPTable } from '../../components'
 import type { SIP } from '../../domain/entities'
+import { useFinanceGoalStore } from '../store/useFinanceGoalStore'
 
 export function FinanceGoalSIPPage() {
   const { sips, addSIP, updateSIP, removeSIP, error } = useSIP()
   const { investors } = useInvestor()
-  const { portfolios } = usePortfolio()
+  const { loadAllPortfolios } = usePortfolio()
+  const store = useFinanceGoalStore()
+  const portfolios = store.portfolios
   const [modalOpened, setModalOpened] = useState(false)
   const [selected, setSelected] = useState<SIP | null>(null)
   const activeSips = useMemo(() => sips.filter((sip) => sip.status === 'Active'), [sips])
   const inactiveSips = useMemo(() => sips.filter((sip) => sip.status === 'Inactive'), [sips])
+
+  useEffect(() => {
+    loadAllPortfolios()
+  }, [loadAllPortfolios])
 
   const handleCreate = () => {
     setSelected(null)
@@ -67,10 +72,10 @@ export function FinanceGoalSIPPage() {
             <Tabs.Tab value="inactive">Inactive ({inactiveSips.length})</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="active" pt="sm">
-            <SIPTable sips={activeSips} onEdit={handleEdit} onDelete={handleDelete} />
+            <SIPTable sips={activeSips} portfolios={portfolios} onEdit={handleEdit} onDelete={handleDelete} />
           </Tabs.Panel>
           <Tabs.Panel value="inactive" pt="sm">
-            <SIPTable sips={inactiveSips} onEdit={handleEdit} onDelete={handleDelete} />
+            <SIPTable sips={inactiveSips} portfolios={portfolios} onEdit={handleEdit} onDelete={handleDelete} />
           </Tabs.Panel>
         </Tabs>
       </Stack>

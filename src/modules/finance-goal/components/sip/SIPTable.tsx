@@ -1,14 +1,20 @@
 import { ActionIcon, Badge, Card, Group, Table, Text, Tooltip } from '@mantine/core'
 import dayjs from 'dayjs'
-import type { SIP } from '../../domain/entities'
+import type { SIP, Portfolio } from '../../domain/entities'
 
 interface SIPTableProps {
   sips: SIP[]
+  portfolios: Portfolio[]
   onEdit?: (sip: SIP) => void
   onDelete?: (sip: SIP) => void
 }
 
-export function SIPTable({ sips, onEdit, onDelete }: SIPTableProps) {
+export function SIPTable({ sips, portfolios, onEdit, onDelete }: SIPTableProps) {
+  const getPortfolioName = (portfolioId: string) => {
+    const portfolio = portfolios.find(p => p.id === portfolioId)
+    return portfolio ? portfolio.scheme : portfolioId
+  }
+
   return (
     <Card withBorder radius="md" padding="lg">
       <Table striped highlightOnHover withTableBorder withColumnBorders>
@@ -35,7 +41,7 @@ export function SIPTable({ sips, onEdit, onDelete }: SIPTableProps) {
           ) : (
             sips.map((sip) => (
               <Table.Tr key={sip.id}>
-                <Table.Td>{sip.portfolioId}</Table.Td>
+                <Table.Td>{getPortfolioName(sip.portfolioId)}</Table.Td>
                 <Table.Td>₹{sip.amount.toLocaleString()}</Table.Td>
                 <Table.Td>{sip.frequency}</Table.Td>
                 <Table.Td>{dayjs(sip.startDate).format('DD MMM YYYY')}</Table.Td>

@@ -1,7 +1,8 @@
 import { db } from '../database/appDatabase'
 import { notesDb } from '../../modules/notes/data/datasources/notesDatabase'
+import { financeDb } from '../../modules/finance-goal/data/datasources/FinanceGoalDatabase'
 
-export type ExportModule = 'tasks' | 'notes'
+export type ExportModule = 'tasks' | 'notes' | 'financeGoals'
 
 export interface ExportData {
   module: ExportModule
@@ -18,6 +19,13 @@ export interface TaskExportData {
 export interface NoteExportData {
   notes: unknown[]
   folders: unknown[]
+}
+
+export interface FinanceGoalsExportData {
+  goals: unknown[]
+  portfolios: unknown[]
+  sips: unknown[]
+  investors: unknown[]
 }
 
 export async function exportModuleData(module: ExportModule): Promise<ExportData> {
@@ -42,6 +50,18 @@ export async function exportModuleData(module: ExportModule): Promise<ExportData
         exportedAt,
         version: 1,
         data: { notes, folders } as NoteExportData,
+      }
+    }
+    case 'financeGoals': {
+      const goals = await financeDb.goals.toArray()
+      const portfolios = await financeDb.portfolios.toArray()
+      const sips = await financeDb.sip.toArray()
+      const investors = await financeDb.investors.toArray()
+      return {
+        module,
+        exportedAt,
+        version: 1,
+        data: { goals, portfolios, sips, investors } as FinanceGoalsExportData,
       }
     }
     default:
@@ -78,6 +98,8 @@ export async function importModuleData(file: File): Promise<{ success: boolean; 
         return importTasks(data.data as TaskExportData)
       case 'notes':
         return importNotes(data.data as NoteExportData)
+      case 'financeGoals':
+        return importFinanceGoals(data.data as FinanceGoalsExportData)
       default:
         return { success: false, message: `Unknown module: ${data.module}` }
     }
@@ -159,4 +181,61 @@ async function importNotes(data: NoteExportData): Promise<{ success: boolean; me
   })
 
   return { success: true, message: `Successfully imported ${importedCount} notes.`, count: importedCount }
+}
+
+async function importFinanceGoals(data: FinanceGoalsExportData): Promise<{ success: boolean; message: string; count?: number }> {
+  if (!Array.isArray(data.goals) || !Array.isArray(data.portfolios) || !Array.isArray(data.sips) || !Array.isArray(data.investors)) {
+    return { success: false, message: 'Invalid finance goals data format.' }
+  }
+
+  let importedCount = 0
+
+  await financeDb.transaction('rw', financeDb.investors, financeDb.portfolios, financeDb.sip, financeDb.goals, async () => {
+    for (const investor of data.investors) {
+      try {
+        const existingInvestor = await financeDb.investors.get((investor as { id: string }).id)
+        if (!existingInvestor) {
+          await financeDb.investors.add(investor as never)
+        }
+      } catch (e) {
+        console.warn('Failed to import investor:', e)
+      }
+    }
+
+    for (const portfolio of data.portfolios) {
+      try {
+        const existingPortfolio = await financeDb.portfolios.get((portfolio as { id: string }).id)
+        if (!existingPortfolio) {
+          await financeDb.portfolios.add(portfolio as never)
+          importedCount++
+        }
+      } catch (e) {
+        console.warn('Failed to import portfolio:', e)
+      }
+    }
+
+    for (const sip of data.sips) {
+      try {
+        const existingSip = await financeDb.sip.get((sip as { id: string }).id)
+        if (!existingSip) {
+          await financeDb.sip.add(sip as never)
+        }
+      } catch (e) {
+        console.warn('Failed to import SIP:', e)
+      }
+    }
+
+    for (const goal of data.goals) {
+      try {
+        const existingGoal = await financeDb.goals.get((goal as { id: string }).id)
+        if (!existingGoal) {
+          await financeDb.goals.add(goal as never)
+        }
+      } catch (e) {
+        console.warn('Failed to import goal:', e)
+      }
+    }
+  })
+
+  return { success: true, message: `Successfully imported ${importedCount} portfolios.`, count: importedCount }
 }

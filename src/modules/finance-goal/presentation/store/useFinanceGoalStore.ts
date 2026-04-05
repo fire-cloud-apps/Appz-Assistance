@@ -7,6 +7,7 @@ import {
   PortfolioRepository,
   SIPRepository,
 } from '../../data/repositories'
+import { getFinanceGoalsItemsPerPage } from '../../../../core/services/userSettingsService'
 
 interface FinanceGoalState {
   portfolios: Portfolio[]
@@ -16,7 +17,18 @@ interface FinanceGoalState {
   isLoading: boolean
   error: string | null
 
+  portfolioPage: number
+  portfolioPageSize: number
+  portfolioTotal: number
+  portfolioFilters: {
+    investorId?: string
+    amcName?: string
+    schemeSearch?: string
+  }
+
   loadAll: () => Promise<void>
+  loadPortfolios: (page?: number, pageSize?: number) => Promise<void>
+  loadPortfoliosFiltered: (page: number, pageSize: number, filters: FinanceGoalState['portfolioFilters']) => Promise<void>
   addPortfolio: (portfolio: Portfolio) => Promise<void>
   updatePortfolio: (portfolio: Portfolio) => Promise<void>
   removePortfolio: (id: string) => Promise<void>
@@ -38,7 +50,7 @@ const sipRepository = new SIPRepository(datasource)
 const goalRepository = new GoalRepository(datasource)
 const investorRepository = new InvestorRepository(datasource)
 
-export const useFinanceGoalStore = create<FinanceGoalState>((set) => ({
+export const useFinanceGoalStore = create<FinanceGoalState>((set, get) => ({
   portfolios: [],
   sips: [],
   goals: [],
@@ -46,16 +58,58 @@ export const useFinanceGoalStore = create<FinanceGoalState>((set) => ({
   isLoading: false,
   error: null,
 
+  portfolioPage: 1,
+  portfolioPageSize: getFinanceGoalsItemsPerPage(),
+  portfolioTotal: 0,
+  portfolioFilters: {},
+
   loadAll: async () => {
     set({ isLoading: true, error: null })
     try {
-      const [portfolios, sips, goals, investors] = await Promise.all([
-        portfolioRepository.getAll(),
+      const [sips, goals, investors] = await Promise.all([
         sipRepository.getAll(),
         goalRepository.getAll(),
         investorRepository.getAll(),
       ])
-      set({ portfolios, sips, goals, investors, isLoading: false })
+      set({ 
+        sips, 
+        goals, 
+        investors, 
+        isLoading: false 
+      })
+    } catch (error) {
+      set({ error: (error as Error).message, isLoading: false })
+    }
+  },
+
+  loadPortfolios: async (page = 1, pageSize?: number) => {
+    set({ isLoading: true, error: null, portfolioFilters: {} })
+    try {
+      const size = pageSize ?? get().portfolioPageSize
+      const result = await portfolioRepository.getPaginated(page, size)
+      set({
+        portfolios: result.data,
+        portfolioPage: result.page,
+        portfolioPageSize: result.pageSize,
+        portfolioTotal: result.total,
+        isLoading: false,
+      })
+    } catch (error) {
+      set({ error: (error as Error).message, isLoading: false })
+    }
+  },
+
+  loadPortfoliosFiltered: async (page, pageSize, filters) => {
+    set({ isLoading: true, error: null, portfolioFilters: filters })
+    try {
+      const result = await portfolioRepository.getFiltered(page, pageSize, filters)
+      set({
+        portfolios: result.data,
+        portfolioPage: result.page,
+        portfolioPageSize: result.pageSize,
+        portfolioTotal: result.total,
+        isLoading: false,
+      })
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false })
     }
@@ -65,8 +119,12 @@ export const useFinanceGoalStore = create<FinanceGoalState>((set) => ({
     set({ isLoading: true, error: null })
     try {
       await portfolioRepository.create(portfolio)
-      const portfolios = await portfolioRepository.getAll()
-      set({ portfolios, isLoading: false })
+      const result = await portfolioRepository.getPaginated(get().portfolioPage, get().portfolioPageSize)
+      set({
+        portfolios: result.data,
+        portfolioTotal: result.total,
+        isLoading: false,
+      })
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false })
     }
@@ -75,8 +133,12 @@ export const useFinanceGoalStore = create<FinanceGoalState>((set) => ({
     set({ isLoading: true, error: null })
     try {
       await portfolioRepository.update(portfolio)
-      const portfolios = await portfolioRepository.getAll()
-      set({ portfolios, isLoading: false })
+      const result = await portfolioRepository.getPaginated(get().portfolioPage, get().portfolioPageSize)
+      set({
+        portfolios: result.data,
+        portfolioTotal: result.total,
+        isLoading: false,
+      })
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false })
     }
@@ -85,8 +147,12 @@ export const useFinanceGoalStore = create<FinanceGoalState>((set) => ({
     set({ isLoading: true, error: null })
     try {
       await portfolioRepository.delete(id)
-      const portfolios = await portfolioRepository.getAll()
-      set({ portfolios, isLoading: false })
+      const result = await portfolioRepository.getPaginated(get().portfolioPage, get().portfolioPageSize)
+      set({
+        portfolios: result.data,
+        portfolioTotal: result.total,
+        isLoading: false,
+      })
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false })
     }

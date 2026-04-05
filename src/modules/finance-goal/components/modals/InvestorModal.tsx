@@ -7,6 +7,8 @@ import type { Investor } from '../../domain/entities'
 
 const investorFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
+  mobile: z.string().optional(),
+  pan: z.string().optional(),
 })
 
 type InvestorFormValues = z.infer<typeof investorFormSchema>
@@ -28,6 +30,8 @@ export function InvestorModal({ opened, onClose, initial, onSubmit }: InvestorMo
     resolver: zodResolver(investorFormSchema),
     defaultValues: {
       name: initial?.name ?? '',
+      mobile: initial?.mobile ?? '',
+      pan: initial?.pan ?? '',
     },
   })
 
@@ -35,6 +39,8 @@ export function InvestorModal({ opened, onClose, initial, onSubmit }: InvestorMo
     if (opened) {
       reset({
         name: initial?.name ?? '',
+        mobile: initial?.mobile ?? '',
+        pan: initial?.pan ?? '',
       })
     }
   }, [opened, initial, reset])
@@ -43,6 +49,8 @@ export function InvestorModal({ opened, onClose, initial, onSubmit }: InvestorMo
     const payload: Investor = {
       id: initial?.id ?? crypto.randomUUID(),
       name: values.name,
+      mobile: values.mobile || undefined,
+      pan: values.pan || undefined,
     }
 
     await onSubmit(payload)
@@ -58,6 +66,18 @@ export function InvestorModal({ opened, onClose, initial, onSubmit }: InvestorMo
             placeholder="Investor name"
             {...register('name')}
             error={errors.name?.message}
+          />
+          <TextInput
+            label="Mobile Number"
+            placeholder="Mobile (optional)"
+            {...register('mobile')}
+            error={errors.mobile?.message}
+          />
+          <TextInput
+            label="PAN"
+            placeholder="PAN (optional)"
+            {...register('pan')}
+            error={errors.pan?.message}
           />
           <Group justify="flex-end">
             <Button variant="default" onClick={onClose}>

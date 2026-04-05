@@ -108,11 +108,17 @@ export function GoalModal({
   const sipOptions = useMemo(() => {
     return sips
       .filter((sip) => !selectedInvestorId || sip.investorId === selectedInvestorId)
-      .map((sip) => ({
-        value: sip.id,
-        label: `${sip.portfolioId} • ₹${sip.amount.toLocaleString()}`,
-      }))
-  }, [sips, selectedInvestorId])
+      .map((sip) => {
+        const portfolio = portfolios.find(p => p.id === sip.portfolioId)
+        const portfolioName = portfolio ? portfolio.scheme : sip.portfolioId
+        const startDateStr = sip.startDate ? ` (Start: ${sip.startDate})` : ''
+        const endDateStr = sip.endDate ? ` - End: ${sip.endDate}` : ''
+        return {
+          value: sip.id,
+          label: `${portfolioName} • ₹${sip.amount.toLocaleString()}${startDateStr}${endDateStr}`,
+        }
+      })
+  }, [sips, selectedInvestorId, portfolios])
 
   const submitHandler = async (values: GoalFormValues) => {
     const invalidPortfolio = values.portfolioIds.find((portfolioId) => {

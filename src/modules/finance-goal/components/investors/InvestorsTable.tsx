@@ -2,6 +2,8 @@ import { ActionIcon, Card, Group, Table, Text, Tooltip } from '@mantine/core'
 interface InvestorHolding {
   id: string
   name: string
+  mobile?: string
+  pan?: string
   totalValue: number
 }
 
@@ -18,6 +20,8 @@ export function InvestorsTable({ investors, onEdit, onDelete }: InvestorsTablePr
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Investor</Table.Th>
+            <Table.Th>Mobile</Table.Th>
+            <Table.Th>PAN</Table.Th>
             <Table.Th>Total Holdings</Table.Th>
             <Table.Th>Actions</Table.Th>
           </Table.Tr>
@@ -25,7 +29,7 @@ export function InvestorsTable({ investors, onEdit, onDelete }: InvestorsTablePr
         <Table.Tbody>
           {investors.length === 0 ? (
             <Table.Tr>
-              <Table.Td colSpan={3}>
+              <Table.Td colSpan={5}>
                 <Text c="dimmed" ta="center">
                   No investors available yet.
                 </Text>
@@ -35,6 +39,8 @@ export function InvestorsTable({ investors, onEdit, onDelete }: InvestorsTablePr
             investors.map((investor) => (
               <Table.Tr key={investor.id}>
                 <Table.Td>{investor.name}</Table.Td>
+                <Table.Td>{investor.mobile ?? '-'}</Table.Td>
+                <Table.Td>{investor.pan ?? '-'}</Table.Td>
                 <Table.Td>₹{investor.totalValue.toLocaleString()}</Table.Td>
                 <Table.Td>
                   <Group gap={6}>

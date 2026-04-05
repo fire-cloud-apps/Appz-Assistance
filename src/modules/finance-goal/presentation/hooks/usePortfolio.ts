@@ -1,33 +1,77 @@
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useFinanceGoalStore } from '../store/useFinanceGoalStore'
 import { portfolioSchema } from './validators'
+
+export interface PortfolioFilters {
+  investorId?: string
+  amcName?: string
+  schemeSearch?: string
+}
 
 export function usePortfolio() {
   const {
     portfolios,
     isLoading,
     error,
-    loadAll,
+    loadPortfolios,
+    loadPortfoliosFiltered,
     addPortfolio,
     updatePortfolio,
     removePortfolio,
+    portfolioPage,
+    portfolioPageSize,
+    portfolioTotal,
+    portfolioFilters,
   } = useFinanceGoalStore()
 
-  const handleAddPortfolio = async (portfolio: typeof portfolios[number]) => {
+  const handleAddPortfolio = useCallback(async (portfolio: typeof portfolios[number]) => {
     portfolioSchema.parse(portfolio)
     await addPortfolio(portfolio)
-  }
+  }, [addPortfolio])
 
-  const handleUpdatePortfolio = async (portfolio: typeof portfolios[number]) => {
+  const handleUpdatePortfolio = useCallback(async (portfolio: typeof portfolios[number]) => {
     portfolioSchema.parse(portfolio)
     await updatePortfolio(portfolio)
-  }
+  }, [updatePortfolio])
 
   useEffect(() => {
-    if (portfolios.length === 0) {
-      loadAll()
+    const store = useFinanceGoalStore.getState()
+    if (store.portfolios.length === 0) {
+      loadPortfolios(1)
     }
-  }, [loadAll, portfolios.length])
+  }, [loadPortfolios])
+
+  const loadAllPortfolios = useCallback(async () => {
+    await useFinanceGoalStore.getState().loadAll()
+  }, [])
+
+  const changePage = useCallback((page: number) => {
+    if (Object.keys(portfolioFilters).length > 0) {
+      loadPortfoliosFiltered(page, portfolioPageSize, portfolioFilters)
+    } else {
+      loadPortfolios(page)
+    }
+  }, [loadPortfolios, loadPortfoliosFiltered, portfolioFilters, portfolioPageSize])
+
+  const changePageSize = useCallback((pageSize: number) => {
+    if (Object.keys(portfolioFilters).length > 0) {
+      loadPortfoliosFiltered(1, pageSize, portfolioFilters)
+    } else {
+      loadPortfolios(1, pageSize)
+    }
+  }, [loadPortfolios, loadPortfoliosFiltered, portfolioFilters])
+
+  const reload = useCallback(() => {
+    loadPortfolios(1)
+  }, [loadPortfolios])
+
+  const applyFilters = useCallback((filters: PortfolioFilters) => {
+    loadPortfoliosFiltered(1, portfolioPageSize, filters)
+  }, [loadPortfoliosFiltered, portfolioPageSize])
+
+  const clearFilters = useCallback(() => {
+    loadPortfolios(1)
+  }, [loadPortfolios])
 
   return useMemo(
     () => ({
@@ -37,7 +81,35 @@ export function usePortfolio() {
       addPortfolio: handleAddPortfolio,
       updatePortfolio: handleUpdatePortfolio,
       removePortfolio,
+      page: portfolioPage,
+      pageSize: portfolioPageSize,
+      total: portfolioTotal,
+      totalPages: Math.ceil(portfolioTotal / portfolioPageSize),
+      changePage,
+      changePageSize,
+      reload,
+      applyFilters,
+      clearFilters,
+      filters: portfolioFilters,
+      loadAllPortfolios,
     }),
-    [portfolios, isLoading, error, handleAddPortfolio, handleUpdatePortfolio, removePortfolio]
+    [
+      portfolios,
+      isLoading,
+      error,
+      handleAddPortfolio,
+      handleUpdatePortfolio,
+      removePortfolio,
+      portfolioPage,
+      portfolioPageSize,
+      portfolioTotal,
+      changePage,
+      changePageSize,
+      reload,
+      applyFilters,
+      clearFilters,
+      portfolioFilters,
+      loadAllPortfolios,
+    ]
   )
 }
