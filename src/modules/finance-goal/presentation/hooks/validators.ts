@@ -42,10 +42,12 @@ export const financialGoalSchema = z
     description: z.string().min(1),
     startDate: dateString,
     targetDate: dateString,
-    targetAmount: z.number().positive(),
+    targetAmount: z.number().nonnegative(),
+    currentAmount: z.number().nonnegative(),
+    investorIds: z.array(z.string().min(1)).min(1, 'At least one investor is required'),
+    portfolioIds: z.array(z.string().min(1)).min(1, 'At least one portfolio is required'),
     sipIds: z.array(z.string().min(1)),
-    investorId: z.string().min(1),
-    expectedGrowthRate: z.number().min(1).max(50, 'Growth rate must be between 1% and 50%'),
+    expectedGrowthRate: z.number().min(0).max(50, 'Growth rate must be between 0% and 50%'),
   })
   .refine((data) => data.targetDate > data.startDate, {
     message: 'Target date must be after start date',

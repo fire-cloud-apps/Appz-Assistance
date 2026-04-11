@@ -1,13 +1,15 @@
 # AppZ - Task Manager Module Status
 
-**Last Updated:** April 3, 2026 (Session - Finance Goals Enhancements)
-**Version:** 1.8.17
-**Build:** 2026.04.03-16
+**Last Updated:** April 11, 2026 (Session - Finance Goals Multi-Investor)
+**Version:** 1.7.18
+**Build:** 2026.04.11-02
 **Status:** In Progress
 
 ---
 
-## Executive Summary (April 3, 2026)
+## Executive Summary (April 11, 2026)
+
+Finance Goals module enhanced with multi-investor and multi-portfolio support per goal. Goals now support multiple investors, mandatory portfolios, optional SIPs, and current amount input. Null safety checks added, SIP filtering fixed, and build passes cleanly.
 
 Finance Goals module was completed with CRUD flows, dashboards, import/export, and sidebar navigation updates. Portfolio import/export now supports JSON sync with composite-key upsert while preserving relationships. Finance storage was moved to a standalone `appzFinanceDb`. Sidebar navigation was reorganized under “Finance Goals” for easy access to Dashboard/Portfolio/SIP/Goals/Investors. Import progress feedback and dashboard CTA buttons were added. Task Manager itself was not modified in this session.
 

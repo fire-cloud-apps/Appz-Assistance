@@ -1,10 +1,11 @@
 import dayjs from 'dayjs'
-import type { FinancialGoal, SIP } from '../entities'
+import type { FinancialGoal, Portfolio, SIP } from '../entities'
 import type { IGoalRepository, ISIPRepository } from '../interfaces'
 
 export interface GoalForecastResult {
   goalId: string
   currentPortfolioValue: number
+  currentAmount: number
   futureSipValue: number
   totalFutureValue: number
   targetAmount: number
@@ -22,30 +23,38 @@ export class ForecastGoalCompletionUseCase {
   async execute(input: {
     goalId?: string
     goal?: FinancialGoal
+    portfolios?: Portfolio[]
     annualReturnRate?: number
     asOfDate?: string
   }): Promise<GoalForecastResult> {
     const goal = await this.resolveGoal(input)
     const asOf = input.asOfDate ? dayjs(input.asOfDate) : dayjs()
-    const annualReturnRate = input.annualReturnRate ?? 0
+    const annualReturnRate = input.annualReturnRate ?? goal.expectedGrowthRate ?? 0
+    const portfolios = input.portfolios ?? []
 
-    // Get SIPs for the goal
+    const currentPortfolioValue = goal.portfolioIds
+      .filter(id => portfolios.some(p => p.id === id))
+      .reduce((sum, id) => {
+        const portfolio = portfolios.find(p => p.id === id)
+        return sum + (portfolio?.currentValue ?? 0)
+      }, 0)
+
+    const currentAmount = goal.currentAmount ?? 0
+    const totalCurrentValue = currentPortfolioValue + currentAmount
+
     const sips = goal.sipIds.length ? await this.sipRepository.getByIds(goal.sipIds) : []
-
-    // Calculate future SIP value
     const futureSipValue = this.calculateSipFutureValue(sips, goal.targetDate, asOf, annualReturnRate)
 
-    // For goals without portfolios, current value is 0 (SIP-based goals don't have existing corpus)
-    const currentPortfolioValue = 0
-    const totalFutureValue = currentPortfolioValue + futureSipValue
+    const totalFutureValue = totalCurrentValue + futureSipValue
     const achievedByTargetDate = totalFutureValue >= goal.targetAmount
 
-    const remainingAmount = Math.max(goal.targetAmount - currentPortfolioValue, 0)
+    const remainingAmount = Math.max(goal.targetAmount - totalCurrentValue, 0)
     const estimate = this.estimateMonthsToTarget(sips, remainingAmount, annualReturnRate, asOf)
 
     return {
       goalId: goal.id,
       currentPortfolioValue,
+      currentAmount,
       futureSipValue,
       totalFutureValue,
       targetAmount: goal.targetAmount,

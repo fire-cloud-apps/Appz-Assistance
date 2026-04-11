@@ -5,7 +5,6 @@ import {
   TextInput,
   Textarea,
   NumberInput,
-  Select,
   MultiSelect,
   Button,
   Group,
@@ -21,18 +20,20 @@ import {
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { FinancialGoal, Investor, SIP } from '../../domain/entities'
+import type { FinancialGoal, Investor, Portfolio, SIP } from '../../domain/entities'
 
 const goalFormSchema = z
   .object({
-    investorId: z.string().min(1, 'Investor is required'),
     name: z.string().min(1, 'Name is required'),
     description: z.string().min(1, 'Description is required'),
     startDate: z.string().min(1, 'Start date is required'),
     targetDate: z.string().min(1, 'Target date is required'),
-    targetAmount: z.number().positive('Target amount must be greater than 0'),
-    expectedGrowthRate: z.number().min(1).max(50, 'Growth rate must be between 1% and 50%'),
-    sipIds: z.array(z.string()).min(1, 'At least one SIP is required'),
+    targetAmount: z.number().nonnegative(),
+    currentAmount: z.number().nonnegative(),
+    investorIds: z.array(z.string()).min(1, 'At least one investor is required'),
+    portfolioIds: z.array(z.string()).min(1, 'At least one portfolio is required'),
+    sipIds: z.array(z.string()),
+    expectedGrowthRate: z.number().min(0).max(50),
   })
   .refine((data) => data.targetDate > data.startDate, {
     message: 'Target date must be after start date',
@@ -45,12 +46,12 @@ interface GoalModalProps {
   opened: boolean
   onClose: () => void
   investors: Investor[]
+  portfolios: Portfolio[]
   sips: SIP[]
   initial?: FinancialGoal | null
   onSubmit: (goal: FinancialGoal) => Promise<void>
 }
 
-// Growth rate options
 const GROWTH_RATE_OPTIONS = [10, 12, 15, 18, 20]
 
 function calculateMonthlyInvestment(targetAmount: number, years: number, annualRate: number): number {
@@ -59,8 +60,6 @@ function calculateMonthlyInvestment(targetAmount: number, years: number, annualR
   const monthlyRate = annualRate / 100 / 12
   const months = years * 12
 
-  // Future Value of SIP formula: FV = P * [((1 + r)^n - 1) / r] * (1 + r)
-  // Solving for P: P = FV / [((1 + r)^n - 1) / r * (1 + r)]
   const factor = ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate)
   return targetAmount / factor
 }
@@ -69,13 +68,14 @@ export function GoalModal({
   opened,
   onClose,
   investors,
+  portfolios,
   sips,
   initial,
   onSubmit,
 }: GoalModalProps) {
-  const investorOptions = investors.map((investor) => ({
-    value: investor.id,
-    label: investor.name,
+  const investorOptions = investors.map((inv) => ({
+    value: inv.id,
+    label: inv.name,
   }))
 
   const {
@@ -89,62 +89,81 @@ export function GoalModal({
   } = useForm<GoalFormValues>({
     resolver: zodResolver(goalFormSchema),
     defaultValues: {
-      investorId: initial?.investorId ?? '',
       name: initial?.name ?? '',
       description: initial?.description ?? '',
       startDate: initial?.startDate ?? '',
       targetDate: initial?.targetDate ?? '',
       targetAmount: initial?.targetAmount ?? 0,
-      expectedGrowthRate: initial?.expectedGrowthRate ?? 12,
+      currentAmount: initial?.currentAmount ?? 0,
+      investorIds: initial?.investorIds ?? [],
+      portfolioIds: initial?.portfolioIds ?? [],
       sipIds: initial?.sipIds ?? [],
+      expectedGrowthRate: initial?.expectedGrowthRate ?? 12,
     },
   })
 
   useEffect(() => {
     if (opened) {
       reset({
-        investorId: initial?.investorId ?? '',
         name: initial?.name ?? '',
         description: initial?.description ?? '',
         startDate: initial?.startDate ?? '',
         targetDate: initial?.targetDate ?? '',
         targetAmount: initial?.targetAmount ?? 0,
-        expectedGrowthRate: initial?.expectedGrowthRate ?? 12,
+        currentAmount: initial?.currentAmount ?? 0,
+        investorIds: initial?.investorIds ?? [],
+        portfolioIds: initial?.portfolioIds ?? [],
         sipIds: initial?.sipIds ?? [],
+        expectedGrowthRate: initial?.expectedGrowthRate ?? 12,
       })
     }
   }, [opened, initial, reset])
 
-  const selectedInvestorId = watch('investorId')
+  const selectedInvestorIds = watch('investorIds')
+  const selectedPortfolioIds = watch('portfolioIds')
   const targetAmount = watch('targetAmount')
   const startDate = watch('startDate')
   const targetDate = watch('targetDate')
   const expectedGrowthRate = watch('expectedGrowthRate')
   const selectedSipIds = watch('sipIds')
 
-  // Filter SIPs by investor only
-  const sipOptions = useMemo(() => {
-    return sips
-      .filter((sip) => !selectedInvestorId || sip.investorId === selectedInvestorId)
-      .map((sip) => ({
-        value: sip.id,
-        label: `${sip.name} • ₹${sip.amount.toLocaleString()}`,
+  const portfolioOptions = useMemo(() => {
+    if (!selectedInvestorIds || selectedInvestorIds.length === 0) return []
+    return portfolios
+      .filter(p => selectedInvestorIds.includes(p.investorId))
+      .map(p => ({
+        value: p.id,
+        label: `${p.scheme} (${p.amcName})`,
       }))
-  }, [sips, selectedInvestorId])
+  }, [portfolios, selectedInvestorIds])
 
-  // Calculate total monthly SIP investment
+  const sipOptions = useMemo(() => {
+    if (!selectedInvestorIds || selectedInvestorIds.length === 0) return []
+    return sips
+      .filter(s => selectedInvestorIds.includes(s.investorId))
+      .map(s => ({
+        value: s.id,
+        label: `${s.name} • ₹${s.amount.toLocaleString()} (${s.status})`,
+      }))
+  }, [sips, selectedInvestorIds])
+
+  const totalPortfolioValue = useMemo(() => {
+    if (!selectedPortfolioIds || selectedPortfolioIds.length === 0) return 0
+    return portfolios
+      .filter(p => selectedPortfolioIds.includes(p.id))
+      .reduce((sum, p) => sum + p.currentValue, 0)
+  }, [selectedPortfolioIds, portfolios])
+
   const totalMonthlySip = useMemo(() => {
     if (!selectedSipIds || selectedSipIds.length === 0) return 0
     return sips
       .filter(sip => selectedSipIds.includes(sip.id))
       .reduce((sum, sip) => {
-        // Convert quarterly to monthly
         const monthlyAmount = sip.frequency === 'Quarterly' ? sip.amount / 3 : sip.amount
         return sum + monthlyAmount
       }, 0)
   }, [selectedSipIds, sips])
 
-  // Calculate required monthly investment for different growth rates
   const investmentCalculations = useMemo(() => {
     if (!targetAmount || targetAmount <= 0 || !startDate || !targetDate) return []
 
@@ -164,14 +183,16 @@ export function GoalModal({
   const submitHandler = async (values: GoalFormValues) => {
     const payload: FinancialGoal = {
       id: initial?.id ?? crypto.randomUUID(),
-      investorId: values.investorId,
       name: values.name,
       description: values.description,
       startDate: values.startDate,
       targetDate: values.targetDate,
       targetAmount: values.targetAmount,
-      expectedGrowthRate: values.expectedGrowthRate,
+      currentAmount: values.currentAmount,
+      investorIds: values.investorIds,
+      portfolioIds: values.portfolioIds,
       sipIds: values.sipIds ?? [],
+      expectedGrowthRate: values.expectedGrowthRate,
     }
 
     await onSubmit(payload)
@@ -182,27 +203,6 @@ export function GoalModal({
     <Modal opened={opened} onClose={onClose} title={initial ? 'Edit Goal' : 'Add Goal'} size="xl">
       <form onSubmit={handleSubmit(submitHandler)}>
         <Stack gap="md">
-          {/* Investor Selection */}
-          <Controller
-            control={control}
-            name="investorId"
-            render={({ field }) => (
-              <Select
-                label="Investor"
-                placeholder="Select investor"
-                data={investorOptions}
-                value={field.value}
-                onChange={(value) => {
-                  field.onChange(value)
-                  // Reset SIPs when investor changes
-                  setValue('sipIds', [])
-                }}
-                error={errors.investorId?.message}
-              />
-            )}
-          />
-
-          {/* Goal Basic Info */}
           <TextInput
             label="Goal Name"
             placeholder="e.g. Retirement corpus"
@@ -217,7 +217,6 @@ export function GoalModal({
             minRows={2}
           />
 
-          {/* Dates */}
           <Group grow>
             <TextInput
               label="Start Date"
@@ -233,69 +232,120 @@ export function GoalModal({
             />
           </Group>
 
-          {/* Target Amount */}
+          <Group grow>
+            <Controller
+              control={control}
+              name="targetAmount"
+              render={({ field }) => (
+                <NumberInput
+                  label="Target Amount (₹)"
+                  min={0}
+                  value={field.value}
+                  onChange={(value) => field.onChange(value ?? 0)}
+                  error={errors.targetAmount?.message}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="currentAmount"
+              render={({ field }) => (
+                <NumberInput
+                  label="Current Amount Collected (₹)"
+                  min={0}
+                  value={field.value}
+                  onChange={(value) => field.onChange(value ?? 0)}
+                  error={errors.currentAmount?.message}
+                />
+              )}
+            />
+          </Group>
+
           <Controller
             control={control}
-            name="targetAmount"
+            name="investorIds"
             render={({ field }) => (
-              <NumberInput
-                label="Target Amount (₹)"
-                min={0}
+              <MultiSelect
+                label="Investors"
+                placeholder="Select one or more investors"
+                data={investorOptions}
                 value={field.value}
-                onChange={(value) => field.onChange(value ?? 0)}
-                error={errors.targetAmount?.message}
+                onChange={(value) => {
+                  field.onChange(value)
+                  setValue('portfolioIds', [])
+                  setValue('sipIds', [])
+                }}
+                error={errors.investorIds?.message}
+                searchable
               />
             )}
           />
 
-          {/* SIP Selection (filtered by Investor) */}
+          <Controller
+            control={control}
+            name="portfolioIds"
+            render={({ field }) => (
+              <MultiSelect
+                label="Portfolios (Mandatory)"
+                placeholder={selectedInvestorIds?.length ? "Select one or more portfolios" : "Select investor(s) first"}
+                data={portfolioOptions}
+                value={field.value}
+                onChange={(value) => {
+                  field.onChange(value)
+                  setValue('sipIds', [])
+                }}
+                error={errors.portfolioIds?.message}
+                searchable
+                disabled={!selectedInvestorIds?.length}
+              />
+            )}
+          />
+
+          {totalPortfolioValue > 0 && (
+            <Card withBorder radius="md" padding="sm" style={{ backgroundColor: 'var(--mantine-color-green-light)' }}>
+              <Group justify="space-between">
+                <Group gap="xs">
+                  <iconify-icon icon="lucide:briefcase" width="18" height="18" />
+                  <Text fw={600} size="sm">Total Portfolio Value:</Text>
+                </Group>
+                <Text fw={700} size="md" c="green.8">₹{totalPortfolioValue.toLocaleString()}</Text>
+              </Group>
+            </Card>
+          )}
+
           <Controller
             control={control}
             name="sipIds"
             render={({ field }) => (
               <MultiSelect
-                label="SIPs"
-                placeholder={selectedInvestorId ? "Select one or more SIPs" : "Select investor first"}
+                label="SIPs (Optional)"
+                placeholder={selectedPortfolioIds?.length ? "Select SIPs (optional)" : "Select portfolio(s) first"}
                 data={sipOptions}
                 value={field.value}
                 onChange={field.onChange}
-                error={errors.sipIds?.message}
                 searchable
-                disabled={!selectedInvestorId}
+                disabled={!selectedPortfolioIds?.length}
               />
             )}
           />
 
-          {/* Total Monthly SIP Investment Display */}
           {totalMonthlySip > 0 && (
-            <Card
-              withBorder
-              radius="md"
-              padding="md"
-              style={{
-                backgroundColor: 'var(--mantine-color-blue-light)',
-              }}
-            >
+            <Card withBorder radius="md" padding="sm" style={{ backgroundColor: 'var(--mantine-color-blue-light)' }}>
               <Group justify="space-between">
                 <Group gap="xs">
-                  <iconify-icon icon="lucide:trending-up" width="20" height="20" />
-                  <Text fw={600} size="sm" c="blue.9">Total Monthly SIP Investment:</Text>
+                  <iconify-icon icon="lucide:trending-up" width="18" height="18" />
+                  <Text fw={600} size="sm" c="blue.9">Total Monthly SIP:</Text>
                 </Group>
-                <Text fw={700} size="lg" c="blue.9">
-                  ₹{totalMonthlySip.toLocaleString()}
-                </Text>
+                <Text fw={700} size="md" c="blue.9">₹{Math.round(totalMonthlySip).toLocaleString()}</Text>
               </Group>
               <Text size="xs" c="dimmed" mt={4}>
-                From {selectedSipIds?.length || 0} SIP(s) selected
+                From {selectedSipIds?.length || 0} SIP(s)
               </Text>
             </Card>
           )}
 
-          {/* Expected Growth Rate Selection */}
           <Box>
-            <Text fw={600} size="sm" mb={6}>
-              Expected Annual Growth Rate
-            </Text>
+            <Text fw={600} size="sm" mb={6}>Expected Annual Growth Rate</Text>
             <Controller
               control={control}
               name="expectedGrowthRate"
@@ -303,17 +353,13 @@ export function GoalModal({
                 <SegmentedControl
                   value={String(field.value)}
                   onChange={(value) => field.onChange(Number(value))}
-                  data={GROWTH_RATE_OPTIONS.map(rate => ({
-                    label: `${rate}%`,
-                    value: String(rate),
-                  }))}
+                  data={GROWTH_RATE_OPTIONS.map(rate => ({ label: `${rate}%`, value: String(rate) }))}
                   fullWidth
                 />
               )}
             />
           </Box>
 
-          {/* Monthly Investment Calculator */}
           {investmentCalculations.length > 0 && (
             <Card withBorder radius="md" padding="md">
               <Group gap="xs" mb="sm">
@@ -321,7 +367,7 @@ export function GoalModal({
                 <Text fw={700} size="md">Required Monthly Investment</Text>
               </Group>
               <Text size="xs" c="dimmed" mb="md">
-                To achieve target of ₹{targetAmount.toLocaleString()} by {dayjs(targetDate).format('MMM YYYY')}
+                To achieve target ₹{targetAmount.toLocaleString()} by {dayjs(targetDate).format('MMM YYYY')}
               </Text>
 
               <Stack gap="xs">
@@ -332,23 +378,14 @@ export function GoalModal({
                     p="xs"
                     style={{
                       borderRadius: rem(8),
-                      backgroundColor: calc.isSelected
-                        ? 'var(--mantine-color-blue-light)'
-                        : 'var(--mantine-color-gray-light)',
+                      backgroundColor: calc.isSelected ? 'var(--mantine-color-blue-light)' : 'var(--mantine-color-gray-light)',
                     }}
                   >
                     <Group gap="xs">
-                      <Badge
-                        color={calc.isSelected ? 'blue' : 'gray'}
-                        variant={calc.isSelected ? 'filled' : 'light'}
-                      >
+                      <Badge color={calc.isSelected ? 'blue' : 'gray'} variant={calc.isSelected ? 'filled' : 'light'}>
                         {calc.rate}% p.a.
                       </Badge>
-                      {calc.isSelected && (
-                        <Text size="xs" c="blue.6" fw={600}>
-                          (Selected)
-                        </Text>
-                      )}
+                      {calc.isSelected && <Text size="xs" c="blue.6" fw={600}>(Selected)</Text>}
                     </Group>
                     <Text fw={calc.isSelected ? 700 : 500} size="sm">
                       ₹{calc.monthlyInvestment.toLocaleString()}/month
@@ -361,11 +398,8 @@ export function GoalModal({
 
           <Divider />
 
-          {/* Action Buttons */}
           <Group justify="flex-end">
-            <Button variant="default" onClick={onClose}>
-              Cancel
-            </Button>
+            <Button variant="default" onClick={onClose}>Cancel</Button>
             <Button type="submit" loading={isSubmitting}>
               {initial ? 'Update' : 'Create'}
             </Button>

@@ -9,7 +9,7 @@ All other projects are under docs/core.
 
 ## STRICTLY FOLLOW Instructions
 - [Developer Instruction](instructions/dev-Instruction.md)
-- [On Start](instructions/start-end.md)
+- [On Start](instructions/onStart.md)
 - [On End](instructions/onEnd.md)
 
 ## Icon Preference

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { FinancialGoal } from '../../domain/entities'
+import type { FinancialGoal, Portfolio } from '../../domain/entities'
 import { FinanceGoalDatasource } from '../../data/datasources/FinanceGoalDatasource'
 import { GoalRepository, SIPRepository } from '../../data/repositories'
 import {
@@ -15,7 +15,7 @@ const forecastUseCase = new ForecastGoalCompletionUseCase(
   sipRepository
 )
 
-export function useGoalForecasts(goals: FinancialGoal[], annualReturnRate = 0) {
+export function useGoalForecasts(goals: FinancialGoal[], portfolios: Portfolio[] = [], annualReturnRate = 0) {
   const [forecasts, setForecasts] = useState<Record<string, GoalForecastResult>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -35,7 +35,7 @@ export function useGoalForecasts(goals: FinancialGoal[], annualReturnRate = 0) {
       try {
         const results = await Promise.all(
           goals.map((goal) =>
-            forecastUseCase.execute({ goal, annualReturnRate }).then((result) => [goal.id, result] as const)
+            forecastUseCase.execute({ goal, portfolios, annualReturnRate }).then((result) => [goal.id, result] as const)
           )
         )
 
@@ -62,7 +62,7 @@ export function useGoalForecasts(goals: FinancialGoal[], annualReturnRate = 0) {
     return () => {
       isMounted = false
     }
-  }, [goals, annualReturnRate])
+  }, [goals, portfolios, annualReturnRate])
 
   return { forecasts, isLoading, error }
 }
