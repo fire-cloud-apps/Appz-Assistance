@@ -6,6 +6,6 @@ export interface FinancialGoalModel {
   targetDate: string
   targetAmount: number
   sipIds: string[]
-  portfolioIds: string[]
   investorId: string
+  expectedGrowthRate: number
 }

@@ -1,6 +1,6 @@
 ## Start (Vibe Code)
-    1. Start : " Read the @docs/README.md, file and understand completely and let me know once you are ready. "
-    2. Close: " I am good to close the session, read the @docs/instructions/dev-Instruction.md 
+    1. Start : " Read the @prompts/README.md, file and understand completely and let me know once you are ready. "
+    2. Close: " I am good to close the session, read the @prompts/instructions/dev-Instruction.md 
                 for 'Session Closure & Deployment', and proceed.  "
     3. Other Close: 'As per the closing plan give me the release-notes and store release notes under the folder
 @docs/release-notes/ with defined naming.'
@@ -13,7 +13,7 @@ Screen: '/'
 Route: '/' 
 
 Feature to Implement:  
-On the Module, Finance Goals I made the implementation of Portfolio import based on the JSON File, But I need to change that completely with excel, and follow the new schema. Read and understand the existing code and also read the file @docs\modules\fg-new-bl.md undertand completely, plan and implement it. 
+On the Module, Finance Goals I made the implementation of Portfolio import based on the JSON File, But I need to change that completely with excel, and follow the new schema. Read and understand the existing code and also read the file @docs\modules\fg-new-bl.md undertand completely plan and implement it. 
 The excel template is @docs\modules\cas_details.xlsx. refer that as well.
 ---
 

@@ -286,7 +286,6 @@ export function FinanceGoalDashboardPage() {
         opened={goalModalOpened}
         onClose={() => setGoalModalOpened(false)}
         investors={investors}
-        portfolios={portfolios}
         sips={sips}
         initial={null}
         onSubmit={async (goal: FinancialGoal) => addGoal(goal)}

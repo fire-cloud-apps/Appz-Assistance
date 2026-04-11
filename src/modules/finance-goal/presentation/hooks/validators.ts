@@ -20,6 +20,7 @@ export const portfolioSchema = z.object({
 
 export const sipSchema = z.object({
   id: z.string().min(1),
+  name: z.string().min(1, 'SIP name is required'),
   portfolioId: z.string().min(1),
   investorId: z.string().min(1),
   amount: z.number().positive(),
@@ -43,8 +44,8 @@ export const financialGoalSchema = z
     targetDate: dateString,
     targetAmount: z.number().positive(),
     sipIds: z.array(z.string().min(1)),
-    portfolioIds: z.array(z.string().min(1)).min(1, 'Goal must have portfolios'),
     investorId: z.string().min(1),
+    expectedGrowthRate: z.number().min(1).max(50, 'Growth rate must be between 1% and 50%'),
   })
   .refine((data) => data.targetDate > data.startDate, {
     message: 'Target date must be after start date',

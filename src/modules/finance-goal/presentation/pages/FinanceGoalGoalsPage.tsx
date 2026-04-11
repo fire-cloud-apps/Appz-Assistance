@@ -1,29 +1,19 @@
 /**
  * Route: /finance/goals
  */
-import { useEffect } from 'react'
 import { Box, Group, Stack, Text, Title, Badge, Button, Alert } from '@mantine/core'
 import { useState } from 'react'
-import { useGoalForecasts, useGoals, useInvestor, useSIP, usePortfolio } from '../hooks'
+import { useGoalForecasts, useGoals, useInvestor, useSIP } from '../hooks'
 import { GoalModal, GoalsList } from '../../components'
 import type { FinancialGoal } from '../../domain/entities'
-import { useFinanceGoalStore } from '../store/useFinanceGoalStore'
 
 export function FinanceGoalGoalsPage() {
   const { goals, addGoal, updateGoal, removeGoal, error } = useGoals()
-  const { loadAllPortfolios } = usePortfolio()
-  const store = useFinanceGoalStore()
   const { investors } = useInvestor()
   const { sips } = useSIP()
   const { forecasts, error: forecastError } = useGoalForecasts(goals)
   const [modalOpened, setModalOpened] = useState(false)
   const [selected, setSelected] = useState<FinancialGoal | null>(null)
-
-  useEffect(() => {
-    loadAllPortfolios()
-  }, [loadAllPortfolios])
-
-  const portfolios = store.portfolios
 
   const handleCreate = () => {
     setSelected(null)
@@ -72,7 +62,7 @@ export function FinanceGoalGoalsPage() {
 
         <GoalsList
           goals={goals}
-          portfolios={portfolios}
+          sips={sips}
           forecasts={forecasts}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -83,7 +73,6 @@ export function FinanceGoalGoalsPage() {
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
         investors={investors}
-        portfolios={portfolios}
         sips={sips}
         initial={selected}
         onSubmit={handleSubmit}

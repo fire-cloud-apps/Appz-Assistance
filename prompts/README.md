@@ -1,22 +1,11 @@
 # AppZ
 
-It is a complete Personalized Application can be used by any individuals. This AppZ contains most of the frequently used applications by the individuals in their day to day life.
+It is a complete Personalized Application that can be used by any individual. 
+This AppZ contains most of the frequently used applications by the individuals in their day-to-day life.
 
 ## Modules
-
-- Productivity
-    - [TaskManager](modules/TaskManager.md)
-    - [Notes](modules/Notes.md)
-    - Knowledge Base
-- Tools
-    - [SIP](modules/sip.md)
-    - [Loan](modules/loan.md)
-- Finance
-    - Personal Finance    
-    - [Finance Goals](modules/finance-goals.md)
-
-## Skills 
-- [Skills](common/Skills.md)
+This product has various modules, all exist under docs/modules.
+All other projects are under docs/core.
 
 ## STRICTLY FOLLOW Instructions
 - [Developer Instruction](instructions/dev-Instruction.md)

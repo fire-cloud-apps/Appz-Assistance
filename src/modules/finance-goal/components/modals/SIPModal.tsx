@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { useEffect, useMemo } from 'react'
 import {
   Modal,
@@ -14,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { Investor, Portfolio, SIP } from '../../domain/entities'
 
 const sipFormSchema = z.object({
+  name: z.string().optional(),
   investorId: z.string().min(1, 'Investor is required'),
   portfolioId: z.string().min(1, 'Portfolio is required'),
   amount: z.number().positive('Amount must be greater than 0'),
@@ -34,17 +36,29 @@ interface SIPModalProps {
   onSubmit: (sip: SIP) => Promise<void>
 }
 
+function generateSipName(portfolio: Portfolio | undefined, amount: number, startDate: string): string {
+  if (!portfolio || !startDate) return ''
+  
+  const amcShort = portfolio.amcName || 'N/A'
+  const schemeShort = portfolio.scheme.length > 20 ? portfolio.scheme.substring(0, 20) + '...' : portfolio.scheme
+  const formattedDate = dayjs(startDate).format('DD-MM-YYYY')
+  
+  return `${amcShort} (${schemeShort}) - ${amount} - (${formattedDate})`
+}
+
 export function SIPModal({ opened, onClose, investors, portfolios, initial, onSubmit }: SIPModalProps) {
   const {
     handleSubmit,
     control,
     reset,
     watch,
+    setValue,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<SIPFormValues>({
     resolver: zodResolver(sipFormSchema),
     defaultValues: {
+      name: initial?.name ?? '',
       investorId: initial?.investorId ?? '',
       portfolioId: initial?.portfolioId ?? '',
       amount: initial?.amount ?? 0,
@@ -58,6 +72,7 @@ export function SIPModal({ opened, onClose, investors, portfolios, initial, onSu
   useEffect(() => {
     if (opened) {
       reset({
+        name: initial?.name ?? '',
         investorId: initial?.investorId ?? '',
         portfolioId: initial?.portfolioId ?? '',
         amount: initial?.amount ?? 0,
@@ -70,6 +85,21 @@ export function SIPModal({ opened, onClose, investors, portfolios, initial, onSu
   }, [opened, initial, reset])
 
   const selectedInvestorId = watch('investorId')
+  const selectedPortfolioId = watch('portfolioId')
+  const amount = watch('amount')
+  const startDate = watch('startDate')
+  const name = watch('name')
+
+  // Auto-generate SIP name when portfolio, amount, or start date changes (only for new SIPs)
+  useEffect(() => {
+    if (!initial && selectedPortfolioId && amount > 0 && startDate) {
+      const portfolio = portfolios.find(p => p.id === selectedPortfolioId)
+      const generatedName = generateSipName(portfolio, amount, startDate)
+      if (generatedName && !name) {
+        setValue('name', generatedName)
+      }
+    }
+  }, [selectedPortfolioId, amount, startDate, portfolios, initial, name, setValue])
 
   const investorOptions = investors.map((investor) => ({
     value: investor.id,
@@ -92,8 +122,15 @@ export function SIPModal({ opened, onClose, investors, portfolios, initial, onSu
       return
     }
 
+    // Auto-generate name if not provided
+    let finalName = values.name
+    if (!finalName && portfolio && values.startDate) {
+      finalName = generateSipName(portfolio, values.amount, values.startDate)
+    }
+
     const payload: SIP = {
       id: initial?.id ?? crypto.randomUUID(),
+      name: finalName || 'Untitled SIP',
       investorId: values.investorId,
       portfolioId: values.portfolioId,
       amount: values.amount,
@@ -111,6 +148,20 @@ export function SIPModal({ opened, onClose, investors, portfolios, initial, onSu
     <Modal opened={opened} onClose={onClose} title={initial ? 'Edit SIP' : 'Add SIP'} size="md">
       <form onSubmit={handleSubmit(submitHandler)}>
         <Stack gap="md">
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <TextInput
+                label="SIP Name"
+                placeholder="Auto-generated or enter custom name"
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.name?.message}
+                description="Auto-filled from portfolio details, or customize your own"
+              />
+            )}
+          />
           <Controller
             control={control}
             name="investorId"

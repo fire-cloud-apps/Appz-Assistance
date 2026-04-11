@@ -14,6 +14,7 @@ export function usePortfolio() {
     isLoading,
     error,
     loadPortfolios,
+    loadPortfoliosAll,
     loadPortfoliosFiltered,
     addPortfolio,
     updatePortfolio,
@@ -42,8 +43,9 @@ export function usePortfolio() {
   }, [loadPortfolios])
 
   const loadAllPortfolios = useCallback(async () => {
-    await useFinanceGoalStore.getState().loadAll()
-  }, [])
+    // Load all portfolios without pagination limit
+    await loadPortfoliosAll()
+  }, [loadPortfoliosAll])
 
   const changePage = useCallback((page: number) => {
     if (Object.keys(portfolioFilters).length > 0) {
@@ -92,6 +94,7 @@ export function usePortfolio() {
       clearFilters,
       filters: portfolioFilters,
       loadAllPortfolios,
+      loadPortfoliosAll,
     }),
     [
       portfolios,
@@ -110,6 +113,7 @@ export function usePortfolio() {
       clearFilters,
       portfolioFilters,
       loadAllPortfolios,
+      loadPortfoliosAll,
     ]
   )
 }

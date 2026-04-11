@@ -16,6 +16,7 @@ interface FinanceGoalState {
   investors: Investor[]
   isLoading: boolean
   error: string | null
+  allPortfoliosLoaded: boolean
 
   portfolioPage: number
   portfolioPageSize: number
@@ -28,6 +29,8 @@ interface FinanceGoalState {
 
   loadAll: () => Promise<void>
   loadPortfolios: (page?: number, pageSize?: number) => Promise<void>
+  loadPortfoliosAll: () => Promise<void>
+  resetPortfoliosState: () => void
   loadPortfoliosFiltered: (page: number, pageSize: number, filters: FinanceGoalState['portfolioFilters']) => Promise<void>
   addPortfolio: (portfolio: Portfolio) => Promise<void>
   updatePortfolio: (portfolio: Portfolio) => Promise<void>
@@ -57,6 +60,7 @@ export const useFinanceGoalStore = create<FinanceGoalState>((set, get) => ({
   investors: [],
   isLoading: false,
   error: null,
+  allPortfoliosLoaded: false,
 
   portfolioPage: 1,
   portfolioPageSize: getFinanceGoalsItemsPerPage(),
@@ -83,6 +87,9 @@ export const useFinanceGoalStore = create<FinanceGoalState>((set, get) => ({
   },
 
   loadPortfolios: async (page = 1, pageSize?: number) => {
+    // Don't overwrite if all portfolios have been loaded
+    if (get().allPortfoliosLoaded) return
+    
     set({ isLoading: true, error: null, portfolioFilters: {} })
     try {
       const size = pageSize ?? get().portfolioPageSize
@@ -97,6 +104,24 @@ export const useFinanceGoalStore = create<FinanceGoalState>((set, get) => ({
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false })
     }
+  },
+
+  loadPortfoliosAll: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      const allPortfolios = await portfolioRepository.getAll()
+      set({
+        portfolios: allPortfolios,
+        allPortfoliosLoaded: true,
+        isLoading: false,
+      })
+    } catch (error) {
+      set({ error: (error as Error).message, isLoading: false })
+    }
+  },
+
+  resetPortfoliosState: () => {
+    set({ portfolios: [], allPortfoliosLoaded: false, portfolioFilters: {} })
   },
 
   loadPortfoliosFiltered: async (page, pageSize, filters) => {

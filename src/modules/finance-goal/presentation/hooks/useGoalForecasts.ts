@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FinancialGoal } from '../../domain/entities'
 import { FinanceGoalDatasource } from '../../data/datasources/FinanceGoalDatasource'
-import { GoalRepository, PortfolioRepository, SIPRepository } from '../../data/repositories'
+import { GoalRepository, SIPRepository } from '../../data/repositories'
 import {
   ForecastGoalCompletionUseCase,
   GoalForecastResult,
@@ -9,11 +9,9 @@ import {
 
 const datasource = new FinanceGoalDatasource()
 const goalRepository = new GoalRepository(datasource)
-const portfolioRepository = new PortfolioRepository(datasource)
 const sipRepository = new SIPRepository(datasource)
 const forecastUseCase = new ForecastGoalCompletionUseCase(
   goalRepository,
-  portfolioRepository,
   sipRepository
 )
 

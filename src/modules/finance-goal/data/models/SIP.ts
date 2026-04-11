@@ -3,6 +3,7 @@ export type SIPStatus = 'Active' | 'Inactive'
 
 export interface SIPModel {
   id: string
+  name: string
   portfolioId: string
   investorId: string
   amount: number

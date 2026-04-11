@@ -1,5 +1,6 @@
 export { PortfolioTable } from './portfolio/PortfolioTable'
 export { SIPTable } from './sip/SIPTable'
+export { SIPCard } from './sip/SIPCard'
 export { GoalsList } from './goals/GoalsList'
 export { InvestorsTable } from './investors/InvestorsTable'
 export { PortfolioModal } from './modals/PortfolioModal'

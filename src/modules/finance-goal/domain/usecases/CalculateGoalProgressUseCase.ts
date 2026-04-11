@@ -1,5 +1,5 @@
 import type { FinancialGoal } from '../entities'
-import type { IGoalRepository, IPortfolioRepository } from '../interfaces'
+import type { IGoalRepository, ISIPRepository } from '../interfaces'
 
 export interface GoalProgressResult {
   goalId: string
@@ -12,15 +12,16 @@ export interface GoalProgressResult {
 export class CalculateGoalProgressUseCase {
   constructor(
     private goalRepository: IGoalRepository,
-    private portfolioRepository: IPortfolioRepository
+    private sipRepository: ISIPRepository
   ) {}
 
   async execute(input: { goalId?: string; goal?: FinancialGoal }): Promise<GoalProgressResult> {
     const goal = await this.resolveGoal(input)
-    const portfolios = goal.portfolioIds.length
-      ? await this.portfolioRepository.getByIds(goal.portfolioIds)
+    // Calculate current value from SIPs instead of portfolios
+    const sips = goal.sipIds.length
+      ? await this.sipRepository.getByIds(goal.sipIds)
       : []
-    const currentValue = portfolios.reduce((sum, portfolio) => sum + portfolio.currentValue, 0)
+    const currentValue = sips.reduce((sum, sip) => sum + sip.amount, 0)
     const progressPercent = goal.targetAmount > 0 ? (currentValue / goal.targetAmount) * 100 : 0
     const isAchieved = currentValue >= goal.targetAmount
 

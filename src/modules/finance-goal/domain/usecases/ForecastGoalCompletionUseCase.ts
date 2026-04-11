@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import type { FinancialGoal, SIP } from '../entities'
-import type { IGoalRepository, IPortfolioRepository, ISIPRepository } from '../interfaces'
+import type { IGoalRepository, ISIPRepository } from '../interfaces'
 
 export interface GoalForecastResult {
   goalId: string
@@ -16,7 +16,6 @@ export interface GoalForecastResult {
 export class ForecastGoalCompletionUseCase {
   constructor(
     private goalRepository: IGoalRepository,
-    private portfolioRepository: IPortfolioRepository,
     private sipRepository: ISIPRepository
   ) {}
 
@@ -30,14 +29,14 @@ export class ForecastGoalCompletionUseCase {
     const asOf = input.asOfDate ? dayjs(input.asOfDate) : dayjs()
     const annualReturnRate = input.annualReturnRate ?? 0
 
-    const portfolios = goal.portfolioIds.length
-      ? await this.portfolioRepository.getByIds(goal.portfolioIds)
-      : []
-    const currentPortfolioValue = portfolios.reduce((sum, item) => sum + item.currentValue, 0)
-
+    // Get SIPs for the goal
     const sips = goal.sipIds.length ? await this.sipRepository.getByIds(goal.sipIds) : []
+
+    // Calculate future SIP value
     const futureSipValue = this.calculateSipFutureValue(sips, goal.targetDate, asOf, annualReturnRate)
 
+    // For goals without portfolios, current value is 0 (SIP-based goals don't have existing corpus)
+    const currentPortfolioValue = 0
     const totalFutureValue = currentPortfolioValue + futureSipValue
     const achievedByTargetDate = totalFutureValue >= goal.targetAmount
 

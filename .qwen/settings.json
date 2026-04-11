@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm run *)",
       "WebSearch",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(findstr *)"
     ]
   },
   "$version": 3

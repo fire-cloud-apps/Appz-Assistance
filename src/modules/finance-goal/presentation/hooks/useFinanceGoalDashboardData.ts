@@ -16,7 +16,7 @@ const investorRepository = new InvestorRepository(datasource)
 const portfolioSummaryUseCase = new GetPortfolioSummaryUseCase(portfolioRepository)
 const activeSipsUseCase = new GetActiveSIPsUseCase(sipRepository)
 const investorHoldingsUseCase = new GetInvestorHoldingsUseCase(investorRepository, portfolioRepository)
-const goalProgressUseCase = new CalculateGoalProgressUseCase(goalRepository, portfolioRepository)
+const goalProgressUseCase = new CalculateGoalProgressUseCase(goalRepository, sipRepository)
 
 interface DashboardInput {
   goals: FinancialGoal[]

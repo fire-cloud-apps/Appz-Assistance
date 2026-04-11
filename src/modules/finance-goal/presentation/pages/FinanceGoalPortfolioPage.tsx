@@ -15,7 +15,7 @@ import {
   TextInput,
   Select,
 } from '@mantine/core'
-import { useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { usePortfolio, useInvestor } from '../hooks'
 import { PortfolioModal, PortfolioTable } from '../../components'
 import type { Portfolio } from '../../domain/entities'
@@ -29,11 +29,11 @@ import {
 import { StatusIcon } from '../../../../core/components/StatusIcon'
 
 export function FinanceGoalPortfolioPage() {
-  const { 
-    portfolios, 
-    addPortfolio, 
-    updatePortfolio, 
-    removePortfolio, 
+  const {
+    portfolios,
+    addPortfolio,
+    updatePortfolio,
+    removePortfolio,
     error,
     page,
     pageSize,
@@ -47,6 +47,7 @@ export function FinanceGoalPortfolioPage() {
     filters,
   } = usePortfolio()
   const { investors } = useInvestor()
+  const store = useFinanceGoalStore()
   const [modalOpened, setModalOpened] = useState(false)
   const [selected, setSelected] = useState<Portfolio | null>(null)
   const [importMessage, setImportMessage] = useState<string | null>(null)
@@ -54,6 +55,12 @@ export function FinanceGoalPortfolioPage() {
   const [importProgress, setImportProgress] = useState(0)
   const [searchValue, setSearchValue] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  // Reset portfolio state when navigating to this page to allow paginated loading
+  useEffect(() => {
+    store.resetPortfoliosState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const investorOptions = useMemo(() => 
     investors.map(inv => ({ value: inv.id, label: inv.name })),

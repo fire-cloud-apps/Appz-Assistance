@@ -10,9 +10,12 @@ interface SIPTableProps {
 }
 
 export function SIPTable({ sips, portfolios, onEdit, onDelete }: SIPTableProps) {
-  const getPortfolioName = (portfolioId: string) => {
+  const getPortfolioDisplayName = (portfolioId: string) => {
     const portfolio = portfolios.find(p => p.id === portfolioId)
-    return portfolio ? portfolio.scheme : portfolioId
+    if (portfolio) {
+      return `${portfolio.scheme} ${portfolio.folio ? `(${portfolio.folio})` : ''}`
+    }
+    return portfolioId
   }
 
   return (
@@ -20,6 +23,7 @@ export function SIPTable({ sips, portfolios, onEdit, onDelete }: SIPTableProps) 
       <Table striped highlightOnHover withTableBorder withColumnBorders>
         <Table.Thead>
           <Table.Tr>
+            <Table.Th>SIP Name</Table.Th>
             <Table.Th>Portfolio</Table.Th>
             <Table.Th>Amount</Table.Th>
             <Table.Th>Frequency</Table.Th>
@@ -32,7 +36,7 @@ export function SIPTable({ sips, portfolios, onEdit, onDelete }: SIPTableProps) 
         <Table.Tbody>
           {sips.length === 0 ? (
             <Table.Tr>
-              <Table.Td colSpan={7}>
+              <Table.Td colSpan={8}>
                 <Text c="dimmed" ta="center">
                   No SIP entries yet.
                 </Text>
@@ -41,7 +45,8 @@ export function SIPTable({ sips, portfolios, onEdit, onDelete }: SIPTableProps) 
           ) : (
             sips.map((sip) => (
               <Table.Tr key={sip.id}>
-                <Table.Td>{getPortfolioName(sip.portfolioId)}</Table.Td>
+                <Table.Td fw={600}>{sip.name}</Table.Td>
+                <Table.Td>{getPortfolioDisplayName(sip.portfolioId)}</Table.Td>
                 <Table.Td>₹{sip.amount.toLocaleString()}</Table.Td>
                 <Table.Td>{sip.frequency}</Table.Td>
                 <Table.Td>{dayjs(sip.startDate).format('DD MMM YYYY')}</Table.Td>
