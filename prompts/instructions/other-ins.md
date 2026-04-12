@@ -1,11 +1,20 @@
 ## Start (Vibe Code)
     1. Start : " Read the @prompts/README.md, file and understand completely and let me know once you are ready. "
-    2. Close: " I am good to close the session, read the @prompts/instructions/dev-Instruction.md 
+    2. Close: " I am good to close the session. Read the @prompts/instructions/dev-Instruction.md 
                 for 'Session Closure & Deployment', and proceed.  "
     3. Other Close: 'As per the closing plan give me the release-notes and store release notes under the folder
 @docs/release-notes/ with defined naming.'
 
 --- 
+
+### CLI Coder used
+1. QWEN (Monday)
+2. OpenCode (Tuesday)
+3. Codex (Wednesday) (Reset Apr 18)
+4. GEMINI (Thursday)
+5. Copilot (Friday)
+
+---
 
 ### All Instructions to follow
 Module: 'Finance Goals' 
@@ -17,14 +26,7 @@ On the Module, Finance Goals I made the implementation of Portfolio import based
 The excel template is @docs\modules\cas_details.xlsx. refer that as well.
 ---
 
-### CLI Coder used
-1. QWEN (Monday)
-2. OpenCode (Tuesday)
-3. Codex (Wednesday)
-4. GEMINI (Thursday)
-5. Copilot (Friday)
 
----
 
 
 

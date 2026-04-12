@@ -1,10 +1,10 @@
 /**
  * Route: /finance/goals
  */
-import { Box, Group, Stack, Text, Title, Badge, Button, Alert } from '@mantine/core'
+import { Box, Group, Stack, Text, Title, Badge, Button, Alert, ActionIcon, Tooltip } from '@mantine/core'
 import { useEffect, useState } from 'react'
 import { useGoalForecasts, useGoals, useInvestor, usePortfolio, useSIP } from '../hooks'
-import { GoalModal, GoalsList } from '../../components'
+import { GoalModal, GoalsList, ScenarioSettingsModal } from '../../components'
 import type { FinancialGoal } from '../../domain/entities'
 
 export function FinanceGoalGoalsPage() {
@@ -14,6 +14,7 @@ export function FinanceGoalGoalsPage() {
   const { portfolios, loadAllPortfolios } = usePortfolio()
   const { forecasts, error: forecastError } = useGoalForecasts(goals, portfolios)
   const [modalOpened, setModalOpened] = useState(false)
+  const [settingsOpened, setSettingsOpened] = useState(false)
   const [selected, setSelected] = useState<FinancialGoal | null>(null)
 
   useEffect(() => {
@@ -52,6 +53,11 @@ export function FinanceGoalGoalsPage() {
             <Text c="dimmed">Define targets and track progress.</Text>
           </div>
           <Group gap="sm">
+            <Tooltip label="Scenario Settings">
+              <ActionIcon variant="light" onClick={() => setSettingsOpened(true)}>
+                <iconify-icon icon="lucide:settings" width="18" height="18" />
+              </ActionIcon>
+            </Tooltip>
             <Badge variant="light" color="blue">
               Total: {goals.length}
             </Badge>
@@ -84,6 +90,11 @@ export function FinanceGoalGoalsPage() {
         sips={sips}
         initial={selected}
         onSubmit={handleSubmit}
+      />
+
+      <ScenarioSettingsModal
+        opened={settingsOpened}
+        onClose={() => setSettingsOpened(false)}
       />
     </Box>
   )

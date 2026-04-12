@@ -40,7 +40,7 @@ export default defineConfig({
   ],
   build: {
     target: 'esnext',
-    chunkSizeWarningLimit: 800,
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       external: ['iconify-icon'],
       output: {
@@ -80,6 +80,9 @@ export default defineConfig({
           }
           if (id.includes('node_modules/zod')) {
             return 'zod'
+          }
+          if (id.includes('node_modules/dayjs')) {
+            return 'vendor-dayjs'
           }
         }
       }

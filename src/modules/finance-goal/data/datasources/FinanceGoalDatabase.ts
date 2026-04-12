@@ -1,16 +1,17 @@
 import Dexie, { Table } from 'dexie'
-import type { FinancialGoalModel, InvestorModel, PortfolioModel, SIPModel } from '../models'
+import type { FinancialGoalModel, InvestorModel, PortfolioModel, SIPModel, ScenarioSettingsModel } from '../models'
 
 export class FinanceGoalDatabase extends Dexie {
   portfolios!: Table<PortfolioModel>
   sip!: Table<SIPModel>
   goals!: Table<FinancialGoalModel>
   investors!: Table<InvestorModel>
+  settings!: Table<ScenarioSettingsModel>
 
   constructor() {
     super('appzFinanceDb')
 
-    this.version(1).stores({
+    this.version(2).stores({
       portfolios: `
         id,
         investorId
@@ -27,6 +28,9 @@ export class FinanceGoalDatabase extends Dexie {
       `,
       investors: `
         id
+      `,
+      settings: `
+        key
       `,
     })
   }
