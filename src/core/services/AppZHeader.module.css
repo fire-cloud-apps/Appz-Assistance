@@ -2,3 +2,44 @@
   background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
   border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 }
+
+/* Logo animations */
+@keyframes logoSlide {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(4px) scale(1.1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateX(0) scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes logoPulseGlow {
+  0% {
+    filter: drop-shadow(0 0 0 rgba(59, 130, 246, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+  }
+  100% {
+    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.8)) brightness(1.1);
+  }
+}
+
+.logoButton {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logoButton:hover .logoImage {
+  animation: logoSlide 0.5s ease-in-out forwards, logoPulseGlow 0.6s ease-in-out forwards;
+}
+
+.logoImage {
+  transition: all 0.3s ease;
+}

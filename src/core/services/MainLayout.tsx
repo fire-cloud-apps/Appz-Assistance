@@ -195,7 +195,7 @@ export function MainLayout() {
           onStopBreakTimer={stopTimer}
           isBreakTimerRunning={isTimerRunning}
           breakTimerTimeRemaining={timeRemaining}
-          onLogoClick={openAboutModal}
+          onAboutClick={openAboutModal}
         />
       </AppShell.Header>
 

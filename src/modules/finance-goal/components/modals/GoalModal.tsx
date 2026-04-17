@@ -32,7 +32,6 @@ const goalFormSchema = z
     startDate: z.string().min(1, 'Start date is required'),
     targetDate: z.string().min(1, 'Target date is required'),
     targetAmount: z.number().nonnegative(),
-    currentAmount: z.number().nonnegative(),
     investorIds: z.array(z.string()).min(1, 'At least one investor is required'),
     portfolioIds: z.array(z.string()).min(1, 'At least one portfolio is required'),
     sipIds: z.array(z.string()),
@@ -74,6 +73,24 @@ function formatIndianCurrency(amount: number): string {
   return `₹${amount.toLocaleString()}`
 }
 
+function formatAmountInIndianUnits(amount: number): string {
+  const safeAmount = Number(amount) || 0
+
+  if (safeAmount >= 10000000) {
+    return `${(safeAmount / 10000000).toFixed(2)} crore`
+  }
+
+  if (safeAmount >= 100000) {
+    return `${(safeAmount / 100000).toFixed(2)} lakh`
+  }
+
+  if (safeAmount >= 1000) {
+    return `${(safeAmount / 1000).toFixed(2)} thousand`
+  }
+
+  return `${safeAmount.toLocaleString()} rupees`
+}
+
 export function GoalModal({
   opened,
   onClose,
@@ -104,7 +121,6 @@ export function GoalModal({
       startDate: initial?.startDate ?? '',
       targetDate: initial?.targetDate ?? '',
       targetAmount: initial?.targetAmount ?? 0,
-      currentAmount: initial?.currentAmount ?? 0,
       investorIds: initial?.investorIds ?? [],
       portfolioIds: initial?.portfolioIds ?? [],
       sipIds: initial?.sipIds ?? [],
@@ -120,7 +136,6 @@ export function GoalModal({
         startDate: initial?.startDate ?? '',
         targetDate: initial?.targetDate ?? '',
         targetAmount: initial?.targetAmount ?? 0,
-        currentAmount: initial?.currentAmount ?? 0,
         investorIds: initial?.investorIds ?? [],
         portfolioIds: initial?.portfolioIds ?? [],
         sipIds: initial?.sipIds ?? [],
@@ -132,11 +147,16 @@ export function GoalModal({
   const selectedInvestorIds = watch('investorIds')
   const selectedPortfolioIds = watch('portfolioIds')
   const targetAmount = watch('targetAmount')
-  const currentAmount = watch('currentAmount')
   const startDate = watch('startDate')
   const targetDate = watch('targetDate')
   const expectedGrowthRate = watch('expectedGrowthRate')
   const selectedSipIds = watch('sipIds')
+
+  const targetAmountHelperText = useMemo(() => {
+    const amount = Number(targetAmount) || 0
+    if (amount <= 0) return undefined
+    return `Approx: ${formatAmountInIndianUnits(amount)}`
+  }, [targetAmount])
 
   const isValidDateRange = useMemo(() => {
     if (!startDate || !targetDate) return false
@@ -177,7 +197,7 @@ export function GoalModal({
       .reduce((sum, p) => sum + p.currentValue, 0)
   }, [selectedPortfolioIds, portfolios])
 
-  const totalCurrentValue = (currentAmount ?? 0) + totalPortfolioValue
+  const totalCurrentValue = totalPortfolioValue
 
   const totalMonthlySip = useMemo(() => {
     if (!selectedSipIds || selectedSipIds.length === 0) return 0
@@ -215,7 +235,7 @@ export function GoalModal({
       return null
     }
 
-    const principal = (Number(currentAmount) || 0) + totalPortfolioValue
+    const principal = totalPortfolioValue
     const months = Math.round(years * 12)
 
     if (months <= 0) {
@@ -255,11 +275,11 @@ export function GoalModal({
       rate: expectedGrowthRate,
       monthlyInvestment: Math.round(monthlyInvestment),
     }
-  }, [canCalculate, targetAmount, startDate, targetDate, expectedGrowthRate, currentAmount, totalPortfolioValue, isValidDateRange])
+  }, [canCalculate, targetAmount, startDate, targetDate, expectedGrowthRate, totalPortfolioValue, isValidDateRange])
 
   const projectionSummary = useMemo(() => {
     if (!canCalculate) return null
-    const principal = (Number(currentAmount) || 0) + totalPortfolioValue
+    const principal = totalPortfolioValue
     return projectionService.calculateProjection({
       principal,
       monthlyContribution: totalMonthlySip,
@@ -268,11 +288,11 @@ export function GoalModal({
       targetDate,
       targetAmount: Number(targetAmount) || 0,
     })
-  }, [canCalculate, targetAmount, startDate, targetDate, expectedGrowthRate, currentAmount, totalPortfolioValue, totalMonthlySip, projectionService])
+  }, [canCalculate, targetAmount, startDate, targetDate, expectedGrowthRate, totalPortfolioValue, totalMonthlySip, projectionService])
 
   const scenarioProjections = useMemo(() => {
     if (!canCalculate) return []
-    const principal = (Number(currentAmount) || 0) + totalPortfolioValue
+    const principal = totalPortfolioValue
     return projectionService.calculateScenarioProjections({
       principal,
       monthlyContribution: totalMonthlySip,
@@ -281,7 +301,7 @@ export function GoalModal({
       targetAmount: Number(targetAmount) || 0,
       ratePercents: GROWTH_RATE_OPTIONS,
     })
-  }, [canCalculate, targetAmount, startDate, targetDate, currentAmount, totalPortfolioValue, totalMonthlySip, projectionService])
+  }, [canCalculate, targetAmount, startDate, targetDate, totalPortfolioValue, totalMonthlySip, projectionService])
 
   const milestoneProjections = useMemo(() => {
     if (!projectionSummary?.yearlyProjections.length) return []
@@ -299,7 +319,7 @@ export function GoalModal({
       startDate: values.startDate,
       targetDate: values.targetDate,
       targetAmount: values.targetAmount,
-      currentAmount: values.currentAmount,
+      currentAmount: totalPortfolioValue,
       investorIds: values.investorIds,
       portfolioIds: values.portfolioIds,
       sipIds: values.sipIds ?? [],
@@ -359,34 +379,20 @@ export function GoalModal({
             />
           </SimpleGrid>
 
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-            <Controller
-              control={control}
-              name="targetAmount"
-              render={({ field }) => (
-                <NumberInput
-                  label="Target Amount (₹)"
-                  min={0}
-                  value={field.value}
-                  onChange={(value) => field.onChange(value ?? 0)}
-                  error={errors.targetAmount?.message}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="currentAmount"
-              render={({ field }) => (
-                <NumberInput
-                  label="Current Amount Collected (₹)"
-                  min={0}
-                  value={field.value}
-                  onChange={(value) => field.onChange(value ?? 0)}
-                  error={errors.currentAmount?.message}
-                />
-              )}
-            />
-          </SimpleGrid>
+          <Controller
+            control={control}
+            name="targetAmount"
+            render={({ field }) => (
+              <NumberInput
+                label="Target Amount (₹)"
+                min={0}
+                value={field.value}
+                onChange={(value) => field.onChange(value ?? 0)}
+                description={targetAmountHelperText}
+                error={errors.targetAmount?.message}
+              />
+            )}
+          />
 
           <Box>
             <Text fw={600} size="sm" mb={6}>Expected Annual Growth Rate</Text>

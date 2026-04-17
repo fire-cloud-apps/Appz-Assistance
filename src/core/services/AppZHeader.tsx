@@ -21,6 +21,7 @@ import { NotificationBell } from '../components/NotificationBell'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useAuthUser } from '../auth/useAuthUser'
 import { useSyncSetting } from '../hooks/useSyncSetting'
+import styles from './AppZHeader.module.css'
 
 interface AppZHeaderProps {
   mobileOpened: boolean
@@ -34,7 +35,7 @@ interface AppZHeaderProps {
   onPauseBreakTimer?: () => void
   isBreakTimerRunning?: boolean
   breakTimerTimeRemaining?: number
-  onLogoClick?: () => void
+  onAboutClick?: () => void
 }
 
 export function AppZHeader({
@@ -49,7 +50,7 @@ export function AppZHeader({
   onPauseBreakTimer,
   isBreakTimerRunning = false,
   breakTimerTimeRemaining = 0,
-  onLogoClick,
+  onAboutClick,
 }: AppZHeaderProps) {
   const navigate = useNavigate()
   const { logout } = useAuth0()
@@ -65,39 +66,34 @@ export function AppZHeader({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
+  const handleLogoClick = () => {
+    if (window.innerWidth < 768) {
+      toggleMobile()
+    } else {
+      toggleDesktop()
+    }
+  }
+
   return (
     <Group h="100%" px="md" justify="space-between">
       <Group gap="xs" h="100%">
-        <Burger
-          opened={mobileOpened}
-          onClick={toggleMobile}
-          hiddenFrom="sm"
-          size="sm"
-        />
-        <Burger
-          opened={desktopOpened}
-          onClick={toggleDesktop}
-          visibleFrom="sm"
-          size="sm"
-        />
         <Flex align="center" gap="xs">
-          <UnstyledButton onClick={onLogoClick}>
+          <UnstyledButton onClick={handleLogoClick} className={styles.logoButton}>
             <Group gap="xs">
-              <Image src={logo} h={32} w={32} fit="contain" alt="AppZ Logo" />
-              <Text fw={700} size="xl" visibleFrom="sm">
-                {appConfig.app.name}
-              </Text>
-              <Text fw={700} size="lg" hiddenFrom="sm">
-                {appConfig.app.name}
-              </Text>
+              <Image src={logo} h={32} w={32} fit="contain" alt="AppZ Logo" className={styles.logoImage} />
+              <Stack gap={0}>
+                <Text fw={700} size="xl" visibleFrom="sm">
+                  {appConfig.app.name}
+                </Text>
+                <Text fw={700} size="lg" hiddenFrom="sm">
+                  {appConfig.app.name}
+                </Text>
+                <Text c="dimmed" size="xs" visibleFrom="sm">
+                  {appConfig.app.tagline} v{appConfig.version.current}
+                </Text>
+              </Stack>
             </Group>
           </UnstyledButton>
-          <Text c="dimmed" size="sm" visibleFrom="sm">
-            {appConfig.app.tagline}
-          </Text>
-          <Text c="dimmed" size="xs" visibleFrom="sm">
-            v{appConfig.version.current}
-          </Text>
         </Flex>
       </Group>
 
@@ -249,6 +245,16 @@ export function AppZHeader({
               {colorScheme === 'dark' ? 'Light' : 'Dark'} Mode
             </Menu.Item>
             
+            <Menu.Divider />
+
+            {/* About Section */}
+            <Menu.Item
+              leftSection={<Icon icon="tabler:info-circle" width={16} />}
+              onClick={onAboutClick}
+            >
+              About
+            </Menu.Item>
+
             <Menu.Divider />
             
             {/* Account Section */}
