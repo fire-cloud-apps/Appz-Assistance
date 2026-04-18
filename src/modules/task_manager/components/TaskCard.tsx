@@ -2,6 +2,7 @@ import { Card, Group, Text, Badge, Button, Stack, Box } from '@mantine/core'
 import { Icon } from '@iconify/react'
 import { Task } from '../data/models'
 import { getRecurrenceLabel } from '../../../core/utils/recurrenceHelper'
+import { formatDateTime } from '../utils/dateUtils'
 
 interface TaskCardProps {
   task: Task
@@ -95,7 +96,7 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
                   <Group gap="xs">
                     <Icon icon="tabler:calendar" width={16} />
                     <Text size="sm" c="dimmed">
-                      Due: {task.dueDate}{task.dueTime ? ` at ${task.dueTime}` : ''}
+                      Due: {formatDateTime(task.dueDate, task.dueTime)}
                     </Text>
                   </Group>
                 )}
@@ -139,7 +140,7 @@ export function TaskCard({ task, isExpanded, onToggle, onSelect, showExpand = fa
           <Group gap="xs" justify="space-between">
             {task.dueDate && (
               <Text size="xs" c="dimmed">
-                Due: {task.dueDate}{task.dueTime ? ` at ${task.dueTime}` : ''}
+                Due: {formatDateTime(task.dueDate, task.dueTime)}
               </Text>
             )}
             <Group gap="xs">

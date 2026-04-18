@@ -1,5 +1,5 @@
-import { ActionIcon, Badge, Card, Group, Progress, SimpleGrid, Stack, Text, Title, Tooltip, Collapse, Button } from '@mantine/core'
-import { useMemo, useState, useEffect } from 'react'
+import { ActionIcon, Badge, Card, Group, Progress, SimpleGrid, Stack, Text, Title, Tooltip, Collapse, Button, Box } from '@mantine/core'
+import { useMemo, useEffect } from 'react'
 import dayjs from 'dayjs'
 import type { FinancialGoal, Investor, Portfolio, SIP } from '../../domain/entities'
 import type { GoalForecastResult } from '../../domain/usecases/ForecastGoalCompletionUseCase'
@@ -14,6 +14,8 @@ interface GoalsListProps {
   portfolios?: Portfolio[]
   sips?: SIP[]
   forecasts?: Record<string, GoalForecastResult>
+  expandedGoals: string[]
+  onToggleExpand: (goalId: string) => void
   onEdit?: (goal: FinancialGoal) => void
   onDelete?: (goal: FinancialGoal) => void
 }
@@ -46,6 +48,8 @@ interface GoalCardProps {
   projectionService: FinancialProjectionService
   scenarioRates: number[]
   scenarios: Array<{ rate: number; label: string }>
+  isExpanded: boolean
+  onToggle: () => void
   onEdit?: (goal: FinancialGoal) => void
   onDelete?: (goal: FinancialGoal) => void
 }
@@ -59,10 +63,11 @@ function GoalCard({
   projectionService,
   scenarioRates,
   scenarios,
+  isExpanded,
+  onToggle,
   onEdit,
   onDelete,
 }: GoalCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
 
   const linkedPortfolios = (goal.portfolioIds ?? []).map(id => portfolios.find(p => p.id === id)).filter((p): p is Portfolio => p !== undefined)
   const portfolioValue = linkedPortfolios.reduce((sum, p) => sum + p.currentValue, 0)
@@ -152,6 +157,20 @@ function GoalCard({
         e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'
       }}
     >
+      {goal.icon && (
+        <Box
+          style={{
+            position: 'absolute',
+            bottom: -10,
+            right: -10,
+            opacity: 0.15,
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
+        >
+          <iconify-icon icon={goal.icon} width="100" height="100" />
+        </Box>
+      )}
       <div
         style={{
           position: 'absolute',
@@ -163,12 +182,17 @@ function GoalCard({
         }}
       />
 
-      <div style={{ padding: '16px', paddingLeft: 22 }}>
+      <div style={{ padding: '16px', paddingLeft: 22, position: 'relative', zIndex: 1 }}>
         <Group justify="space-between" mb="sm">
-          <Stack gap={2}>
-            <Title order={5} lineClamp={1}>{goal.name}</Title>
-            <Text c="dimmed" size="xs" lineClamp={1}>{goal.description || 'No description'}</Text>
-          </Stack>
+          <Group gap="sm" wrap="nowrap" style={{ flex: 1 }}>
+            {goal.icon && (
+              <iconify-icon icon={goal.icon} width="24" height="24" />
+            )}
+            <Stack gap={2}>
+              <Title order={5} lineClamp={1}>{goal.name}</Title>
+              <Text c="dimmed" size="xs" lineClamp={1}>{goal.description || 'No description'}</Text>
+            </Stack>
+          </Group>
           <Group gap={4}>
             <Tooltip label="Edit">
               <ActionIcon variant="subtle" size="sm" onClick={() => onEdit?.(goal)}>
@@ -270,7 +294,7 @@ function GoalCard({
           size="xs"
           fullWidth
           mt="xs"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={onToggle}
           rightSection={
             <iconify-icon
               icon="lucide:chevron-down"
@@ -283,7 +307,7 @@ function GoalCard({
           {isExpanded ? 'Show Less' : 'Show Details'}
         </Button>
 
-        <Collapse in={isExpanded}>
+        <Collapse key={goal.id} in={isExpanded}>
           <Stack gap="xs" mt="sm" style={{ borderTop: '1px solid var(--mantine-color-gray-3)', paddingTop: 12 }}>
             {forecast && (
               <Stack gap={4}>
@@ -369,6 +393,8 @@ export function GoalsList({
   portfolios = [],
   sips = [],
   forecasts,
+  expandedGoals,
+  onToggleExpand,
   onEdit,
   onDelete,
 }: GoalsListProps) {
@@ -397,7 +423,7 @@ export function GoalsList({
   }
 
   return (
-    <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+    <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md" style={{ alignItems: 'start' }}>
       {goals.map((goal) => (
         <GoalCard
           key={goal.id}
@@ -409,6 +435,8 @@ export function GoalsList({
           projectionService={projectionService}
           scenarioRates={scenarioRates}
           scenarios={scenarios}
+          isExpanded={expandedGoals.includes(goal.id)}
+          onToggle={() => onToggleExpand(goal.id)}
           onEdit={onEdit}
           onDelete={onDelete}
         />

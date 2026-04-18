@@ -22,6 +22,7 @@ import { DateInput } from '@mantine/dates'
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { IconPicker } from '../../../../core/components/IconPicker'
 import type { FinancialGoal, Investor, Portfolio, SIP } from '../../domain/entities'
 import { FinancialProjectionService } from '../../domain/services'
 
@@ -36,6 +37,7 @@ const goalFormSchema = z
     portfolioIds: z.array(z.string()).min(1, 'At least one portfolio is required'),
     sipIds: z.array(z.string()),
     expectedGrowthRate: z.number().min(0).max(50),
+    icon: z.string().optional(),
   })
   .refine((data) => data.targetDate > data.startDate, {
     message: 'Target date must be after start date',
@@ -125,6 +127,7 @@ export function GoalModal({
       portfolioIds: initial?.portfolioIds ?? [],
       sipIds: initial?.sipIds ?? [],
       expectedGrowthRate: initial?.expectedGrowthRate ?? 12,
+      icon: initial?.icon ?? '',
     },
   })
 
@@ -140,6 +143,7 @@ export function GoalModal({
         portfolioIds: initial?.portfolioIds ?? [],
         sipIds: initial?.sipIds ?? [],
         expectedGrowthRate: initial?.expectedGrowthRate ?? 12,
+        icon: initial?.icon ?? '',
       })
     }
   }, [opened, initial, reset])
@@ -324,6 +328,7 @@ export function GoalModal({
       portfolioIds: values.portfolioIds,
       sipIds: values.sipIds ?? [],
       expectedGrowthRate: values.expectedGrowthRate,
+      icon: values.icon,
     }
 
     await onSubmit(payload)
@@ -334,12 +339,28 @@ export function GoalModal({
     <Modal opened={opened} onClose={onClose} title={initial ? 'Edit Goal' : 'Add Goal'} size="xl">
       <form onSubmit={handleSubmit(submitHandler)}>
         <Stack gap="md">
-          <TextInput
-            label="Goal Name"
-            placeholder="e.g. Retirement corpus"
-            {...register('name')}
-            error={errors.name?.message}
-          />
+          <Group align="flex-start" gap="md">
+            <TextInput
+              label="Goal Name"
+              placeholder="e.g. Retirement corpus"
+              {...register('name')}
+              error={errors.name?.message}
+              style={{ flex: 3 }}
+            />
+
+            <Controller
+              control={control}
+              name="icon"
+              render={({ field }) => (
+                <IconPicker
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  label="Goal Icon"
+                  style={{ flex: 1, minWidth: '250px' }}
+                />
+              )}
+            />
+          </Group>
           <Textarea
             label="Description"
             placeholder="Describe the goal"

@@ -1,4 +1,4 @@
-import { ActionIcon, Badge, Card, Group, SimpleGrid, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Badge, Card, Group, SimpleGrid, Text, Tooltip, Box } from '@mantine/core'
 import dayjs from 'dayjs'
 import type { SIP, Portfolio } from '../../domain/entities'
 
@@ -19,61 +19,84 @@ function SIPCardItem({ sip, portfolios, onEdit, onDelete }: { sip: SIP; portfoli
   }
 
   return (
-    <Card withBorder radius="md" padding="md" shadow="sm">
-      <Group justify="space-between" mb="xs">
-        <Text fw={700} size="lg" lineClamp={2} style={{ flex: 1 }}>
-          {sip.name}
-        </Text>
-        <Badge
-          color={sip.status === 'Active' ? 'green' : 'gray'}
-          variant="light"
-          size="md"
+    <Card withBorder radius="md" padding="md" shadow="sm" style={{ position: 'relative', overflow: 'hidden' }}>
+      {sip.icon && (
+        <Box
+          style={{
+            position: 'absolute',
+            bottom: -10,
+            right: -10,
+            opacity: 0.15,
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
         >
-          {sip.status}
-        </Badge>
+          <iconify-icon icon={sip.icon} width="100" height="100" />
+        </Box>
+      )}
+      <Group justify="space-between" mb="xs" style={{ position: 'relative', zIndex: 1 }}>
+        <Group gap="sm" style={{ flex: 1 }}>
+          {sip.icon && (
+            <iconify-icon icon={sip.icon} width="24" height="24" />
+          )}
+          <Text fw={700} size="lg" lineClamp={2}>
+            {sip.name}
+          </Text>
+        </Group>
       </Group>
 
-      <Text size="sm" c="dimmed" mb="xs" lineClamp={1}>
-        {getPortfolioDisplayName(sip.portfolioId)}
-      </Text>
-
-      <Group gap="xs" mb="xs">
-        <iconify-icon icon="lucide:indian-rupee" width="16" height="16" />
-        <Text size="sm" fw={600}>
-          {sip.amount.toLocaleString()}
+      <Box style={{ position: 'relative', zIndex: 1 }}>
+        <Text size="sm" c="dimmed" mb="xs" lineClamp={1}>
+          {getPortfolioDisplayName(sip.portfolioId)}
         </Text>
-        <Text size="sm" c="dimmed">
-          | {sip.frequency}
-        </Text>
-      </Group>
 
-      <Group gap="xs" mb="md">
-        <iconify-icon icon="lucide:calendar-days" width="16" height="16" />
-        <Text size="xs" c="dimmed">
-          Start: {dayjs(sip.startDate).format('DD MMM YYYY')}
-        </Text>
-        {sip.endDate && (
-          <>
-            <Text size="xs" c="dimmed">|</Text>
-            <Text size="xs" c="dimmed">
-              End: {dayjs(sip.endDate).format('DD MMM YYYY')}
-            </Text>
-          </>
-        )}
-      </Group>
+        <Group gap="xs" mb="xs">
+          <iconify-icon icon="lucide:indian-rupee" width="16" height="16" />
+          <Text size="sm" fw={600}>
+            {sip.amount.toLocaleString()}
+          </Text>
+          <Text size="sm" c="dimmed">
+            | {sip.frequency}
+          </Text>
+        </Group>
 
-      <Group justify="flex-end" gap="xs">
-        <Tooltip label="Edit">
-          <ActionIcon variant="light" color="blue" onClick={() => onEdit?.(sip)}>
-            <iconify-icon icon="lucide:edit" width="16" height="16" />
-          </ActionIcon>
-        </Tooltip>
-        <Tooltip label="Delete">
-          <ActionIcon variant="light" color="red" onClick={() => onDelete?.(sip)}>
-            <iconify-icon icon="lucide:trash-2" width="16" height="16" />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
+        <Group gap="xs" mb="md">
+          <iconify-icon icon="lucide:calendar-days" width="16" height="16" />
+          <Text size="xs" c="dimmed">
+            Start: {dayjs(sip.startDate).format('DD MMM YYYY')}
+          </Text>
+          {sip.endDate && (
+            <>
+              <Text size="xs" c="dimmed">|</Text>
+              <Text size="xs" c="dimmed">
+                End: {dayjs(sip.endDate).format('DD MMM YYYY')}
+              </Text>
+            </>
+          )}
+        </Group>
+
+        <Group justify="space-between" align="center">
+          <Badge
+            color={sip.status === 'Active' ? 'green' : 'gray'}
+            variant="light"
+            size="md"
+          >
+            {sip.status}
+          </Badge>
+          <Group gap="xs">
+            <Tooltip label="Edit">
+              <ActionIcon variant="light" color="blue" onClick={() => onEdit?.(sip)}>
+                <iconify-icon icon="lucide:edit" width="16" height="16" />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Delete">
+              <ActionIcon variant="light" color="red" onClick={() => onDelete?.(sip)}>
+                <iconify-icon icon="lucide:trash-2" width="16" height="16" />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
+        </Group>
+      </Box>
     </Card>
   )
 }

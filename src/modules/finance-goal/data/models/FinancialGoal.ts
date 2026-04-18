@@ -10,4 +10,5 @@ export interface FinancialGoalModel {
   portfolioIds: string[]
   sipIds: string[]
   expectedGrowthRate: number
+  icon?: string
 }

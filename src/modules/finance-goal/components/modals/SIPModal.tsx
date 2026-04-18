@@ -12,6 +12,7 @@ import {
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { IconPicker } from '../../../../core/components/IconPicker'
 import type { Investor, Portfolio, SIP } from '../../domain/entities'
 
 const sipFormSchema = z.object({
@@ -23,6 +24,7 @@ const sipFormSchema = z.object({
   startDate: z.string().min(1, 'Start date is required'),
   endDate: z.string().optional(),
   status: z.enum(['Active', 'Inactive']),
+  icon: z.string().optional(),
 })
 
 type SIPFormValues = z.infer<typeof sipFormSchema>
@@ -66,8 +68,16 @@ export function SIPModal({ opened, onClose, investors, portfolios, initial, onSu
       startDate: initial?.startDate ?? '',
       endDate: initial?.endDate ?? '',
       status: initial?.status ?? 'Active',
+      icon: initial?.icon ?? '',
     },
   })
+
+  // Set the search value initially if editing
+  useEffect(() => {
+    if (initial?.icon) {
+      // We don't need to do much here since Autocomplete value is controlled by form
+    }
+  }, [initial])
 
   useEffect(() => {
     if (opened) {
@@ -80,6 +90,7 @@ export function SIPModal({ opened, onClose, investors, portfolios, initial, onSu
         startDate: initial?.startDate ?? '',
         endDate: initial?.endDate ?? '',
         status: initial?.status ?? 'Active',
+        icon: initial?.icon ?? '',
       })
     }
   }, [opened, initial, reset])
@@ -138,6 +149,7 @@ export function SIPModal({ opened, onClose, investors, portfolios, initial, onSu
       startDate: values.startDate,
       endDate: values.endDate ? values.endDate : undefined,
       status: values.status,
+      icon: values.icon,
     }
 
     await onSubmit(payload)
@@ -148,20 +160,37 @@ export function SIPModal({ opened, onClose, investors, portfolios, initial, onSu
     <Modal opened={opened} onClose={onClose} title={initial ? 'Edit SIP' : 'Add SIP'} size="md">
       <form onSubmit={handleSubmit(submitHandler)}>
         <Stack gap="md">
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <TextInput
-                label="SIP Name"
-                placeholder="Auto-generated or enter custom name"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.name?.message}
-                description="Auto-filled from portfolio details, or customize your own"
-              />
-            )}
-          />
+          <Group align="flex-start" gap="md">
+            <Controller
+              control={control}
+              name="name"
+              render={({ field }) => (
+                <TextInput
+                  label="SIP Name"
+                  placeholder="Auto-generated or enter custom name"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.name?.message}
+                  description="Auto-filled from portfolio details, or customize your own"
+                  style={{ flex: 3 }}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="icon"
+              render={({ field }) => (
+                <IconPicker
+                  label="Icon"
+                  placeholder="Search icon"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.icon?.message}
+                  style={{ flex: 1, minWidth: '250px' }}
+                />
+              )}
+            />
+          </Group>
           <Controller
             control={control}
             name="investorId"

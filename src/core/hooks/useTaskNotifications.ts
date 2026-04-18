@@ -61,7 +61,7 @@ export function useTaskNotifications() {
               showNotification('Task Due Now!', {
                 body: `${task.title} is due${timeLabel}.`,
                 tag: `task-${task.id}`,
-                requireInteraction: false,
+                targetUrl: `/task/${task.id}`,
               })
               addNotifiedTask(task.id)
             }
@@ -70,7 +70,7 @@ export function useTaskNotifications() {
             showNotification('Task Due Today!', {
               body: `${task.title} is due today.`,
               tag: `task-${task.id}`,
-              requireInteraction: false,
+              targetUrl: `/task/${task.id}`,
             })
             addNotifiedTask(task.id)
           }

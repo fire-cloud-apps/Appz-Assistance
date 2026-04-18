@@ -16,6 +16,7 @@ export function FinanceGoalGoalsPage() {
   const [modalOpened, setModalOpened] = useState(false)
   const [settingsOpened, setSettingsOpened] = useState(false)
   const [selected, setSelected] = useState<FinancialGoal | null>(null)
+  const [expandedGoals, setExpandedGoals] = useState<string[]>([])
 
   useEffect(() => {
     loadAllPortfolios()
@@ -42,6 +43,12 @@ export function FinanceGoalGoalsPage() {
     } else {
       await addGoal(goal)
     }
+  }
+
+  const handleToggleExpand = (goalId: string) => {
+    setExpandedGoals(prev => 
+      prev.includes(goalId) ? prev.filter(id => id !== goalId) : [...prev, goalId]
+    )
   }
 
   return (
@@ -77,6 +84,8 @@ export function FinanceGoalGoalsPage() {
           portfolios={portfolios}
           sips={sips}
           forecasts={forecasts}
+          expandedGoals={expandedGoals}
+          onToggleExpand={handleToggleExpand}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

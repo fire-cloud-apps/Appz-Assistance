@@ -28,6 +28,7 @@ export const sipSchema = z.object({
   startDate: dateString,
   endDate: dateString.optional(),
   status: z.enum(['Active', 'Inactive']),
+  icon: z.string().optional(),
 })
 
 export const investorSchema = z.object({

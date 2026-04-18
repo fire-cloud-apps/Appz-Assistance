@@ -1,5 +1,6 @@
 import { Task, TaskStatus } from '../models'
 import { db } from '../../../../core/database/appDatabase'
+import dayjs from 'dayjs'
 
 export class TaskRepository {
   private sortTasksForAll(tasks: Task[]): Task[] {
@@ -15,8 +16,11 @@ export class TaskRepository {
       if (!a.dueDate) return 1
       // If b has no due date, put it at the end
       if (!b.dueDate) return -1
-      // Sort by due date (earliest first)
-      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      // Sort by due date (earliest first) using dayjs for proper parsing
+      const aDate = dayjs(a.dueDate, 'YYYY-MM-DD')
+      const bDate = dayjs(b.dueDate, 'YYYY-MM-DD')
+      if (!aDate.isValid() || !bDate.isValid()) return 0
+      return aDate.valueOf() - bDate.valueOf()
     })
   }
 

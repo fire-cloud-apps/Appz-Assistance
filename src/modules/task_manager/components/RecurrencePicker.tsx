@@ -18,6 +18,7 @@ import {
   RecurrenceWeeklyDay,
 } from '../data/models'
 import { getRecurrenceLabel, getDayOfWeek } from '../../../core/utils/recurrenceHelper'
+import dayjs from 'dayjs'
 
 interface RecurrencePickerProps {
   opened: boolean
@@ -52,10 +53,11 @@ export function RecurrencePicker({
       setMonthlyDay(initialPattern.monthlyDay || 1)
     } else {
       // Defaults
+      const parsedDueDate = dueDate ? dayjs(dueDate, 'YYYY-MM-DD') : null
       setFrequency('weekly')
       setInterval(1)
-      setWeeklyDays(dueDate ? [getDayOfWeek(new Date(dueDate))] : ['mon'])
-      setMonthlyDay(dueDate ? new Date(dueDate).getDate() : 1)
+      setWeeklyDays(parsedDueDate?.isValid() ? [getDayOfWeek(parsedDueDate.toDate())] : ['mon'])
+      setMonthlyDay(parsedDueDate?.isValid() ? parsedDueDate.date() : 1)
     }
 
     if (initialEndDate) {
@@ -96,9 +98,13 @@ export function RecurrencePicker({
   }
 
   const getMonthlyDayOptions = () => {
-    const daysInMonth = dueDate
-      ? new Date(new Date(dueDate).getFullYear(), new Date(dueDate).getMonth() + 1, 0).getDate()
-      : 31
+    let daysInMonth = 31
+    if (dueDate) {
+      const parsedDate = dayjs(dueDate, 'YYYY-MM-DD')
+      if (parsedDate.isValid()) {
+        daysInMonth = parsedDate.daysInMonth()
+      }
+    }
     return Array.from({ length: daysInMonth }, (_, i) => ({
       value: i + 1,
       label: `${i + 1}${getOrdinal(i + 1)}`,
@@ -232,9 +238,9 @@ export function RecurrencePicker({
               {endType === 'onDate' && (
                 <Box ml="xl">
                   <DateInput
-                    value={endDate}
-                    onChange={(value) => setEndDate(value || null)}
-                    minDate={dueDate ? new Date(dueDate) : new Date()}
+                    value={endDate ? dayjs(endDate, 'YYYY-MM-DD').toDate() : null}
+                    onChange={(value) => setEndDate(value ? dayjs(value).format('YYYY-MM-DD') : null)}
+                    minDate={dueDate ? dayjs(dueDate, 'YYYY-MM-DD').toDate() : new Date()}
                     valueFormat="YYYY-MM-DD"
                     placeholder="Select end date"
                     w={200}
@@ -259,7 +265,7 @@ export function RecurrencePicker({
                 monthlyDay: frequency === 'monthly' ? monthlyDay : undefined,
               })}
               {endType === 'onDate' && endDate
-                ? ` until ${new Date(endDate).toLocaleDateString()}`
+                ? ` until ${dayjs(endDate, 'YYYY-MM-DD').format('DD MMM YYYY')}`
                 : ''}
             </Text>
           </Box>

@@ -45,7 +45,14 @@ export function SIPTable({ sips, portfolios, onEdit, onDelete }: SIPTableProps) 
           ) : (
             sips.map((sip) => (
               <Table.Tr key={sip.id}>
-                <Table.Td fw={600}>{sip.name}</Table.Td>
+                <Table.Td fw={600}>
+                  <Group gap="sm">
+                    {sip.icon && (
+                      <iconify-icon icon={sip.icon} width="20" height="20" />
+                    )}
+                    <Text fw={600}>{sip.name}</Text>
+                  </Group>
+                </Table.Td>
                 <Table.Td>{getPortfolioDisplayName(sip.portfolioId)}</Table.Td>
                 <Table.Td>₹{sip.amount.toLocaleString()}</Table.Td>
                 <Table.Td>{sip.frequency}</Table.Td>

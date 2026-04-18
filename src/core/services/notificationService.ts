@@ -13,6 +13,7 @@ export interface NotificationPermission {
 
 export interface AppNotificationOptions extends NotificationOptions {
   tag?: string
+  targetUrl?: string
 }
 
 export function requestNotificationPermission(): Promise<boolean> {
@@ -65,14 +66,24 @@ export function showNotification(title: string, options?: AppNotificationOptions
   }
 
   try {
+    const { targetUrl, ...notificationOptions } = options || {}
+
     const notification = new Notification(title, {
       icon: '/appz-logo.png',
       badge: '/appz-logo.png',
-      ...options,
+      requireInteraction: true,
+      ...notificationOptions,
     })
 
-    // Auto close after 5 seconds
-    setTimeout(() => notification.close(), 5000)
+    notification.onclick = (event) => {
+      event.preventDefault()
+      window.focus()
+
+      const url = targetUrl ?? (notification as any).data?.targetUrl ?? (notification as any).data?.url
+      if (url) {
+        window.location.href = url
+      }
+    }
 
     return notification
   } catch (error) {

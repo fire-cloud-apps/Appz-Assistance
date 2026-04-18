@@ -25,6 +25,8 @@ import { useEffect } from 'react' // Removed useState
 import { ArchiveConfirmationModal } from '../../components/ArchiveConfirmationModal'
 import { SubtaskModal } from '../../components/SubtaskModal'
 import { getRecurrenceLabel } from '../../../../core/utils/recurrenceHelper'
+import dayjs from 'dayjs'
+import { formatDateTime } from '../../utils/dateUtils'
 
 export function TaskDetailScreen() {
   const { id } = useParams<{ id: string }>()
@@ -151,17 +153,17 @@ export function TaskDetailScreen() {
             )}
 
             <Divider />
-            <Group justify="space-between">
+            <Group justify="space-between" wrap="wrap">
               <Box>
                 <Text size="sm" c="dimmed">Created</Text>
-                <Text size="sm">{new Date(task.createdAt).toLocaleDateString()}</Text>
+                <Text size="sm">{dayjs(task.createdAt).format('DD MMM YYYY')}</Text>
               </Box>
-              {task.dueDate && (
-                <Box>
-                  <Text size="sm" c="dimmed">Due Date</Text>
-                  <Text size="sm">{task.dueDate}</Text>
-                </Box>
-              )}
+              <Box>
+                <Text size="sm" c="dimmed">Due Date</Text>
+                <Text size="sm" c={!task.dueDate ? 'dimmed' : undefined}>
+                  {task.dueDate ? formatDateTime(task.dueDate, task.dueTime) : 'No Due Date'}
+                </Text>
+              </Box>
               <Box>
                 <Text size="sm" c="dimmed">Level</Text>
                 <Text size="sm">Level {task.taskLevel}</Text>
@@ -176,7 +178,7 @@ export function TaskDetailScreen() {
                   </Group>
                   {task.recurrenceEndDate && (
                     <Text size="xs" c="dimmed" mt={4}>
-                      Until: {new Date(task.recurrenceEndDate).toLocaleDateString()}
+                      Until: {dayjs(task.recurrenceEndDate).format('DD MMM YYYY')}
                     </Text>
                   )}
                 </Box>

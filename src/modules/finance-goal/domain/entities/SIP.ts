@@ -11,4 +11,5 @@ export interface SIP {
   startDate: string
   endDate?: string
   status: SIPStatus
+  icon?: string
 }

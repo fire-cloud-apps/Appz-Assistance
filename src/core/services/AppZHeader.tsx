@@ -1,6 +1,5 @@
 import {
   Group,
-  Burger,
   ActionIcon,
   Text,
   Flex,
@@ -39,8 +38,6 @@ interface AppZHeaderProps {
 }
 
 export function AppZHeader({
-  mobileOpened,
-  desktopOpened,
   toggleMobile,
   toggleDesktop,
   toggleColorScheme,

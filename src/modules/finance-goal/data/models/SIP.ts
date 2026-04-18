@@ -11,4 +11,5 @@ export interface SIPModel {
   startDate: string
   endDate?: string
   status: SIPStatus
+  icon?: string
 }

@@ -36,10 +36,13 @@ export class CreateTaskUseCase {
 
     // Validate due date is not in the past
     if (validatedData.dueDate) {
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const dueDate = new Date(validatedData.dueDate)
-      if (dueDate < today) {
+      const dayjs = require('dayjs')
+      const today = dayjs().startOf('day')
+      const dueDate = dayjs(validatedData.dueDate, 'YYYY-MM-DD')
+      if (!dueDate.isValid()) {
+        throw new Error('Invalid due date format')
+      }
+      if (dueDate.isBefore(today)) {
         throw new Error('Due date cannot be in the past')
       }
     }

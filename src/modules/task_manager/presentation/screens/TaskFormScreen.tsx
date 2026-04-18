@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react' // Added
 import { useForm } from 'react-hook-form' // Added
 import { zodResolver } from '@hookform/resolvers/zod' // Added
+import dayjs from 'dayjs'
 import {
   Button,
   TextInput,
@@ -82,7 +83,7 @@ export function TaskFormScreen() {
         description: taskToEdit.description || '',
         status: taskToEdit.status,
         priority: taskToEdit.priority,
-        dueDate: taskToEdit.dueDate ? new Date(taskToEdit.dueDate).toISOString().split('T')[0] : null,
+        dueDate: taskToEdit.dueDate || null,
         dueTime: taskToEdit.dueTime || null,
         parentTaskId: taskToEdit.parentTaskId || null,
         taskLevel: taskToEdit.taskLevel,
@@ -286,7 +287,7 @@ export function TaskFormScreen() {
               justify="flex-start"
             >
               {recurrencePattern
-                ? `Repeats: ${getRecurrenceLabel(recurrencePattern)}${recurrenceEndDate ? ` until ${new Date(recurrenceEndDate).toLocaleDateString()}` : ''}`
+                ? `Repeats: ${getRecurrenceLabel(recurrencePattern)}${recurrenceEndDate ? ` until ${dayjs(recurrenceEndDate, 'YYYY-MM-DD').format('DD MMM YYYY')}` : ''}`
                 : 'Does not repeat'}
             </Button>
           </Box>
