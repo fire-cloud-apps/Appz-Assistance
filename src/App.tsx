@@ -36,7 +36,6 @@ function App() {
   const authorizationParams = {
     redirect_uri: authConfig.redirectUri,
     scope: authConfig.scope,
-    ...(authConfig.audience ? { audience: authConfig.audience } : {}),
   }
 
   return (
@@ -47,8 +46,6 @@ function App() {
           domain={authConfig.domain}
           clientId={authConfig.clientId}
           authorizationParams={authorizationParams}
-          cacheLocation="localstorage"
-          useRefreshTokens
         >
           <MantineProvider theme={createAppTheme(primaryColor)} defaultColorScheme="auto">
             <Notifications

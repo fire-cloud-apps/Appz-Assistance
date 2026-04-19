@@ -1,0 +1,1 @@
+docs: Add API endpoint documentation for Notes, Task Manager, and Finance Goal modules

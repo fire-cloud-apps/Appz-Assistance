@@ -30,6 +30,25 @@ import {
   FinanceGoalInvestorsPage,
 } from '../modules/finance-goal/presentation/pages'
 
+const hasAuthCallbackParams = () => {
+  if (typeof window === 'undefined') return false
+
+  const search = window.location.search
+  const hasCode = /[?&](?:connect_)?code=/.test(search)
+  const hasError = /[?&]error=/.test(search)
+  const hasState = /[?&]state=/.test(search)
+
+  return (hasCode || hasError) && hasState
+}
+
+function IndexRouteHandler() {
+  if (hasAuthCallbackParams()) {
+    return null
+  }
+
+  return <Navigate to="/home" replace />
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -37,7 +56,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/home" replace />,
+        element: <IndexRouteHandler />,
       },
       {
         path: 'home',

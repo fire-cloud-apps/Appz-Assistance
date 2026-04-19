@@ -63,6 +63,11 @@ export function useAuthUser() {
           return
         }
 
+        if (!authConfig.audience) {
+          if (isActive) setRoles([])
+          return
+        }
+
         const accessToken = await getAccessTokenSilently({
           authorizationParams: {
             audience: authConfig.audience,

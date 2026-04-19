@@ -22,6 +22,17 @@ import { useBreakTimer } from '../../modules/break_timer/presentation/hooks/useB
 import { AboutModal } from '../components/AboutModal'
 import { getModuleVisibility } from './userSettingsService'
 
+const hasAuthCallbackParams = () => {
+  if (typeof window === 'undefined') return false
+
+  const search = window.location.search
+  const hasCode = /[?&](?:connect_)?code=/.test(search)
+  const hasError = /[?&]error=/.test(search)
+  const hasState = /[?&]state=/.test(search)
+
+  return (hasCode || hasError) && hasState
+}
+
 export function MainLayout() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure(false)
@@ -29,8 +40,9 @@ export function MainLayout() {
   const [aboutModalOpened, { open: openAboutModal, close: closeAboutModal }] = useDisclosure(false);
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
+  const { isAuthenticated, isLoading, loginWithRedirect, error } = useAuth0()
   const { syncEnabled } = useSyncSetting()
+  const isHandlingAuthCallback = hasAuthCallbackParams()
 
   // Break Timer - for starting timer from header
   const { isTimerRunning, timeRemaining, startTimer, pauseTimer, stopTimer } = useBreakTimer();
@@ -46,22 +58,6 @@ export function MainLayout() {
       archiveCleanupService.stopCleanupJob()
     }
   }, [])
-
-  // Check auth state for rendering
-  const showAuthLoading = syncEnabled && isLoading
-  const showAuthScreen = syncEnabled && !isLoading && !isAuthenticated
-
-  if (showAuthLoading) {
-    return (
-      <Center h="100vh">
-        <Loader />
-      </Center>
-    )
-  }
-
-  if (showAuthScreen) {
-    return <AuthScreen onLogin={() => loginWithRedirect()} />
-  }
 
   const allModuleGroups = [
     {
@@ -151,6 +147,33 @@ export function MainLayout() {
   }, [])
 
   const modules = moduleGroups.flatMap((group) => group.modules)
+
+  // Check auth state for rendering after hook declarations to keep hook order stable
+  const showAuthLoading = isLoading || isHandlingAuthCallback
+  const showAuthScreen = syncEnabled && !isLoading && !isAuthenticated
+
+  if (showAuthLoading) {
+    return (
+      <Center h="100vh">
+        <Loader />
+      </Center>
+    )
+  }
+
+  if (showAuthScreen) {
+    return (
+      <AuthScreen
+        onLogin={() =>
+          loginWithRedirect({
+            appState: {
+              returnTo: location.pathname,
+            },
+          })
+        }
+        errorMessage={error?.message}
+      />
+    )
+  }
 
   const activePath = location.pathname
   const activeModule =

@@ -5,6 +5,18 @@
 
 --- 
 
+Understand the Project especially Models which I need to use to create Web API's based on that create a technical document and name it as 'api-endpoints-{module}.md'.
+Store the file in the docs\api\api-endpoints-{module}.md.
+The project might have multiple modules, but for now focus only on the 'Notes'.
+
+
+Need to develop a web API using https://fast-endpoints.com/.
+
+Follow the below,
+- Name the solution as AppZ.WebAPIs.sln, and name the project as AppZ.Assistance.csproj.
+- Use 'Fast-endpoints.com' and create the API endpoints
+- API should be generic API,
+
 ### CLI Coder used
 1. QWEN (Monday)
 2. OpenCode (Tuesday)

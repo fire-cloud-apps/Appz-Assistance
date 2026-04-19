@@ -2,6 +2,7 @@ import { Task, TaskStatus, TaskPriority } from '../../data/models'
 import { generateId } from '../../../../core/utils'
 import { createTaskSchema } from './validators'
 import { TaskRepository } from '../../data/repositories'
+import dayjs from 'dayjs'
 
 export class CreateTaskUseCase {
   constructor(private taskRepository: TaskRepository) {}
@@ -36,7 +37,6 @@ export class CreateTaskUseCase {
 
     // Validate due date is not in the past
     if (validatedData.dueDate) {
-      const dayjs = require('dayjs')
       const today = dayjs().startOf('day')
       const dueDate = dayjs(validatedData.dueDate, 'YYYY-MM-DD')
       if (!dueDate.isValid()) {

@@ -4,9 +4,10 @@ import { isAuthConfigured } from './authConfig'
 
 interface AuthScreenProps {
   onLogin: () => void
+  errorMessage?: string
 }
 
-export function AuthScreen({ onLogin }: AuthScreenProps) {
+export function AuthScreen({ onLogin, errorMessage }: AuthScreenProps) {
   return (
     <Center h="100vh" p="xl">
       <Card shadow="sm" radius="lg" withBorder p="xl" w={{ base: '100%', sm: 420 }}>
@@ -30,6 +31,11 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
           {!isAuthConfigured && (
             <Text size="xs" c="red" ta="center">
               Auth0 Client ID is missing. Set VITE_AUTH0_CLIENT_ID to enable login.
+            </Text>
+          )}
+          {errorMessage && (
+            <Text size="xs" c="red" ta="center">
+              {errorMessage}
             </Text>
           )}
         </Stack>

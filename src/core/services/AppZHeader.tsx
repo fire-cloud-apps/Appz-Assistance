@@ -50,12 +50,13 @@ export function AppZHeader({
   onAboutClick,
 }: AppZHeaderProps) {
   const navigate = useNavigate()
-  const { logout } = useAuth0()
+  const { logout, isAuthenticated, loginWithRedirect } = useAuth0()
   const { profile } = useAuthUser()
   const { syncEnabled, toggleSync } = useSyncSetting()
-  const displayName = profile?.name ?? 'User'
-  const displayEmail = profile?.email ?? 'No email'
-  const displayRole = profile?.roles?.[0]
+
+  const displayName = isAuthenticated ? profile?.name ?? 'User' : 'Guest'
+  const displayEmail = isAuthenticated ? profile?.email ?? 'No email' : 'Not logged in'
+  const displayRole = isAuthenticated ? profile?.roles?.[0] : undefined
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -70,6 +71,13 @@ export function AppZHeader({
       toggleDesktop()
     }
   }
+
+  const handleLogin = () =>
+    loginWithRedirect({
+      appState: {
+        returnTo: window.location.pathname,
+      },
+    })
 
   return (
     <Group h="100%" px="md" justify="space-between">
@@ -145,12 +153,13 @@ export function AppZHeader({
           <Menu.Target>
             <UnstyledButton>
               <Group gap="xs">
-                <Avatar
-                  src={profile?.image}
-                  radius="xl"
-                  size={32}
-                  name={displayName}
-                />
+                {isAuthenticated ? (
+                  <Avatar src={profile?.image} radius="xl" size={32} name={displayName} />
+                ) : (
+                  <Avatar radius="xl" size={32} color="gray">
+                    <Icon icon="tabler:user" width={20} />
+                  </Avatar>
+                )}
                 <Stack gap={0} visibleFrom="sm">
                   <Text size="sm" fw={600} lineClamp={1}>
                     {displayName}
@@ -185,64 +194,70 @@ export function AppZHeader({
             <Menu.Divider />
             
             {/* Break Timer Section */}
-            <Menu.Label>Break Timer</Menu.Label>
-            {isBreakTimerRunning ? (
+            {isAuthenticated && (
               <>
-                <Menu.Item
-                  leftSection={<Icon icon="tabler:player-pause" width={16} />}
-                  onClick={onPauseBreakTimer}
-                >
-                  Pause Timer
-                </Menu.Item>
-                <Menu.Item
-                  leftSection={<Icon icon="tabler:player-stop" width={16} />}
-                  onClick={onStopBreakTimer}
-                  color="red"
-                >
-                  Stop Timer
-                </Menu.Item>
+                <Menu.Label>Break Timer</Menu.Label>
+                {isBreakTimerRunning ? (
+                  <>
+                    <Menu.Item
+                      leftSection={<Icon icon="tabler:player-pause" width={16} />}
+                      onClick={onPauseBreakTimer}
+                    >
+                      Pause Timer
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<Icon icon="tabler:player-stop" width={16} />}
+                      onClick={onStopBreakTimer}
+                      color="red"
+                    >
+                      Stop Timer
+                    </Menu.Item>
+                    <Menu.Divider />
+                    <Stack gap="xs" px="sm" py="xs">
+                      <Text size="xs" c="dimmed">Time Remaining</Text>
+                      <Badge size="lg" color="blue" variant="filled">
+                        {formatTime(breakTimerTimeRemaining)}
+                      </Badge>
+                    </Stack>
+                  </>
+                ) : (
+                  <Menu.Item
+                    leftSection={<Icon icon="tabler:player-play" width={16} />}
+                    onClick={onStartBreakTimer}
+                  >
+                    Start Break Timer
+                  </Menu.Item>
+                )}
                 <Menu.Divider />
-                <Stack gap="xs" px="sm" py="xs">
-                  <Text size="xs" c="dimmed">Time Remaining</Text>
-                  <Badge size="lg" color="blue" variant="filled">
-                    {formatTime(breakTimerTimeRemaining)}
-                  </Badge>
-                </Stack>
               </>
-            ) : (
-              <Menu.Item
-                leftSection={<Icon icon="tabler:player-play" width={16} />}
-                onClick={onStartBreakTimer}
-              >
-                Start Break Timer
-              </Menu.Item>
             )}
             
-            <Menu.Divider />
-            
             {/* Settings Section */}
-            <Menu.Label>Settings</Menu.Label>
-            <Menu.Item
-              leftSection={<Icon icon="tabler:settings" width={16} />}
-              onClick={() => navigate('/settings')}
-            >
-              Settings
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<Icon icon={syncEnabled ? 'tabler:cloud-check' : 'tabler:cloud-off'} width={16} />}
-              onClick={toggleSync}
-              color={syncEnabled ? 'green' : undefined}
-            >
-              Sync {syncEnabled ? 'Enabled' : 'Disabled'}
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<Icon icon={colorScheme === 'dark' ? 'tabler:sun' : 'tabler:moon'} width={16} />}
-              onClick={toggleColorScheme}
-            >
-              {colorScheme === 'dark' ? 'Light' : 'Dark'} Mode
-            </Menu.Item>
-            
-            <Menu.Divider />
+            {isAuthenticated && (
+              <>
+                <Menu.Label>Settings</Menu.Label>
+                <Menu.Item
+                  leftSection={<Icon icon="tabler:settings" width={16} />}
+                  onClick={() => navigate('/settings')}
+                >
+                  Settings
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<Icon icon={syncEnabled ? 'tabler:cloud-check' : 'tabler:cloud-off'} width={16} />}
+                  onClick={toggleSync}
+                  color={syncEnabled ? 'green' : undefined}
+                >
+                  Sync {syncEnabled ? 'Enabled' : 'Disabled'}
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<Icon icon={colorScheme === 'dark' ? 'tabler:sun' : 'tabler:moon'} width={16} />}
+                  onClick={toggleColorScheme}
+                >
+                  {colorScheme === 'dark' ? 'Light' : 'Dark'} Mode
+                </Menu.Item>
+                <Menu.Divider />
+              </>
+            )}
 
             {/* About Section */}
             <Menu.Item
@@ -255,15 +270,26 @@ export function AppZHeader({
             <Menu.Divider />
             
             {/* Account Section */}
-            <Menu.Item leftSection={<Icon icon="tabler:user" width={16} />} onClick={() => navigate('/profile')}>
-              Profile
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<Icon icon="tabler:logout" width={16} />}
-              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-            >
-              Logout
-            </Menu.Item>
+            {isAuthenticated ? (
+              <>
+                <Menu.Item leftSection={<Icon icon="tabler:user" width={16} />} onClick={() => navigate('/profile')}>
+                  Profile
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<Icon icon="tabler:logout" width={16} />}
+                  onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                >
+                  Logout
+                </Menu.Item>
+              </>
+            ) : (
+              <Menu.Item
+                leftSection={<Icon icon="tabler:login" width={16} />}
+                onClick={handleLogin}
+              >
+                Login
+              </Menu.Item>
+            )}
           </Menu.Dropdown>
         </Menu>
       </Group>
