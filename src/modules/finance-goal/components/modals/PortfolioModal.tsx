@@ -12,6 +12,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { Investor, Portfolio } from '../../domain/entities'
+import { useAuthUser } from '../../../../core/auth/useAuthUser'
 
 const portfolioFormSchema = z.object({
   amcName: z.string().min(1, 'AMC name is required'),
@@ -39,6 +40,8 @@ interface PortfolioModalProps {
 }
 
 export function PortfolioModal({ opened, onClose, investors, initial, onSubmit }: PortfolioModalProps) {
+  const { profile } = useAuthUser()
+
   const {
     register,
     handleSubmit,
@@ -87,7 +90,7 @@ export function PortfolioModal({ opened, onClose, investors, initial, onSubmit }
     label: investor.name,
   }))
 
-  const submitHandler = async (values: PortfolioFormValues) => {
+const submitHandler = async (values: PortfolioFormValues) => {
     const payload: Portfolio = {
       id: initial?.id ?? crypto.randomUUID(),
       amcName: values.amcName,
@@ -102,6 +105,8 @@ export function PortfolioModal({ opened, onClose, investors, initial, onSubmit }
       appreciation: values.appreciation,
       weightedAvg: values.weightedAvg,
       xirr: values.xirr,
+      sync: false,
+      userId: profile?.id ?? '',
     }
 
     await onSubmit(payload)

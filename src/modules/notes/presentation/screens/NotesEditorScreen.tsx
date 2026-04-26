@@ -6,6 +6,7 @@ import { useNoteById, useUpdateNote, useCreateNote, useFolderById } from '../hoo
 import { Note } from '../../data/models/Note'
 import { NoteEditor } from '../components/NoteEditor'
 import { useDebouncedAutosave } from '../hooks/useDebouncedAutosave'
+import { useAuthUser } from '../../../../core/auth/useAuthUser'
 import dayjs from 'dayjs'
 
 interface NoteData {
@@ -22,6 +23,7 @@ export function NotesEditorScreen() {
   const { id } = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
   const folderIdParam = searchParams.get('folderId')
+  const { profile } = useAuthUser()
   
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -78,6 +80,8 @@ export function NotesEditorScreen() {
           createdAt: now,
           updatedAt: now,
           isDeleted: false,
+          sync: false,
+          userId: profile?.id ?? '',
         }
         await createNote.mutateAsync(newNote)
         navigate(`/notes/editor/${newNote.id}`)

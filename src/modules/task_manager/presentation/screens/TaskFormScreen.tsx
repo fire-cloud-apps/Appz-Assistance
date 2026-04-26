@@ -34,6 +34,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Task, RecurrencePattern } from '../../data/models'
 import { RecurrencePicker } from '../../components/RecurrencePicker'
 import { getRecurrenceLabel } from '../../../../core/utils/recurrenceHelper'
+import { useAuthUser } from '../../../../core/auth/useAuthUser'
 
 // Removed type TaskFormValues = z.infer<typeof createTaskSchema>
 // Removed type UpdateTaskFormValues = z.infer<typeof updateTaskSchema>
@@ -42,6 +43,7 @@ export function TaskFormScreen() {
   const navigate = useNavigate()
   const { id: taskId } = useParams<{ id: string }>()
   const isEditing = !!taskId
+  const { profile } = useAuthUser()
 
   const { data: taskToEdit, isLoading: isLoadingTask } = useTaskById(taskId || '')
   const createTask = useCreateTask()
@@ -122,6 +124,8 @@ export function TaskFormScreen() {
         isRecurring: !!recurrencePattern,
         recurrencePattern,
         recurrenceEndDate,
+        sync: false,
+        userId: profile?.id ?? '',
       }
       
       if (isEditing) {

@@ -5,6 +5,8 @@ interface InvestorHolding {
   mobile?: string
   pan?: string
   totalValue: number
+  sync: boolean
+  userId: string
 }
 
 interface InvestorsTableProps {

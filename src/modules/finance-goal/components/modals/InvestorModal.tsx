@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { Investor } from '../../domain/entities'
+import { useAuthUser } from '../../../../core/auth/useAuthUser'
 
 const investorFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -21,6 +22,8 @@ interface InvestorModalProps {
 }
 
 export function InvestorModal({ opened, onClose, initial, onSubmit }: InvestorModalProps) {
+  const { profile } = useAuthUser()
+
   const {
     register,
     handleSubmit,
@@ -51,6 +54,8 @@ export function InvestorModal({ opened, onClose, initial, onSubmit }: InvestorMo
       name: values.name,
       mobile: values.mobile || undefined,
       pan: values.pan || undefined,
+      sync: false,
+      userId: profile?.id ?? '',
     }
 
     await onSubmit(payload)

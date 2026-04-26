@@ -12,4 +12,6 @@ export interface Note {
   updatedAt: string
   lastViewedAt?: string
   isDeleted: boolean
+  sync: boolean
+  userId: string
 }

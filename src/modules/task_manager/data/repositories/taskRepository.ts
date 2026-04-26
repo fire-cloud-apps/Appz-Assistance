@@ -1,5 +1,5 @@
 import { Task, TaskStatus } from '../models'
-import { db } from '../../../../core/database/appDatabase'
+import { taskManagerDb } from '../../../../core/database/taskManagerDatabase'
 import dayjs from 'dayjs'
 
 export class TaskRepository {
@@ -25,11 +25,11 @@ export class TaskRepository {
   }
 
   async createTask(task: Task): Promise<string> {
-    return db.tasks.add(task)
+    return taskManagerDb.tasks.add(task)
   }
 
   async updateTask(task: Task): Promise<void> {
-    const existing = await db.tasks.get(task.id)
+    const existing = await taskManagerDb.tasks.get(task.id)
     const isCompleting = task.status === 'Completed'
     const wasCompleted = existing?.status === 'Completed'
 
@@ -43,58 +43,58 @@ export class TaskRepository {
       task.completedAt = null
     }
 
-    await db.tasks.put(task)
+    await taskManagerDb.tasks.put(task)
   }
 
   async deleteTask(id: string): Promise<void> {
-    await db.tasks.delete(id)
+    await taskManagerDb.tasks.delete(id)
   }
 
   async softDeleteTask(id: string): Promise<void> {
-    const task = await db.tasks.get(id)
+    const task = await taskManagerDb.tasks.get(id)
     if (task) {
       task.isDeleted = true
       task.updatedAt = new Date().toISOString()
-      await db.tasks.put(task)
+      await taskManagerDb.tasks.put(task)
     }
   }
 
   async archiveTask(id: string): Promise<void> {
-    const task = await db.tasks.get(id)
+    const task = await taskManagerDb.tasks.get(id)
     if (task) {
       task.isArchived = true
       task.archivedAt = new Date().toISOString()
       task.updatedAt = new Date().toISOString()
-      await db.tasks.put(task)
+      await taskManagerDb.tasks.put(task)
     }
   }
 
   async unarchiveTask(id: string): Promise<void> {
-    const task = await db.tasks.get(id)
+    const task = await taskManagerDb.tasks.get(id)
     if (task) {
       task.isArchived = false
       task.archivedAt = null
       task.updatedAt = new Date().toISOString()
-      await db.tasks.put(task)
+      await taskManagerDb.tasks.put(task)
     }
   }
 
   async getTaskById(id: string): Promise<Task | undefined> {
-    return db.tasks.get(id)
+    return taskManagerDb.tasks.get(id)
   }
 
   async getTasks(): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     return allTasks.filter(task => !task.isDeleted && !task.isArchived)
   }
 
   async getParentTasks(): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     return allTasks.filter(task => task.parentTaskId === null && !task.isDeleted && !task.isArchived)
   }
 
   async getParentTasksPaged(page: number, pageSize: number): Promise<{ items: Task[]; total: number }> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     const parentTasks = allTasks.filter(task => task.parentTaskId === null && !task.isDeleted && !task.isArchived)
     const sortedTasks = this.sortTasksForAll(parentTasks)
     const total = sortedTasks.length
@@ -104,34 +104,34 @@ export class TaskRepository {
   }
 
   async getChildTasks(parentTaskId: string): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     return allTasks.filter(task => task.parentTaskId === parentTaskId && !task.isDeleted && !task.isArchived)
   }
 
   async getTasksByStatus(status: TaskStatus): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     return allTasks.filter(task => task.status === status && !task.isDeleted && !task.isArchived)
   }
 
   async completeTask(id: string): Promise<void> {
-    const task = await db.tasks.get(id)
+    const task = await taskManagerDb.tasks.get(id)
     if (task) {
       task.status = 'Completed'
       task.completedAt = new Date().toISOString()
       task.updatedAt = new Date().toISOString()
-      await db.tasks.put(task)
+      await taskManagerDb.tasks.put(task)
     }
   }
 
   async getTasksByPriority(priority: string): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     return allTasks.filter(task => task.priority === priority && !task.isDeleted && !task.isArchived)
   }
 
   async getUpcomingTasks(limit: number = 5): Promise<Task[]> {
     const today = new Date().toISOString().split('T')[0]
 
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     const upcomingTasks = allTasks
       .filter(task =>
         !task.isDeleted &&
@@ -149,7 +149,7 @@ export class TaskRepository {
   async getOverdueTasks(limit: number = 5): Promise<Task[]> {
     const today = new Date().toISOString().split('T')[0]
 
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     const overdueTasks = allTasks
       .filter(task =>
         !task.isDeleted &&
@@ -165,7 +165,7 @@ export class TaskRepository {
   }
 
   async searchTasks(searchTerm: string): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     const normalizedTerm = searchTerm.toLowerCase().trim()
 
     if (!normalizedTerm) {
@@ -183,7 +183,7 @@ export class TaskRepository {
   }
 
   async searchTasksPaged(searchTerm: string, page: number, pageSize: number): Promise<{ items: Task[]; total: number }> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     const normalizedTerm = searchTerm.toLowerCase().trim()
 
     if (!normalizedTerm) {
@@ -208,7 +208,7 @@ export class TaskRepository {
   }
 
   async getArchivedTasksPaged(page: number, pageSize: number): Promise<{ items: Task[]; total: number }> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     const archivedTasks = allTasks.filter(task => task.isArchived && !task.isDeleted)
     const sortedTasks = archivedTasks.sort((a, b) => 
       new Date(b.archivedAt || '').getTime() - new Date(a.archivedAt || '').getTime()
@@ -220,7 +220,7 @@ export class TaskRepository {
   }
 
   async getExpiredArchivedTasks(retentionDays: number): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     const now = new Date()
     
     return allTasks.filter(task => {
@@ -232,7 +232,7 @@ export class TaskRepository {
   }
 
   async getCompletedTasksForArchive(retentionDays: number): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     const now = new Date()
 
     return allTasks.filter(task => {
@@ -249,13 +249,13 @@ export class TaskRepository {
   }
 
   async permanentlyDeleteTask(id: string): Promise<void> {
-    await db.tasks.delete(id)
+    await taskManagerDb.tasks.delete(id)
   }
 
   // Recurrence-related methods
 
   async getRecurringTasks(): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     return allTasks.filter(task =>
       task.isRecurring &&
       !task.isDeleted &&
@@ -265,7 +265,7 @@ export class TaskRepository {
   }
 
   async getRecurrenceInstances(parentRecurrenceId: string): Promise<Task[]> {
-    const allTasks = await db.tasks.toArray()
+    const allTasks = await taskManagerDb.tasks.toArray()
     return allTasks.filter(task =>
       task.parentRecurrenceId === parentRecurrenceId &&
       !task.isDeleted &&
@@ -274,27 +274,27 @@ export class TaskRepository {
   }
 
   async createRecurrenceInstance(task: Task): Promise<string> {
-    return db.tasks.add(task)
+    return taskManagerDb.tasks.add(task)
   }
 
   async updateRecurrencePattern(taskId: string, pattern: any): Promise<void> {
-    const task = await db.tasks.get(taskId)
+    const task = await taskManagerDb.tasks.get(taskId)
     if (task) {
       task.recurrencePattern = pattern
       task.isRecurring = true
       task.updatedAt = new Date().toISOString()
-      await db.tasks.put(task)
+      await taskManagerDb.tasks.put(task)
     }
   }
 
   async removeRecurrence(taskId: string): Promise<void> {
-    const task = await db.tasks.get(taskId)
+    const task = await taskManagerDb.tasks.get(taskId)
     if (task) {
       task.isRecurring = false
       task.recurrencePattern = null
       task.recurrenceEndDate = null
       task.updatedAt = new Date().toISOString()
-      await db.tasks.put(task)
+      await taskManagerDb.tasks.put(task)
     }
   }
 }

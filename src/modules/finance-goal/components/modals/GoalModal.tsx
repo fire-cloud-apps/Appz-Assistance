@@ -25,6 +25,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPicker } from '../../../../core/components/IconPicker'
 import type { FinancialGoal, Investor, Portfolio, SIP } from '../../domain/entities'
 import { FinancialProjectionService } from '../../domain/services'
+import { useAuthUser } from '../../../../core/auth/useAuthUser'
 
 const goalFormSchema = z
   .object({
@@ -102,6 +103,8 @@ export function GoalModal({
   initial,
   onSubmit,
 }: GoalModalProps) {
+  const { profile } = useAuthUser()
+
   const investorOptions = investors.map((inv) => ({
     value: inv.id,
     label: inv.name,
@@ -329,6 +332,8 @@ export function GoalModal({
       sipIds: values.sipIds ?? [],
       expectedGrowthRate: values.expectedGrowthRate,
       icon: values.icon,
+      sync: false,
+      userId: profile?.id ?? '',
     }
 
     await onSubmit(payload)

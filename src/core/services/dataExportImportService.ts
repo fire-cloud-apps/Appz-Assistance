@@ -1,4 +1,4 @@
-import { db } from '../database/appDatabase'
+import { taskManagerDb } from '../database/taskManagerDatabase'
 import { notesDb } from '../../modules/notes/data/datasources/notesDatabase'
 import { financeDb } from '../../modules/finance-goal/data/datasources/FinanceGoalDatabase'
 
@@ -33,8 +33,8 @@ export async function exportModuleData(module: ExportModule): Promise<ExportData
   
   switch (module) {
     case 'tasks': {
-      const tasks = await db.tasks.toArray()
-      const activities = await db.taskActivities.toArray()
+      const tasks = await taskManagerDb.tasks.toArray()
+      const activities = await taskManagerDb.taskActivities.toArray()
       return {
         module,
         exportedAt,
@@ -118,12 +118,12 @@ async function importTasks(data: TaskExportData): Promise<{ success: boolean; me
 
   let importedCount = 0
   
-  await db.transaction('rw', db.tasks, db.taskActivities, async () => {
+  await taskManagerDb.transaction('rw', taskManagerDb.tasks, taskManagerDb.taskActivities, async () => {
     for (const task of data.tasks) {
       try {
-        const existingTask = await db.tasks.get((task as { id: string }).id)
+        const existingTask = await taskManagerDb.tasks.get((task as { id: string }).id)
         if (!existingTask) {
-          await db.tasks.add(task as never)
+          await taskManagerDb.tasks.add(task as never)
           importedCount++
         }
       } catch (e) {
@@ -134,9 +134,9 @@ async function importTasks(data: TaskExportData): Promise<{ success: boolean; me
     if (Array.isArray(data.taskActivities)) {
       for (const activity of data.taskActivities) {
         try {
-          const existingActivity = await db.taskActivities.get((activity as { id: string }).id)
+          const existingActivity = await taskManagerDb.taskActivities.get((activity as { id: string }).id)
           if (!existingActivity) {
-            await db.taskActivities.add(activity as never)
+            await taskManagerDb.taskActivities.add(activity as never)
           }
         } catch (e) {
           console.warn('Failed to import task activity:', e)

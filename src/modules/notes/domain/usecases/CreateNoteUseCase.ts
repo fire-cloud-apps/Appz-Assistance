@@ -14,6 +14,8 @@ export class CreateNoteUseCase {
     color?: string
     isPinned?: boolean
     isFavorite?: boolean
+    sync?: boolean
+    userId?: string
   }): Promise<Note> {
     const validatedData = createNoteSchema.parse(data)
 
@@ -39,6 +41,8 @@ export class CreateNoteUseCase {
       createdAt: now,
       updatedAt: now,
       isDeleted: false,
+      sync: validatedData.sync ?? false,
+      userId: validatedData.userId ?? '',
     }
 
     await noteRepository.createNote(note)

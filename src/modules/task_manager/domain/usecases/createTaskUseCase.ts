@@ -15,6 +15,8 @@ export class CreateTaskUseCase {
     dueDate?: string | null
     parentTaskId?: string | null
     taskLevel: number
+    sync?: boolean
+    userId?: string
   }): Promise<Task> {
     // Validate input
     const validatedData = createTaskSchema.parse(data)
@@ -62,6 +64,8 @@ export class CreateTaskUseCase {
       isDeleted: false,
       isArchived: false,
       archivedAt: null,
+      sync: validatedData.sync ?? false,
+      userId: validatedData.userId ?? '',
     }
 
     await this.taskRepository.createTask(task)

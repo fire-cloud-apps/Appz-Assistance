@@ -14,12 +14,14 @@ import { createTaskSchema } from '../domain/usecases/validators'
 import { useTaskStore, useCreateTask, useParentTasks } from '../presentation/hooks'
 import { getToday } from '../../../core/utils/dateHelper'
 import { useState } from 'react'
+import { useAuthUser } from '../../../core/auth/useAuthUser'
 
 export function CreateTaskModal() {
   const { isCreateModalOpen, closeCreateModal } = useTaskStore()
   const createTask = useCreateTask()
   const { data: parentTasks = [] } = useParentTasks()
   const [dueTime, setDueTime] = useState<string | null>(null)
+  const { profile } = useAuthUser()
 
   const {
     register,
@@ -53,6 +55,8 @@ export function CreateTaskModal() {
         dueDate: data.dueDate || null,
         dueTime,
         parentTaskId: data.parentTaskId || null,
+        sync: false,
+        userId: profile?.id ?? '',
       })
       reset()
       setDueTime(null)

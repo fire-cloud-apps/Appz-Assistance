@@ -7,9 +7,9 @@ export class NotesDatabase extends Dexie {
   notes!: Table<Note>
 
   constructor() {
-    super('notesDB')
+    super('notes-db')
 
-    this.version(1).stores({
+    this.version(2).stores({
       folders: `
         id,
         parentId,
@@ -28,8 +28,15 @@ export class NotesDatabase extends Dexie {
         createdAt,
         updatedAt,
         lastViewedAt,
-        isDeleted
+        isDeleted,
+        sync,
+        userId
       `
+    }).upgrade(tx => {
+      return tx.table('notes').toCollection().modify(note => {
+        if (note.sync === undefined) note.sync = false
+        if (note.userId === undefined) note.userId = ''
+      })
     })
   }
 }

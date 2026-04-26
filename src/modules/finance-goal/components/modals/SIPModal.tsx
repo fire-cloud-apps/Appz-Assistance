@@ -14,6 +14,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPicker } from '../../../../core/components/IconPicker'
 import type { Investor, Portfolio, SIP } from '../../domain/entities'
+import { useAuthUser } from '../../../../core/auth/useAuthUser'
 
 const sipFormSchema = z.object({
   name: z.string().optional(),
@@ -49,6 +50,8 @@ function generateSipName(portfolio: Portfolio | undefined, amount: number, start
 }
 
 export function SIPModal({ opened, onClose, investors, portfolios, initial, onSubmit }: SIPModalProps) {
+  const { profile } = useAuthUser()
+
   const {
     handleSubmit,
     control,
@@ -150,6 +153,8 @@ export function SIPModal({ opened, onClose, investors, portfolios, initial, onSu
       endDate: values.endDate ? values.endDate : undefined,
       status: values.status,
       icon: values.icon,
+      sync: false,
+      userId: profile?.id ?? '',
     }
 
     await onSubmit(payload)

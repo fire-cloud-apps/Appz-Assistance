@@ -46,6 +46,8 @@ export const createNoteSchema = z.object({
   color: z.string().optional(),
   isPinned: z.boolean().optional().default(false),
   isFavorite: z.boolean().optional().default(false),
+  sync: z.boolean().optional().default(false),
+  userId: z.string().optional().default(''),
 })
 
 export const updateNoteSchema = createNoteSchema.extend({

@@ -15,6 +15,7 @@ import { createTaskSchema } from '../domain/usecases/validators'
 import { useTaskStore, useCreateTask } from '../presentation/hooks'
 import { getToday } from '../../../core/utils/dateHelper'
 import { useState } from 'react'
+import { useAuthUser } from '../../../core/auth/useAuthUser'
 
 interface SubtaskModalProps {
   parentTaskId: string
@@ -26,6 +27,7 @@ export function SubtaskModal({ parentTaskId, parentTaskTitle, parentTaskLevel }:
   const { isSubtaskModalOpen, closeSubtaskModal } = useTaskStore()
   const createTask = useCreateTask()
   const [dueTime, setDueTime] = useState<string | null>(null)
+  const { profile } = useAuthUser()
 
   const {
     register,
@@ -57,6 +59,8 @@ export function SubtaskModal({ parentTaskId, parentTaskTitle, parentTaskLevel }:
         dueDate: data.dueDate || null,
         dueTime,
         parentTaskId: parentTaskId,
+        sync: false,
+        userId: profile?.id ?? '',
       })
       reset()
       setDueTime(null)

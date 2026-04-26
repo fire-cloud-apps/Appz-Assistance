@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Note } from '../../data/models/Note'
 import { useCreateNote, useUpdateNote } from '../hooks/useNoteQueries'
+import { useAuthUser } from '../../../../core/auth/useAuthUser'
 
 const noteSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Max 200 characters'),
@@ -34,6 +35,7 @@ export function CreateNoteModal({
   const updateNote = useUpdateNote()
   const [color, setColor] = useState<string | undefined>(undefined)
   const [tags, setTags] = useState<string[]>([])
+  const { profile } = useAuthUser()
 
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<NoteFormData>({
     resolver: zodResolver(noteSchema),
@@ -83,6 +85,8 @@ export function CreateNoteModal({
           createdAt: now,
           updatedAt: now,
           isDeleted: false,
+          sync: false,
+          userId: profile?.id ?? '',
         }
         await createNote.mutateAsync(newNote)
       }

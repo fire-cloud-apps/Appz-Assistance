@@ -12,14 +12,18 @@ import {
   Badge,
   Box,
 } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import { Icon } from '@iconify/react'
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import logo from '../../img/appz-logo.png'
 import appConfig from '../config/appConfig.json'
 import { NotificationBell } from '../components/NotificationBell'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useAuthUser } from '../auth/useAuthUser'
+import { useApiAccessToken } from '../auth/useApiAccessToken'
 import { useSyncSetting } from '../hooks/useSyncSetting'
+import { ApiError, createApiClient } from './apiClient'
 import styles from './AppZHeader.module.css'
 
 interface AppZHeaderProps {
@@ -52,7 +56,9 @@ export function AppZHeader({
   const navigate = useNavigate()
   const { logout, isAuthenticated, loginWithRedirect } = useAuth0()
   const { profile } = useAuthUser()
+  const { getApiAccessToken, hasApiAudience } = useApiAccessToken()
   const { syncEnabled, toggleSync } = useSyncSetting()
+  const [isTestingApi, setIsTestingApi] = useState(false)
 
   const displayName = isAuthenticated ? profile?.name ?? 'User' : 'Guest'
   const displayEmail = isAuthenticated ? profile?.email ?? 'No email' : 'Not logged in'
@@ -78,6 +84,62 @@ export function AppZHeader({
         returnTo: window.location.pathname,
       },
     })
+
+  const formatTokenPreview = (token: string) => {
+    if (token.length <= 18) return token
+    return `${token.slice(0, 12)}...${token.slice(-6)}`
+  }
+
+  const formatApiResponse = (value: unknown) => {
+    if (typeof value === 'string') return value
+
+    try {
+      return JSON.stringify(value)
+    } catch {
+      return 'Received a non-serializable response.'
+    }
+  }
+
+  const handleApiHealthCheck = async () => {
+    if (isTestingApi) return
+
+    setIsTestingApi(true)
+    notifications.show({
+      title: 'API Health Check',
+      message: 'Requesting Auth0 access token and calling /health-check...',
+      color: 'blue',
+      autoClose: 2500,
+    })
+
+    try {
+      const token = await getApiAccessToken()
+      const apiClient = createApiClient(() => Promise.resolve(token))
+      const response = await apiClient.get<unknown>('/health-check')
+
+      notifications.show({
+        title: 'API Health Check Succeeded',
+        message: `Bearer token ${formatTokenPreview(token)} sent successfully. Response: ${formatApiResponse(response)}`,
+        color: 'green',
+        autoClose: 10000,
+      })
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? `Request failed with ${error.status} ${error.statusText}. Response: ${formatApiResponse(error.responseBody)}`
+          : error instanceof Error
+            ? error.message
+            : 'The API health-check request failed.'
+
+      notifications.show({
+        title: 'API Health Check Failed',
+        message,
+        color: 'red',
+        autoClose: 10000,
+      })
+    } finally {
+      setIsTestingApi(false)
+    }
+  }
 
   return (
     <Group h="100%" px="md" justify="space-between">
@@ -254,6 +316,20 @@ export function AppZHeader({
                   onClick={toggleColorScheme}
                 >
                   {colorScheme === 'dark' ? 'Light' : 'Dark'} Mode
+                </Menu.Item>
+                <Menu.Divider />
+              </>
+            )}
+
+            {isAuthenticated && (
+              <>
+                <Menu.Label>API</Menu.Label>
+                <Menu.Item
+                  leftSection={<Icon icon="tabler:shield-check" width={16} />}
+                  onClick={handleApiHealthCheck}
+                  disabled={isTestingApi || !hasApiAudience}
+                >
+                  {isTestingApi ? 'Testing API...' : 'Test API Health Check'}
                 </Menu.Item>
                 <Menu.Divider />
               </>

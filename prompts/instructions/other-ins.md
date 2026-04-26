@@ -5,21 +5,23 @@
 
 --- 
 
-Understand the Project especially Models which I need to use to create Web API's based on that create a technical document and name it as 'api-endpoints-{module}.md'.
-Store the file in the docs\api\api-endpoints-{module}.md.
-The project might have multiple modules, but for now focus only on the 'Notes'.
+I need a feature, this application is actually using 'Auth0' for authentication, behind the scenes It will have a Web API, To consume web api endpoints securely by this web application, It requires a OAuth2.0 based authentication token. It seems it is not available. Please check if the JWT token based authentication is available if not enable this feature. 
 
-
-Need to develop a web API using https://fast-endpoints.com/.
-
+---
+Need to develop a web API which should use, https://fast-endpoints.com/.
 Follow the below,
 - Name the solution as AppZ.WebAPIs.sln, and name the project as AppZ.Assistance.csproj.
 - Use 'Fast-endpoints.com' and create the API endpoints
-- API should be generic API,
+- API should be generic should accept any json data.
+- Need the complete API endpoint for all the available public methods from 'TursoDb.Core'
+- Refer the TursoDb.Core/QUICK_REFERENCE.md, for the available methods, and make the API endpoints accordingly.
+- Write the .HTTP file for the API endpoints, to test the API endpoints.
+---
 
 ### CLI Coder used
 1. QWEN (Monday)
-2. OpenCode (Tuesday)
+2. OpenCode (Tuesday) 
+   3. Last Session Id - opencode -s ses_2355698c3ffeG45c8hdXtyujZ2
 3. Codex (Wednesday) (Reset Apr 18)
 4. GEMINI (Thursday)
 5. Copilot (Friday)

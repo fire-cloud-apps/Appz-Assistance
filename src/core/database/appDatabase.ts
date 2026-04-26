@@ -1,170 +1,30 @@
 import Dexie, { Table } from 'dexie'
-import { Task } from '../../modules/task_manager/data/models'
 import { InAppNotification } from './models/InAppNotification'
-import { TaskActivity } from './taskActivity'
-import { BreakSettings } from '../../modules/break_timer/data/models/BreakSettings' // New import
+import { BreakSettings } from '../../modules/break_timer/data/models/BreakSettings'
 
 export class AppDatabase extends Dexie {
-  tasks!: Table<Task>
-  taskActivities!: Table<TaskActivity>
   inAppNotifications!: Table<InAppNotification>
-  breakSettings!: Table<BreakSettings> // New table declaration
+  breakSettings!: Table<BreakSettings>
 
   constructor() {
-    super('appzDB')
+    super('appz-db')
 
-    this.version(1).stores({
-      tasks: `
-        id,
-        parentTaskId,
-        taskLevel,
-        status,
-        priority,
-        dueDate,
-        createdAt,
-        updatedAt,
-        isDeleted,
-        isArchived,
-        archivedAt
-      `,
-      taskActivities: `
-        id,
-        taskId,
-        createdAt
-      `
-    })
+    // Version 1: Initial schema (for any legacy data migrations)
+    this.version(1).stores({})
 
-    // Version 2: Add recurrence fields
+    // Version 2: Add in-app notifications table
     this.version(2).stores({
-      tasks: `
+      inAppNotifications: `
         id,
-        parentTaskId,
-        taskLevel,
-        status,
-        priority,
-        dueDate,
-        createdAt,
-        updatedAt,
-        isDeleted,
-        isArchived,
-        archivedAt,
-        isRecurring,
-        parentRecurrenceId,
-        recurrenceInstanceId,
-        recurrenceEndDate
-      `,
-      taskActivities: `
-        id,
+        type,
         taskId,
+        isRead,
         createdAt
       `
     })
 
-    // Version 3: Add in-app notifications table
+    // Version 3: Add breakSettings table
     this.version(3).stores({
-      tasks: `
-        id,
-        parentTaskId,
-        taskLevel,
-        status,
-        priority,
-        dueDate,
-        createdAt,
-        updatedAt,
-        isDeleted,
-        isArchived,
-        archivedAt,
-        completedAt,
-        isRecurring,
-        parentRecurrenceId,
-        recurrenceInstanceId,
-        recurrenceEndDate
-      `,
-      taskActivities: `
-        id,
-        taskId,
-        createdAt
-      `,
-      inAppNotifications: `
-        id,
-        type,
-        taskId,
-        isRead,
-        createdAt
-      `
-    })
-
-    // Version 5: Add recurrencePattern field for proper storage of recurring tasks
-    this.version(5).stores({
-      tasks: `
-        id,
-        parentTaskId,
-        taskLevel,
-        status,
-        priority,
-        dueDate,
-        createdAt,
-        updatedAt,
-        isDeleted,
-        isArchived,
-        archivedAt,
-        completedAt,
-        isRecurring,
-        parentRecurrenceId,
-        recurrenceInstanceId,
-        recurrenceEndDate,
-        recurrencePattern
-      `,
-      taskActivities: `
-        id,
-        taskId,
-        createdAt
-      `,
-      inAppNotifications: `
-        id,
-        type,
-        taskId,
-        isRead,
-        createdAt
-      `
-    })
-
-    // Version 6: Add breakSettings table
-    this.version(6).stores({
-      breakSettings: `
-        id,
-        createdAt,
-        updatedAt
-      `
-    })
-
-    // Version 7: Add dueTime field to tasks
-    this.version(7).stores({
-      tasks: `
-        id,
-        parentTaskId,
-        taskLevel,
-        status,
-        priority,
-        dueDate,
-        dueTime,
-        createdAt,
-        updatedAt,
-        isDeleted,
-        isArchived,
-        archivedAt,
-        completedAt,
-        isRecurring,
-        parentRecurrenceId,
-        recurrenceInstanceId,
-        recurrenceEndDate,
-        recurrencePattern
-      `,
-      taskActivities: `
-        id,
-        taskId,
-        createdAt
-      `,
       inAppNotifications: `
         id,
         type,
@@ -179,7 +39,7 @@ export class AppDatabase extends Dexie {
       `
     })
 
-    // Version 8: Reserved for future schema changes
+    // Version 4: Reserved for future schema changes
   }
 }
 

@@ -50,6 +50,9 @@ export const createTaskSchema = z.object({
     .string()
     .nullable()
     .optional(),
+  // Sync fields
+  sync: z.boolean().optional().default(false),
+  userId: z.string().optional().default(''),
 })
 
 export const updateTaskSchema = createTaskSchema.extend({

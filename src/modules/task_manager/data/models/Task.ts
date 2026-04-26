@@ -22,6 +22,9 @@ export interface Task {
   recurrenceEndDate?: string | null;
   parentRecurrenceId?: string | null;
   recurrenceInstanceId?: string | null;
+  // Sync fields
+  sync: boolean;
+  userId: string;
 }
 
 export type TaskStatus = 'Pending' | 'InProgress' | 'Completed' | 'Cancelled';

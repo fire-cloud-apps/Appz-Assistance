@@ -30,6 +30,18 @@ const normalizeRoles = (value: unknown): string[] => {
   return []
 }
 
+const buildApiAuthorizationParams = () => {
+  const params: { audience: string; scope?: string } = {
+    audience: authConfig.audience,
+  }
+
+  if (authConfig.apiScope.trim()) {
+    params.scope = authConfig.apiScope
+  }
+
+  return params
+}
+
 export function useAuthUser() {
   const { user, isAuthenticated, getIdTokenClaims, getAccessTokenSilently } = useAuth0()
   const [roles, setRoles] = useState<string[]>([])
@@ -69,10 +81,7 @@ export function useAuthUser() {
         }
 
         const accessToken = await getAccessTokenSilently({
-          authorizationParams: {
-            audience: authConfig.audience,
-            scope: authConfig.scope,
-          },
+          authorizationParams: buildApiAuthorizationParams(),
         })
         const accessClaims = accessToken ? decodeJwtPayload(accessToken) : null
         const accessRoleValue = accessClaims?.[authConfig.roleClaim]

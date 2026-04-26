@@ -30,7 +30,14 @@ export function FinanceGoalInvestorsPage() {
   }
 
   const handleEdit = (investor: InvestorHolding) => {
-    setSelected({ id: investor.id, name: investor.name, mobile: investor.mobile, pan: investor.pan })
+    setSelected({ 
+      id: investor.id, 
+      name: investor.name, 
+      mobile: investor.mobile, 
+      pan: investor.pan,
+      sync: investor.sync,
+      userId: investor.userId,
+    })
     setModalOpened(true)
   }
 

@@ -75,7 +75,8 @@ function buildCompositeKey(values: {
 function toPortfolioEntity(
   record: PortfolioImportRecord,
   investorId: string,
-  existingId?: string
+  existingId?: string,
+  userId?: string
 ): Portfolio {
   return {
     id: existingId ?? crypto.randomUUID(),
@@ -91,6 +92,8 @@ function toPortfolioEntity(
     appreciation: record.Appreciation,
     weightedAvg: record.WtgAvg,
     xirr: record['Annualised XIRR'],
+    sync: false,
+    userId: userId ?? '',
   }
 }
 
@@ -158,20 +161,23 @@ export async function importPortfolioRecords(records: PortfolioImportRecord[]): 
   let updatedPortfolios = 0
   let skipped = 0
 
-  for (const record of validRecords) {
+for (const record of validRecords) {
     const investorKey = normalize(record.InvestorName)
     let investor = investorsByName.get(investorKey)
 
     if (!investor) {
-      investor = { 
+      const newInvestor: Investor = { 
         id: crypto.randomUUID(), 
         name: record.InvestorName,
         mobile: record.InvestorMobile ? maskMobileNumber(record.InvestorMobile) : undefined,
         pan: record.InvestorPAN ? maskPAN(record.InvestorPAN) : undefined,
+        sync: false,
+        userId: '',
       }
-      await investorRepository.create(investor)
-      investorsByName.set(investorKey, investor)
-      investorNameById.set(investor.id, investor.name)
+      await investorRepository.create(newInvestor)
+      investorsByName.set(investorKey, newInvestor)
+      investorNameById.set(newInvestor.id, newInvestor.name)
+      investor = newInvestor
       createdInvestors += 1
     }
 

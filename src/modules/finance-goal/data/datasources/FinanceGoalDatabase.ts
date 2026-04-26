@@ -9,7 +9,7 @@ export class FinanceGoalDatabase extends Dexie {
   settings!: Table<ScenarioSettingsModel>
 
   constructor() {
-    super('appzFinanceDb')
+    super('finance-db')
 
     this.version(2).stores({
       portfolios: `

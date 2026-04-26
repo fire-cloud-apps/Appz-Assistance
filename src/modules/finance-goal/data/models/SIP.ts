@@ -12,4 +12,6 @@ export interface SIPModel {
   endDate?: string
   status: SIPStatus
   icon?: string
+  sync: boolean
+  userId: string
 }

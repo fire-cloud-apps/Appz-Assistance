@@ -11,4 +11,6 @@ export interface FinancialGoal {
   sipIds: string[]
   expectedGrowthRate: number
   icon?: string
+  sync: boolean
+  userId: string
 }

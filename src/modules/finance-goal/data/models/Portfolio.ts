@@ -12,4 +12,6 @@ export interface PortfolioModel {
   appreciation: number
   weightedAvg: number
   xirr: number
+  sync: boolean
+  userId: string
 }
